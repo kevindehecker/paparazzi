@@ -63,6 +63,8 @@
 #include "subsystems/ahrs.h"
 #include "subsystems/ins.h"
 
+#include "subsystems/video.h"
+
 #include "state.h"
 
 #include "firmwares/rotorcraft/main.h"
@@ -92,6 +94,11 @@ PRINT_CONFIG_VAR(MODULES_FREQUENCY)
 #endif
 PRINT_CONFIG_VAR(BARO_PERIODIC_FREQUENCY)
 
+#ifndef VIDEO_FREQUENCY
+#define VIDEO_FREQUENCY 15
+#endif
+PRINT_CONFIG_VAR(VIDEO_FREQUENCY)
+
 
 static inline void on_gyro_event( void );
 static inline void on_accel_event( void );
@@ -108,6 +115,7 @@ tid_t radio_control_tid; ///< id for radio_control_periodic_task() timer
 tid_t electrical_tid;    ///< id for electrical_periodic() timer
 tid_t baro_tid;          ///< id for baro_periodic() timer
 tid_t telemetry_tid;     ///< id for telemetry_periodic() timer
+tid_t video_tid;     	 ///< id for video_periodic() timer
 
 #ifndef SITL
 int main( void ) {
@@ -138,17 +146,24 @@ STATIC_INLINE void main_init( void ) {
 
   baro_init();
   imu_init();
+  autopilot_init();
+  nav_init();
+  guidance_h_init();
+  guidance_v_init();
+  stabilization_init();
 
   ahrs_aligner_init();
   ahrs_init();
 
   ins_init();
 
+//#if USE_VIDEO_ARDRONE // TODO: create working define
+	video_init();
+//#endif
+
 #if USE_GPS
   gps_init();
 #endif
-
-  autopilot_init();
 
   modules_init();
 
@@ -172,6 +187,7 @@ STATIC_INLINE void main_init( void ) {
   electrical_tid = sys_time_register_timer(0.1, NULL);
   baro_tid = sys_time_register_timer(1./BARO_PERIODIC_FREQUENCY, NULL);
   telemetry_tid = sys_time_register_timer((1./TELEMETRY_FREQUENCY), NULL);
+  video_tid = sys_time_register_timer((1./VIDEO_FREQUENCY), NULL);
 }
 
 STATIC_INLINE void handle_periodic_tasks( void ) {
@@ -189,6 +205,8 @@ STATIC_INLINE void handle_periodic_tasks( void ) {
     baro_periodic();
   if (sys_time_check_and_ack_timer(telemetry_tid))
     telemetry_periodic();
+  if (sys_time_check_and_ack_timer(video_tid))
+    video_periodic();
 }
 
 STATIC_INLINE void main_periodic( void ) {
@@ -212,6 +230,10 @@ STATIC_INLINE void telemetry_periodic(void) {
   PeriodicSendMain(DefaultChannel,DefaultDevice);
 }
 
+STATIC_INLINE void video_periodic(void) {
+  video_receive();
+}
+
 STATIC_INLINE void failsafe_check( void ) {
   if (radio_control.status != RC_OK &&
       autopilot_mode != AP_MODE_KILL &&
@@ -222,7 +244,6 @@ STATIC_INLINE void failsafe_check( void ) {
 
 #if USE_GPS
   if (autopilot_mode == AP_MODE_NAV &&
-      autopilot_motors_on &&
 #if NO_GPS_LOST_WITH_RC_VALID
       radio_control.status != RC_OK &&
 #endif
@@ -300,7 +321,6 @@ static inline void on_baro_dif_event( void ) {
 }
 
 static inline void on_gps_event(void) {
-  ahrs_update_gps();
   ins_update_gps();
 #ifdef USE_VEHICLE_INTERFACE
   if (gps.fix == GPS_FIX_3D)

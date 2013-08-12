@@ -25,6 +25,7 @@
     <subsystem name="gps" type="sirf" />
     <subsystem name="stabilization" type="int_quat" />
     <subsystem name="ahrs" type="int_cmpl_quat" />
+    <subsystem name="video" type="ardrone2" />
     <subsystem name="ins" />
 
   </firmware>
