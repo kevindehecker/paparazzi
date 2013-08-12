@@ -63,6 +63,8 @@
 #include "subsystems/ahrs.h"
 #include "subsystems/ins.h"
 
+#include "subsystems/video.h"
+
 #include "state.h"
 
 #include "firmwares/rotorcraft/main.h"
@@ -108,6 +110,7 @@ tid_t radio_control_tid; ///< id for radio_control_periodic_task() timer
 tid_t electrical_tid;    ///< id for electrical_periodic() timer
 tid_t baro_tid;          ///< id for baro_periodic() timer
 tid_t telemetry_tid;     ///< id for telemetry_periodic() timer
+tid_t video_tid;     	 ///< id for video_periodic() timer
 
 #ifndef SITL
 int main( void ) {
@@ -146,6 +149,10 @@ STATIC_INLINE void main_init( void ) {
 
   ins_init();
 
+//#if USE_VIDEO_ARDRONE // TODO: create working define
+	video_init();
+//#endif
+
 #if USE_GPS
   gps_init();
 #endif
@@ -174,6 +181,7 @@ STATIC_INLINE void main_init( void ) {
   electrical_tid = sys_time_register_timer(0.1, NULL);
   baro_tid = sys_time_register_timer(1./BARO_PERIODIC_FREQUENCY, NULL);
   telemetry_tid = sys_time_register_timer((1./TELEMETRY_FREQUENCY), NULL);
+  video_tid = sys_time_register_timer((1./VIDEO_FREQUENCY), NULL);
 }
 
 STATIC_INLINE void handle_periodic_tasks( void ) {
@@ -191,6 +199,8 @@ STATIC_INLINE void handle_periodic_tasks( void ) {
     baro_periodic();
   if (sys_time_check_and_ack_timer(telemetry_tid))
     telemetry_periodic();
+  if (sys_time_check_and_ack_timer(video_tid))
+    video_periodic();
 }
 
 STATIC_INLINE void main_periodic( void ) {
@@ -212,6 +222,10 @@ STATIC_INLINE void main_periodic( void ) {
 
 STATIC_INLINE void telemetry_periodic(void) {
   PeriodicSendMain(DefaultChannel,DefaultDevice);
+}
+
+STATIC_INLINE void video_periodic(void) {
+  video_receive();
 }
 
 STATIC_INLINE void failsafe_check( void ) {
