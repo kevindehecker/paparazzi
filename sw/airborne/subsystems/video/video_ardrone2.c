@@ -39,8 +39,6 @@
 #include <string.h> 		/* memset */
 
 #include <stdlib.h>
-#include <pthread.h> //seperate thread to start video external program... 
-
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -60,8 +58,6 @@ struct    sockaddr_in servaddr;  /*  socket address structure  */
 char      buffer[MAX_LINE];      /*  character buffer          */
 char     *endptr;                /*  for strtol()              */
 
-/* prototype for thread routine */
-//void init_gst(void);
 
 int closeSocket(void) {
 	return close(conn_s);
@@ -132,22 +128,12 @@ ssize_t Readline_socket(void *vptr, size_t maxlen) {
 void video_init(void) {
 
 	//init and start the GST framework
-/*	pthread_t thread1;
-
-	pthread_create (&thread1, NULL, (void *) &init_gst, (void *) NULL);
-
-	pthread_join(thread1, NULL);
-*/
+	//	int status = system("/data/video/kevin/initvideoall.sh");
 
 	//init the socket
 	initSocket();
 }
-/*
-void init_gst(void) {
-	int status = system("/data/video/kevin/initvideoall.sh");
-    pthread_exit(0);
-}
-*/
+
 
 void video_receive(void) {
   
