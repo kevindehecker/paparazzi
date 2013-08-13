@@ -93,5 +93,5 @@ void electrical_periodic(void) {
   //from raw measurement we got quite a lineair response
   //9.0V=662, 9.5V=698, 10.0V=737,10.5V=774, 11.0V=811, 11.5V=848, 12.0V=886, 12.5V=923
   //leading to our 0.13595166 magic number for decivolts conversion
-  electrical.vsupply = raw_voltage*0.13595166;
+ // electrical.vsupply = raw_voltage*0.13595166; disabled for testing only kevin
 }
