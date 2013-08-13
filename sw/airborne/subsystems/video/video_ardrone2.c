@@ -31,6 +31,8 @@
 #include <stdio.h>
 
 
+#include "subsystems/electrical.h" // for testing only, to set vsupply
+
 #include <sys/socket.h>       /*  socket definitions        */
 #include <sys/types.h>        /*  socket types              */
 #include <arpa/inet.h>        /*  inet (3) funtions         */
@@ -44,6 +46,7 @@
 #include <arpa/inet.h>
 #include <time.h> 
 
+char** str_split(char* a_str, const char *  a_delim, unsigned int * amount);
 
 struct VideoARDrone video_impl;
 
@@ -102,33 +105,87 @@ int initSocket() {
 
 /*  Read a line from a socket  */
 
-ssize_t Readline_socket(void *vptr, size_t maxlen) {
+int Readline_socket(void) {
 
 	int n;
-
 	while ( (n = read(list_s, buffer, sizeof(buffer)-1)) > 0)
     {
 		buffer[n] = 0;
-		if(fputs(buffer, stdout) == EOF)
-		{
-			printf("\n Error : Fputs error\n");
-		}
+		
+	}
+	if (n!=0) {
+//		printf ("Received result: %s, n: %d\n",buffer);
+	}
+	else {
+		return -1;
 	}
 
-	buffer[n+1] = 0;
-	printf ("Result: %s",buffer);
+    char** tokens;
+	unsigned int amount;
+	tokens = str_split(buffer, ";", &amount);
+	if (amount == 2) {
+		int res;
+		res = atoi(tokens[1]);
+		return res;
+	} 
 
-	return 1; // TODO, change
+
+	return -1;
 }
 
 
+char** str_split(char* a_str, const char *  a_delim, unsigned int * amount)
+{
+    char** result    = 0;
+    size_t count     = 0;
+    char* tmp        = a_str;
+    char* last_comma = 0;
 
+    /* Count how many elements will be extracted. */
+    while (*tmp)
+    {
+        if (*a_delim == *tmp)
+        {
+            count++;
+            last_comma = tmp;
+        }
+        tmp++;
+    }
+
+    /* Add space for trailing token. */
+    count += last_comma < (a_str + strlen(a_str) - 1);
+	*amount = count;
+    /* Add space for terminating null string so caller
+       knows where the list of returned strings ends. */
+    count++;
+
+    result = malloc(sizeof(char*) * count);
+
+    if (result)
+    {
+        size_t idx  = 0;
+        char* token = strtok(a_str, a_delim);
+
+        while (token)
+        {
+            *(result + idx++) = strdup(token);
+            token = strtok(0, a_delim);
+        }
+        *(result + idx) = 0;
+    }
+
+    return result;
+}
 
 
 void video_init(void) {
 
 	//init and start the GST framework
+	//for now this is being done by the makefile.omap from ppz center upload button
+	//the following code does not work properly:
 	//	int status = system("/data/video/kevin/initvideoall.sh");
+	//as it waits until script is done (which never happens)
+	//-> no init is needed, framework is started automatically
 
 	//init the socket
 	initSocket();
@@ -140,11 +197,10 @@ void video_receive(void) {
 
 	char * tmp;
 
-	//read the data from the video tcp socket
-	video_impl.maxY = 666;	
-	//printf("test out!");
-	Readline_socket(tmp, 100);
 
+	//read the data from the video tcp socket
+	video_impl.maxY = Readline_socket();
+	electrical.vsupply = video_impl.maxY; // for testing!!!
 
 }
 
