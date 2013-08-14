@@ -99,7 +99,7 @@ endif
 	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_drivers/pl2303.ko /$(SUB_DIR)/pl2303.ko";			\
 	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_drivers/ftdi-sio.ko /$(SUB_DIR)/ftdi-sio.ko";		\
 	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_drivers/cp210x.ko /$(SUB_DIR)/cp210x.ko";	\
-	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/initvideoall.sh /$(SUB_DIR)/initvideoall.sh";	\
+	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/initvideoall.sh /$(SUB_DIR)/initvideoall.sh";	\ #hoi!
 	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/arm_light.tgz /$(SUB_DIR)/arm_light.tgz";	\
 	  echo "put $(OBJDIR)/$(TARGET).elf /$(SUB_DIR)/$(TARGET).elf";									\
 	  echo "quit";																					\
