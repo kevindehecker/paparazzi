@@ -114,20 +114,26 @@ int Readline_socket(void) {
 		
 	}
 	if (n!=0) {
-//		printf ("Received result: %s, n: %d\n",buffer);
+		printf ("Received result: %s, n: %d\n",buffer,n);
 	}
 	else {
+		printf ("nothing\n");
 		return -1;
 	}
 
     char** tokens;
 	unsigned int amount;
 	tokens = str_split(buffer, ";", &amount);
-	if (amount == 2) {
+	if (amount > 2) {
 		int res;
-		res = atoi(tokens[1]);
-		return res;
-	} 
+		video_impl.maxY = atoi(tokens[1]);
+		video_impl.max_idx = atoi(tokens[3]);
+		video_impl.max_idy = atoi(tokens[5]);
+		return 1;
+	}
+
+	
+ 
 
 
 	return -1;
@@ -195,12 +201,11 @@ void video_init(void) {
 void video_receive(void) {
   
 
-	char * tmp;
-
-
 	//read the data from the video tcp socket
-	video_impl.maxY = Readline_socket();
-	electrical.vsupply = video_impl.maxY; // for testing!!!
+	Readline_socket();
+	electrical.vsupply = video_impl.max_idx; // for testing!!!
+	electrical.current = video_impl.max_idy; // for testing!!!
+
 
 }
 

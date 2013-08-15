@@ -8,4 +8,3 @@ export DSP_PATH=/opt/arm/tidsp-binaries-23.i3.8/
 /bin/dspbridge/dynreg.out -r /opt/arm/tidsp-binaries-23.i3.8/m4venc_sn.dll64P -v
 
 
-gst-launch v4l2src device=/dev/video1 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=544, height=304 ! example tcp_port=2002 ! fakesink #dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=p port=5000
