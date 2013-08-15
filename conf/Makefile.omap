@@ -101,6 +101,7 @@ endif
 	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_drivers/cp210x.ko /$(SUB_DIR)/cp210x.ko";	\
 	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/initvideoall.sh /$(SUB_DIR)/initvideoall.sh";	\
 	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/arm_light.tgz /$(SUB_DIR)/arm_light.tgz";	\
+	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/gst-plugin_example/libExample.so /$(SUB_DIR)/libExample.so";	\
 	  echo "put $(OBJDIR)/$(TARGET).elf /$(SUB_DIR)/$(TARGET).elf";									\
 	  echo "quit";																					\
 	} | ftp -n $(HOST)
@@ -116,6 +117,8 @@ endif
 	  echo "mkdir -p /opt/arm";						\
 	  echo "tar -xzf arm_light.tgz";				\
 	  echo "tar -xzf opt/arm/tidsp.tgz";			\
+	  echo "chmod 777 libExample.so";				\
+	  echo "mv libExample.so opt/arm/gst/lib/gstreamer-0.10/libExample.so";			\
 	  echo "mv opt/arm/tidsp opt/arm/tidsp-binaries-23.i3.8";			\
 	  echo "mount --bind opt /opt";					\
 	  echo "chmod 777 initvideoall.sh";				\
