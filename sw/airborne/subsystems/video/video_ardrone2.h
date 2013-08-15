@@ -35,7 +35,9 @@
 
 
 struct VideoARDrone {
-  uint32_t maxY;             // test output variable
+  uint32_t maxY;		//maximum brightness
+  uint32_t max_idx;		//x coordinate of brightest pixel
+  uint32_t max_idy;		//y .....
 };
 extern struct VideoARDrone video_impl;
 
