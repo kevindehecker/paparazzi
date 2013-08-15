@@ -221,4 +221,10 @@
     <define name="MAX_BAT_LEVEL" value="12.4" unit="V"/>
   </section>
 
+<makefile>
+all:
+	echo "Compiling gst-example_plugin"
+	sb2 make -C ../ext/ardrone2_video/gst-plugin_example/ clean all
+</makefile>
+
 </airframe>
