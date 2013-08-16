@@ -129,6 +129,7 @@ int Readline_socket(void) {
 		video_impl.maxY = atoi(tokens[1]);
 		video_impl.max_idx = atoi(tokens[3]);
 		video_impl.max_idy = atoi(tokens[5]);
+		video_impl.counter = atoi(tokens[7]);
 		return 1;
 	}
 
@@ -231,15 +232,10 @@ void video_receive(void) {
 	electrical.vsupply = video_impl.max_idx; // for testing!!!
 	electrical.current = video_impl.max_idy; // for testing!!!
 
-char * test = calloc(64,sizeof(char));
-test[0] = 'H';
-test[1] = 'O';
-test[2] = 'E';
-test[3] = 'R';
-test[4] = '!';
-test[5] = '\n';
-printf("nwritten: %d\n",Writeline_socket(test,64));
-printf("Data sent to gst: %s",test);
+	char * test = calloc(64,sizeof(char));
+	sprintf(test, "Joehoe, the counter is: %d\n",video_impl.counter);
+	Writeline_socket(test,64);
+	printf("Data sent to gst: %s",test);
 
 
 

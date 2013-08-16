@@ -243,12 +243,7 @@ void *TCP_threat( void *ptr) {
 		char * buffer = calloc(64,sizeof(char));
 		int res = Readline_socket(buffer,64);
 		if	(res>0) {
-			int i;
-			for (i=0;i<64;i++) {
-				if (buffer[i] != 0)
-					printf("Not zero! %c at %d \n",buffer[i],i);
-			}
-			printf("Wow, data back!\n %s",buffer+1);
+			printf("Wow, stress!!! Data back: \n %s",buffer+1);
 		} else {
 			printf("Nothing received: %d",res);
 			usleep(100000);
