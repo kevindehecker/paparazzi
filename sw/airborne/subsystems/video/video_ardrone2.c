@@ -114,7 +114,7 @@ int Readline_socket(void) {
 		
 	}
 	if (n!=0) {
-		printf ("Received result: %s, n: %d\n",buffer,n);
+		printf ("Received result: %s",buffer);
 	}
 	else {
 		printf ("nothing\n");
@@ -183,6 +183,27 @@ char** str_split(char* a_str, const char *  a_delim, unsigned int * amount)
     return result;
 }
 
+/*  Write a line to a socket  */
+
+ssize_t Writeline_socket(char * text, size_t n) {
+    size_t      nleft;
+    ssize_t     nwritten;
+	nleft  = n;
+	
+    while ( nleft > 0 ) {
+	if ( (nwritten = write(list_s, text, nleft)) <= 0 ) {
+	    if ( errno == EINTR )
+		nwritten = 0;
+	    else
+		return -1;
+	}
+	nleft  -= nwritten;
+	text += nwritten;
+    }
+
+    return n;
+	
+}
 
 void video_init(void) {
 
@@ -203,8 +224,23 @@ void video_receive(void) {
 
 	//read the data from the video tcp socket
 	Readline_socket();
+
+
+//testing
+
 	electrical.vsupply = video_impl.max_idx; // for testing!!!
 	electrical.current = video_impl.max_idy; // for testing!!!
+
+char * test = calloc(64,sizeof(char));
+test[0] = 'H';
+test[1] = 'O';
+test[2] = 'E';
+test[3] = 'R';
+test[4] = '!';
+test[5] = '\n';
+printf("nwritten: %d\n",Writeline_socket(test,64));
+printf("Data sent to gst: %s",test);
+
 
 
 }
