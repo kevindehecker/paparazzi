@@ -30,9 +30,9 @@ int closeSocket(void) {
 int initSocket(unsigned int tcpport) {
 
     /*  Create the listening socket  */
-    if ( (list_s = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0 ) {
+    if ( (list_s = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
 		fprintf(stderr, "tcp server: Error creating listening socket.\n");
-		return -1;
+		return 0;
     }
 
 
@@ -62,7 +62,7 @@ int initSocket(unsigned int tcpport) {
 	/*  Wait for a connection, then accept() it  */	
 	if ( (conn_s = accept(list_s, NULL, NULL) ) < 0 ) {
 	    fprintf(stderr, "tcp server: Error calling function accept()\n");
-	    return -1;
+	    return 0;
 	}
 	printf("Connected!\n");
 	return 1;
