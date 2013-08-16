@@ -18,6 +18,7 @@
 #endif
 
 #include <gst/gst.h>
+#include <stdlib.h>     /* calloc, exit, free */
 
 #include "gstexample.h"
 #include "socket.h"
@@ -205,7 +206,7 @@ gst_example_set_caps (GstPad * pad, GstCaps * caps)
   imgHeight = (unsigned int)tmp;
   g_print ("The video size is %dx%d\n", imgWidth, imgHeight);
 	counter =0;
-  
+
   //initialise socket:
 	if (tcpport>0) {
 		g_print("Waiting for connection on port %d\n",tcpport);
@@ -240,6 +241,13 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
 		}
 		if (tcpport>0) {
 			Writeline_socket(tmp, 64);
+
+			char * buffer = calloc(64,sizeof(char));
+			if	(Readline_socket(buffer,64)>0) {
+				printf("Wow, data back!\n %s",buffer);
+			}
+			free(buffer);
+
 		}
 	counter++;
 	
