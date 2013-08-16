@@ -20,7 +20,6 @@
 int       list_s;                /*  listening socket          */
 int       conn_s;                /*  connection socket         */
 struct    sockaddr_in servaddr;  /*  socket address structure  */
-char      buffer[MAX_LINE];      /*  character buffer          */
 char     *endptr;                /*  for strtol()              */
 
 
@@ -31,9 +30,9 @@ int closeSocket(void) {
 int initSocket(unsigned int tcpport) {
 
     /*  Create the listening socket  */
-    if ( (list_s = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
-	fprintf(stderr, "tcp server: Error creating listening socket.\n");
-	return -1;
+    if ( (list_s = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0 ) {
+		fprintf(stderr, "tcp server: Error creating listening socket.\n");
+		return -1;
     }
 
 
@@ -71,16 +70,16 @@ int initSocket(unsigned int tcpport) {
 
 /*  Read a line from a socket  */
 
-ssize_t Readline_socket(void *vptr, size_t maxlen) {
+ssize_t Readline_socket(char * data, size_t maxlen) {
     size_t n, rc;
-    char    c, *buffer;
+    char   *inbuffer, c;
 
-    buffer = vptr;
+	inbuffer = data ;
 
     for ( n = 1; n < maxlen; n++ ) {
 	
 	if ( (rc = read(conn_s, &c, 1)) == 1 ) {
-	    *buffer++ = c;
+	    *inbuffer++ = c;
 	    if ( c == '\n' )
 		break;
 	}
@@ -97,7 +96,7 @@ ssize_t Readline_socket(void *vptr, size_t maxlen) {
 	}
     }
 
-    *buffer = 0;
+    *inbuffer = 0;
     return n;
 }
 
