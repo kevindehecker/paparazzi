@@ -20,6 +20,7 @@
 #include <gst/gst.h>
 #include <stdlib.h>     /* calloc, exit, free */
 #include <pthread.h>
+#include <unistd.h>	//usleep
 
 #include "gstexample.h"
 #include "socket.h"
@@ -242,9 +243,15 @@ void *TCP_threat( void *ptr) {
 		char * buffer = calloc(64,sizeof(char));
 		int res = Readline_socket(buffer,64);
 		if	(res>0) {
-			printf("Wow, data back!\n %s",buffer);
+			int i;
+			for (i=0;i<64;i++) {
+				if (buffer[i] != 0)
+					printf("Not zero! %c at %d \n",buffer[i],i);
+			}
+			printf("Wow, data back!\n %s",buffer+1);
 		} else {
 			printf("Nothing received: %d",res);
+			usleep(100000);
 		}
 		free(buffer);
 	}
@@ -277,7 +284,7 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
 		if (tcpport>0) { 	//if network was enabled by user
 			if (socketIsReady) { 
 				if (filter->silent == FALSE) {	
-					g_print("Writing to port %d\n", tcpport);
+					g_print("Sending data to ppz@port %d\n", tcpport);
 				}
 				g_print("nwritten: %d\n", Writeline_socket(tmp, 64));
 

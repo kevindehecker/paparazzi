@@ -76,12 +76,10 @@ ssize_t Readline_socket(char * data, size_t maxlen) {
 
 	inbuffer = data ;
 
-    for ( n = 1; n < maxlen; n++ ) {
+    for ( n = 1; n <= maxlen; n++ ) {
 	
 	if ( (rc = read(conn_s, &c, 1)) == 1 ) {
-	    *inbuffer++ = c;
-	    if ( c == '\n' )
-		break;
+	    inbuffer[n] = c;
 	}
 	else if ( rc == 0 ) {
 	    if ( n == 1 )
@@ -96,7 +94,7 @@ ssize_t Readline_socket(char * data, size_t maxlen) {
 	}
     }
 
-    *inbuffer = 0;
+    //*inbuffer = 0;
     return n;
 }
 
