@@ -19,6 +19,7 @@
 
 #include <gst/gst.h>
 #include <stdlib.h>     /* calloc, exit, free */
+#include <pthread.h>
 
 #include "gstexample.h"
 #include "socket.h"
@@ -28,6 +29,9 @@ unsigned int imgWidth, imgHeight;
 void getMaximumY(unsigned char *frame_buf, unsigned char * max_y,unsigned int * max_idy,unsigned int * max_idx) ;
 unsigned int tcpport;
 unsigned int counter;
+unsigned int socketIsReady;
+
+void *TCP_threat( void *ptr);
 
 GST_DEBUG_CATEGORY_STATIC (gst_example_debug);
 #define GST_CAT_DEFAULT gst_example_debug
@@ -208,15 +212,45 @@ gst_example_set_caps (GstPad * pad, GstCaps * caps)
 	counter =0;
 
   //initialise socket:
+
 	if (tcpport>0) {
-		g_print("Waiting for connection on port %d\n",tcpport);
-    	if (!initSocket(tcpport)) { 
-			g_print("Error initialising connection\n");
-			return 0;	
-		}
-		g_print("Connected!\n");
+		//start seperate threat to connect
+		//seperate threat is needed because otherwise big delays can exist in the init or chain function
+		//causing the gst to crash
+	
+		pthread_t th1;
+		int th1_r;
+		pthread_create(&th1,NULL,TCP_threat,&th1_r);
+		//pthread_join(th1,NULL);
+
 	}
   return gst_pad_set_caps (otherpad, caps);
+}
+
+
+void *TCP_threat( void *ptr) {
+	g_print("Waiting for connection on port %d\n",tcpport);
+	socketIsReady = initSocket(tcpport);
+   	if (!socketIsReady) { 
+		g_print("Error initialising connection\n");	
+	} else {
+		g_print("Connected!\n");
+	}
+
+
+	while(1) {
+		char * buffer = calloc(64,sizeof(char));
+		int res = Readline_socket(buffer,64);
+		if	(res>0) {
+			printf("Wow, data back!\n %s",buffer);
+		} else {
+			printf("Nothing received: %d",res);
+		}
+		free(buffer);
+	}
+
+
+
 }
 
 /* chain function
@@ -234,21 +268,24 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
 	getMaximumY(img, &maxY, &max_idx, &max_idy);
 	
 		//g_print("maxy: %d\n",maxY);
-		char tmp[64];
+		
+		char * tmp = calloc(64,sizeof(char));
 		sprintf(tmp, "MaxY;%d;id_x;%d;id_y;%d;count;%d\n",maxY,max_idx,max_idy,counter);
 		if (filter->silent == FALSE) {	
 			g_print("%s", tmp);
 		}
-		if (tcpport>0) {
-			Writeline_socket(tmp, 64);
+		if (tcpport>0) { 	//if network was enabled by user
+			if (socketIsReady) { 
+				if (filter->silent == FALSE) {	
+					g_print("Writing to port %d\n", tcpport);
+				}
+				g_print("nwritten: %d\n", Writeline_socket(tmp, 64));
 
-			char * buffer = calloc(64,sizeof(char));
-			if	(Readline_socket(buffer,64)>0) {
-				printf("Wow, data back!\n %s",buffer);
+				
 			}
-			free(buffer);
 
 		}
+		free(tmp);
 	counter++;
 	
 	  
