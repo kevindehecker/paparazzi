@@ -8,7 +8,7 @@
 
 /*  Function declarations  */
 	int initSocket(unsigned int port) ;
-	ssize_t Readline_socket(void *vptr, size_t maxlen);
+	ssize_t Readline_socket(char * data, size_t maxlen);
 	ssize_t Writeline_socket(char * text, size_t n);
 	int closeSocket(void);
 
