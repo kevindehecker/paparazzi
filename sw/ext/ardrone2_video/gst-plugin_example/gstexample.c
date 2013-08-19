@@ -24,6 +24,7 @@
 
 #include "gstexample.h"
 #include "socket.h"
+#include "video_message_structs.h"
 #include <stdio.h>
 
 unsigned int imgWidth, imgHeight;
@@ -31,6 +32,8 @@ void getMaximumY(unsigned char *frame_buf, unsigned char * max_y,unsigned int * 
 unsigned int tcpport;
 unsigned int counter;
 unsigned int socketIsReady;
+struct gst2ppz_message_struct gst2ppz;
+struct ppz2gst_message_struct ppz2gst;
 
 void *TCP_threat( void *ptr);
 
@@ -240,15 +243,13 @@ void *TCP_threat( void *ptr) {
 
 
 	while(1) {
-		char * buffer = calloc(64,sizeof(char));
-		int res = Readline_socket(buffer,64);
+		int res = Read_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 		if	(res>0) {
-			printf("Wow, stress!!! Data back: \n %s",buffer+1);
+			printf("Wow, stress!!! Data back: %d\n",ppz2gst.heading);
 		} else {
 			printf("Nothing received: %d",res);
 			usleep(100000);
 		}
-		free(buffer);
 	}
 
 
@@ -269,7 +270,6 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
 	unsigned char maxY;
 	getMaximumY(img, &maxY, &max_idx, &max_idy);
 	
-		//g_print("maxy: %d\n",maxY);
 		
 		char * tmp = calloc(64,sizeof(char));
 		sprintf(tmp, "MaxY;%d;id_x;%d;id_y;%d;count;%d\n",maxY,max_idx,max_idy,counter);
@@ -281,8 +281,11 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
 				if (filter->silent == FALSE) {	
 					g_print("Sending data to ppz@port %d\n", tcpport);
 				}
-				g_print("nwritten: %d\n", Writeline_socket(tmp, 64));
-
+				gst2ppz.maxY = maxY;
+				gst2ppz.max_idx = max_idx;
+				gst2ppz.max_idy = max_idy;
+				gst2ppz.counter = counter;
+				g_print("nwritten: %d\n", Write_msg_socket((char *) &gst2ppz, sizeof(gst2ppz)));
 				
 			}
 

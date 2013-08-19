@@ -150,7 +150,7 @@ gstexample.o: gstexample.c /opt/arm/gst/include/gstreamer-0.10/gst/gst.h \
  /opt/arm/gst/include/gstreamer-0.10/gst/gstparse.h \
  /opt/arm/gst/include/gstreamer-0.10/gst/gstxml.h \
  /opt/arm/gst/include/gstreamer-0.10/gst/gstcompat.h gstexample.h \
- socket.h
+ socket.h video_message_structs.h
 
 /opt/arm/gst/include/gstreamer-0.10/gst/gst.h:
 
@@ -459,3 +459,5 @@ gstexample.o: gstexample.c /opt/arm/gst/include/gstreamer-0.10/gst/gst.h \
 gstexample.h:
 
 socket.h:
+
+video_message_structs.h:

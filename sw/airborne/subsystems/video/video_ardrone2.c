@@ -29,7 +29,7 @@
 
 #include "video_ardrone2.h"
 #include <stdio.h>
-
+#include "video_message_structs.h"
 
 #include "subsystems/electrical.h" // for testing only, to set vsupply
 
@@ -49,6 +49,8 @@
 char** str_split(char* a_str, const char *  a_delim, unsigned int * amount);
 
 struct VideoARDrone video_impl;
+struct gst2ppz_message_struct gst2ppz;
+struct ppz2gst_message_struct ppz2gst;
 
 /*  Global constants  */
 
@@ -105,104 +107,46 @@ int initSocket() {
 
 /*  Read a line from a socket  */
 
-int Readline_socket(void) {
+int Read_msg_socket(char * data, unsigned int size) {
 
 	int n;
-	while ( (n = read(list_s, buffer, sizeof(buffer)-1)) > 0)
+	while ( (n = read(conn_s, data, size-1)) > 0)
     {
-		buffer[n] = 0;
+		
 		
 	}
 	if (n!=0) {
-		printf ("Received result: %s",buffer);
-	}
-	else {
-		printf ("nothing\n");
-		return -1;
-	}
-
-    char** tokens;
-	unsigned int amount;
-	tokens = str_split(buffer, ";", &amount);
-	if (amount > 2) {
-		int res;
-		video_impl.maxY = atoi(tokens[1]);
-		video_impl.max_idx = atoi(tokens[3]);
-		video_impl.max_idy = atoi(tokens[5]);
-		video_impl.counter = atoi(tokens[7]);
+		printf ("Received result!\n");
 		return 1;
 	}
+	else {
+		printf ("Strange, nothing received\n");
+		return 0;
+	}
 
-	
- 
-
-
-	return -1;
 }
 
-
-char** str_split(char* a_str, const char *  a_delim, unsigned int * amount)
-{
-    char** result    = 0;
-    size_t count     = 0;
-    char* tmp        = a_str;
-    char* last_comma = 0;
-
-    /* Count how many elements will be extracted. */
-    while (*tmp)
-    {
-        if (*a_delim == *tmp)
-        {
-            count++;
-            last_comma = tmp;
-        }
-        tmp++;
-    }
-
-    /* Add space for trailing token. */
-    count += last_comma < (a_str + strlen(a_str) - 1);
-	*amount = count;
-    /* Add space for terminating null string so caller
-       knows where the list of returned strings ends. */
-    count++;
-
-    result = malloc(sizeof(char*) * count);
-
-    if (result)
-    {
-        size_t idx  = 0;
-        char* token = strtok(a_str, a_delim);
-
-        while (token)
-        {
-            *(result + idx++) = strdup(token);
-            token = strtok(0, a_delim);
-        }
-        *(result + idx) = 0;
-    }
-
-    return result;
-}
 
 /*  Write a line to a socket  */
 
-ssize_t Writeline_socket(char * text, size_t n) {
+ssize_t Write_msg_socket(char * data, unsigned int size) {
     size_t      nleft;
     ssize_t     nwritten;
-	nleft  = n;
+	nleft  = size;
+	nwritten =0;
 	
     while ( nleft > 0 ) {
-	if ( (nwritten = write(list_s, text, nleft)) <= 0 ) {
+	if ( (nwritten = write(conn_s, data, nleft)) <= 0 ) {
 	    if ( errno == EINTR )
 		nwritten = 0;
 	    else
 		return -1;
 	}
 	nleft  -= nwritten;
-	text += nwritten;
+	data += nwritten;
     }
 
-    return n;
+    return nwritten;
 	
 }
 
@@ -224,20 +168,22 @@ void video_receive(void) {
   
 
 	//read the data from the video tcp socket
-	Readline_socket();
+	Read_msg_socket((char *) &gst2ppz,sizeof(gst2ppz));
+	//TODO: the following moving arround seems wastefull:		
+	video_impl.maxY = gst2ppz.maxY;
+	video_impl.max_idx = gst2ppz.max_idx;
+	video_impl.max_idy = gst2ppz.max_idy;
+	video_impl.counter = gst2ppz.counter;
 
 
 //testing
 
 	electrical.vsupply = video_impl.max_idx; // for testing!!!
 	electrical.current = video_impl.max_idy; // for testing!!!
-
-	char * test = calloc(64,sizeof(char));
-	sprintf(test, "Joehoe, the counter is: %d\n",video_impl.counter);
-	Writeline_socket(test,64);
-	printf("Data sent to gst: %s",test);
+	ppz2gst.heading = gst2ppz.counter;		// testing!
 
 
+	Write_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 
 }
 
