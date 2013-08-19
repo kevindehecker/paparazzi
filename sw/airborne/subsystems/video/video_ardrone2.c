@@ -58,14 +58,13 @@ struct ppz2gst_message_struct ppz2gst;
 
 /*  Global variables  */
 int       list_s;                /*  listening socket          */
-int       conn_s;                /*  connection socket         */
 struct    sockaddr_in servaddr;  /*  socket address structure  */
 char      buffer[MAX_LINE];      /*  character buffer          */
 char     *endptr;                /*  for strtol()              */
 
 
 int closeSocket(void) {
-	return close(conn_s);
+	return close(list_s);
 }
 
 int initSocket() {
@@ -110,19 +109,8 @@ int initSocket() {
 int Read_msg_socket(char * data, unsigned int size) {
 
 	int n;
-	while ( (n = read(conn_s, data, size-1)) > 0)
-    {
-		
-		
-	}
-	if (n!=0) {
-		printf ("Received result!\n");
-		return 1;
-	}
-	else {
-		printf ("Strange, nothing received\n");
-		return 0;
-	}
+	n = read(list_s, data, size);
+    return n;
 
 }
 
@@ -136,7 +124,7 @@ ssize_t Write_msg_socket(char * data, unsigned int size) {
 	nwritten =0;
 	
     while ( nleft > 0 ) {
-	if ( (nwritten = write(conn_s, data, nleft)) <= 0 ) {
+	if ( (nwritten = write(list_s, data, nleft)) <= 0 ) {
 	    if ( errno == EINTR )
 		nwritten = 0;
 	    else
@@ -168,21 +156,20 @@ void video_receive(void) {
   
 
 	//read the data from the video tcp socket
-	Read_msg_socket((char *) &gst2ppz,sizeof(gst2ppz));
-	//TODO: the following moving arround seems wastefull:		
-	video_impl.maxY = gst2ppz.maxY;
-	video_impl.max_idx = gst2ppz.max_idx;
-	video_impl.max_idy = gst2ppz.max_idy;
-	video_impl.counter = gst2ppz.counter;
-
+	
+	if (Read_msg_socket((char *) &gst2ppz,sizeof(gst2ppz))>=0) {
+		printf("Received data. Maxy: %d, counter: %d\n",gst2ppz.maxY,gst2ppz.counter);
+		video_impl.maxY = gst2ppz.maxY;
+		video_impl.max_idx = gst2ppz.max_idx;
+		video_impl.max_idy = gst2ppz.max_idy;
+		video_impl.counter = gst2ppz.counter;
+	}
 
 //testing
 
 	electrical.vsupply = video_impl.max_idx; // for testing!!!
 	electrical.current = video_impl.max_idy; // for testing!!!
 	ppz2gst.heading = gst2ppz.counter;		// testing!
-
-
 	Write_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 
 }
