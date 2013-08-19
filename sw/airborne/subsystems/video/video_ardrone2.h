@@ -52,8 +52,8 @@ extern struct VideoARDrone video_impl;
 
 /*  private function declarations  */
 	int initSocket(void) ;
-	int Readline_socket(void);
-	ssize_t Writeline_socket(char * text, size_t n);
+	int Read_msg_socket(char * data, unsigned int size);
+	ssize_t Write_msg_socket(char * data, unsigned int size);
 	int closeSocket(void);
 
 

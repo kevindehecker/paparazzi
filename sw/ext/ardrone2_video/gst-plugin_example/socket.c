@@ -121,6 +121,51 @@ ssize_t Writeline_socket(char * text, size_t n) {
 	
 }
 
+/*  Read a line from a socket  */
+
+int Read_msg_socket(char * data, unsigned int size) {
+
+	int n;
+	while ( (n = read(conn_s, data, size-1)) > 0)
+    {
+		
+		
+	}
+	if (n!=0) {
+		printf ("Received result!\n");
+		return 1;
+	}
+	else {
+		printf ("Strange, nothing received\n");
+		return 0;
+	}
+
+}
+
+
+/*  Write a line to a socket  */
+
+ssize_t Write_msg_socket(char * data, unsigned int size) {
+    size_t      nleft;
+    ssize_t     nwritten = 0;
+	nleft  = size;
+	
+    while ( nleft > 0 ) {
+	if ( (nwritten = write(conn_s, data, nleft)) <= 0 ) {
+	    if ( errno == EINTR )
+		nwritten = 0;
+	    else
+		return -1;
+	}
+	nleft  -= nwritten;
+	data += nwritten;
+    }
+
+    return nwritten;
+	
+}
+
+
 
 
 
