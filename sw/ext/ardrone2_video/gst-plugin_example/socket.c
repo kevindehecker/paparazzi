@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <gst/gst.h>
 
 
 
@@ -17,7 +17,7 @@
 #define MAX_LINE           (1000)
 
 /*  Global variables  */
-int       list_s;                /*  listening socket          */
+
 int       conn_s;                /*  connection socket         */
 struct    sockaddr_in servaddr;  /*  socket address structure  */
 char     *endptr;                /*  for strtol()              */
@@ -28,7 +28,7 @@ int closeSocket(void) {
 }
 
 int initSocket(unsigned int tcpport) {
-
+	int       list_s;                /*  listening socket          */
     /*  Create the listening socket  */
     if ( (list_s = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
 		fprintf(stderr, "tcp server: Error creating listening socket.\n");
@@ -64,7 +64,6 @@ int initSocket(unsigned int tcpport) {
 	    fprintf(stderr, "tcp server: Error calling function accept()\n");
 	    return 0;
 	}
-	printf("Connected!\n");
 	return 1;
 }
 
@@ -124,21 +123,9 @@ ssize_t Writeline_socket(char * text, size_t n) {
 /*  Read a line from a socket  */
 
 int Read_msg_socket(char * data, unsigned int size) {
-
 	int n;
-	while ( (n = read(conn_s, data, size-1)) > 0)
-    {
-		
-		
-	}
-	if (n!=0) {
-		printf ("Received result!\n");
-		return 1;
-	}
-	else {
-		printf ("Strange, nothing received\n");
-		return 0;
-	}
+	n = read(conn_s, data, size);
+    return n;
 
 }
 

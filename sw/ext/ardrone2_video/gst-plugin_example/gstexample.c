@@ -206,14 +206,16 @@ gst_example_set_caps (GstPad * pad, GstCaps * caps)
     
   //make the image size known
    const GstStructure *str;
-  str = gst_caps_get_structure (caps, 0);
-  gint tmp;
-  gst_structure_get_int (str, "width", &tmp);
-  imgWidth = (unsigned int)tmp;  
-  gst_structure_get_int (str, "height", &tmp);
-  imgHeight = (unsigned int)tmp;
-  g_print ("The video size is %dx%d\n", imgWidth, imgHeight);
+	str = gst_caps_get_structure (caps, 0);
+	gint tmp;
+	gst_structure_get_int (str, "width", &tmp);
+	imgWidth = (unsigned int)tmp;  
+	gst_structure_get_int (str, "height", &tmp);
+	imgHeight = (unsigned int)tmp;
+	g_print ("The video size is %dx%d\n", imgWidth, imgHeight);
 	counter =0;
+	
+	//ppz2gst = (ppz2gst_message_struct *) malloc(sizeof(ppz2gst));
 
   //initialise socket:
 
@@ -245,9 +247,9 @@ void *TCP_threat( void *ptr) {
 	while(1) {
 		int res = Read_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 		if	(res>0) {
-			printf("Wow, stress!!! Data back: %d\n",ppz2gst.heading);
+			g_print("Wow, stress!!! Data back: %d\n",ppz2gst.heading);
 		} else {
-			printf("Nothing received: %d",res);
+			g_print("Nothing received: %d\n",res);
 			usleep(100000);
 		}
 	}
@@ -285,7 +287,7 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
 				gst2ppz.max_idx = max_idx;
 				gst2ppz.max_idy = max_idy;
 				gst2ppz.counter = counter;
-				g_print("nwritten: %d\n", Write_msg_socket((char *) &gst2ppz, sizeof(gst2ppz)));
+				Write_msg_socket((char *) &gst2ppz, sizeof(gst2ppz));
 				
 			}
 
