@@ -30,6 +30,9 @@
 #include "video_ardrone2.h"
 #include <stdio.h>
 #include "video_message_structs.h"
+#include "subsystems/gps/gps_ardrone2.h"
+#include "subsystems/imu/imu_ardrone2_raw.h"
+
 
 #include "subsystems/electrical.h" // for testing only, to set vsupply
 
