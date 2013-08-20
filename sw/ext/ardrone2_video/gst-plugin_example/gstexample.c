@@ -26,14 +26,28 @@
 #include "socket.h"
 #include "video_message_structs.h"
 #include <stdio.h>
+#include <stdlib.h>
 
+#define image_index(xx, yy)  ((yy * imgWidth + xx) * 2)
 unsigned int imgWidth, imgHeight;
-void getMaximumY(unsigned char *frame_buf, unsigned char * max_y,unsigned int * max_idy,unsigned int * max_idx) ;
 unsigned int tcpport;
+unsigned char threshtune;
 unsigned int counter;
 unsigned int socketIsReady;
 struct gst2ppz_message_struct gst2ppz;
 struct ppz2gst_message_struct ppz2gst;
+
+
+
+
+void brightspotDetector(unsigned char *frame_buf, unsigned int * max_idx,unsigned int * max_idy) ;
+void get1DHist(unsigned char *frame_buf, unsigned int * OneDHist);
+unsigned char getThreshold(unsigned int * OneDHist);
+void createBinaryImage(unsigned char threshold, unsigned char * frame_buf);
+void get2DHist(unsigned char * frame_buf, unsigned int * hist_x, unsigned int * hist_y);
+unsigned int cmpfunc (const void * a, const void * b);
+unsigned int getMedian(unsigned int * hist,  unsigned int size);
+
 
 void *TCP_threat( void *ptr);
 
@@ -51,7 +65,8 @@ enum
 {
   PROP_0,
   PROP_SILENT,
-  PROP_TCP
+  PROP_TCP,
+  PROP_THRESHTUNE
 };
 
 /* the capabilities of the inputs and outputs.
@@ -120,6 +135,10 @@ gst_example_class_init (GstexampleClass * klass)
 		  
   g_object_class_install_property (gobject_class, PROP_TCP,
       g_param_spec_uint ("tcp_port", "TCP port", "Output results over tcp",0,65535,
+          0, G_PARAM_READWRITE));	
+
+  g_object_class_install_property (gobject_class, PROP_THRESHTUNE,
+      g_param_spec_uint ("threshtune", "threshtune tune", "Changes output of binary image function",0,65535,
           0, G_PARAM_READWRITE));		  
 		  
 }
@@ -164,7 +183,10 @@ gst_example_set_property (GObject * object, guint prop_id,
       break;	  
     case PROP_TCP:
       tcpport = g_value_get_uint (value);
-      break;		  
+      break;	
+    case PROP_THRESHTUNE:
+      threshtune = g_value_get_uint (value);
+      break;	  
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -184,6 +206,9 @@ gst_example_get_property (GObject * object, guint prop_id,
 	case PROP_TCP:
       g_value_set_uint (value, tcpport);
       break;
+	case PROP_THRESHTUNE:
+      g_value_set_uint (value, threshtune);
+      break;	  
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -270,13 +295,13 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
 	unsigned char * img = GST_BUFFER_DATA(buf);   
 	unsigned int max_idx, max_idy;
 	unsigned char maxY;
-	getMaximumY(img, &maxY, &max_idx, &max_idy);
+	brightspotDetector(img,&max_idx,&max_idy);
 	
 		
-		char * tmp = calloc(64,sizeof(char));
-		sprintf(tmp, "MaxY;%d;id_x;%d;id_y;%d;count;%d\n",maxY,max_idx,max_idy,counter);
+		//char * tmp = calloc(64,sizeof(char));
+		//sprintf(tmp, "MaxY;%d;id_x;%d;id_y;%d;count;%d\n",maxY,max_idx,max_idy,counter);
 		if (filter->silent == FALSE) {	
-			g_print("%s", tmp);
+		//	g_print("%s", tmp);
 		}
 		if (tcpport>0) { 	//if network was enabled by user
 			if (socketIsReady) { 
@@ -292,35 +317,167 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
 			}
 
 		}
-		free(tmp);
+		//free(tmp);
 	counter++;
 	
 	  
   return gst_pad_push (filter->srcpad, buf);
 }
 
-// This function gives the maximum of a subsampled version of the image
-void getMaximumY(unsigned char *frame_buf, unsigned char * max_y,unsigned int * max_idx,unsigned int * max_idy) 
+
+
+
+void brightspotDetector(unsigned char *frame_buf, unsigned int * max_idx,unsigned int * max_idy) 
 {
-	unsigned int ix, y,max_y_ix;
+	unsigned char thresh;
+	unsigned int * OneDHist =(unsigned int *) calloc(256,sizeof(unsigned int));
+	unsigned int * hist_x =(unsigned int *) calloc(imgWidth,sizeof(unsigned int));
+	unsigned int * hist_y = (unsigned int *)calloc(imgHeight,sizeof(unsigned int));
+	get1DHist(frame_buf,OneDHist);
+
+	
+	thresh = getThreshold(OneDHist);
+	//printf("Thresh: %d\n",thresh);
+	createBinaryImage(thresh,frame_buf);
+	
+	
+	get2DHist(frame_buf,hist_x,hist_y);
+	*max_idx = getMedian(hist_x,imgWidth);
+	*max_idy = getMedian(hist_y,imgHeight);
+	printf("max x: %d, max y: %d\n",*max_idx,*max_idy);
+	
+	
+	free(OneDHist);
+	free(hist_x);
+	free(hist_y);
+}
+void get1DHist(unsigned char *frame_buf, unsigned int * OneDHist) {
+	unsigned int ix;
 	unsigned int color_channels = 4;
-	unsigned int step = 5 * color_channels;
-	*max_y = 0;
-	max_y_ix = 0;
+	unsigned int step = 1 * color_channels;
+	
+	
 	for (ix=0; ix<(imgWidth*imgHeight*2); ix+= step)
-	{ 
-		// we can speed things up by just looking at the first channel:
-        y = (((unsigned int)frame_buf[ix+1] + (unsigned int)frame_buf[ix+3])) >> 1;
-		if(y > *max_y) {
-			*max_y = y;	//save value of brightnest pixel
-			max_y_ix = ix; // also save location
-		}
+	{ 		
+        OneDHist[frame_buf[ix+1]]++;
+		OneDHist[frame_buf[ix+3]]++;		
     }
-    
+/*
+	for (ix=0;ix<256;ix++) {
+		printf(" %d, ",OneDHist[ix]); 
+	}
+	printf("\n");
+	printf("\n");
+
+*/
+} 
+
+unsigned char getThreshold(unsigned int * OneDHist) {
+
+	unsigned int total= (unsigned int)((float)(imgWidth*imgHeight)*((float)threshtune/100));
+	unsigned char i;
+	unsigned int tmptotal = 0;
+	
+	//printf("Total: %d\n",total);
+	
+	for (i = 0; i<255; i++) {
+		tmptotal+=OneDHist[i];
+		if (tmptotal> total)
+			return i;
+	}
+	return 0;
+}
+
+void createBinaryImage(unsigned char threshold, unsigned char * frame_buf) {
+	unsigned int ix;
+	unsigned int color_channels = 4;
+	unsigned int step = 1 * color_channels;
+		
+	for (ix=0; ix<(imgWidth*imgHeight*2); ix+= step)
+	{ 		
+		//frame_buf[ix] = 0;
+		//frame_buf[ix+2] = 0;
+        if (frame_buf[ix+1] < threshold)
+			frame_buf[ix+1] = 0;
+		else
+			frame_buf[ix+1] = 255;
+        if (frame_buf[ix+3] < threshold)
+			frame_buf[ix+3] = 0;	
+		else
+			frame_buf[ix+3] = 255;			
+    }
+
+}
+
+void get2DHist(unsigned char * frame_buf, unsigned int * hist_x, unsigned int * hist_y) {
+	unsigned int x,y,ix;
+		
+	for (x=0; x<(imgWidth); x++)
+	{
+		unsigned int tmpsum = 0;
+		for (y=0; y<(imgHeight); y++)
+		{ 
+			ix = image_index(x,y);
+			tmpsum+=frame_buf[ix+1] > 0;
+			//printf(" %d, ",ix); 
+		}
+	//	printf(" %d, ",tmpsum); 
+		hist_x[x] = tmpsum;
+		
+	}
+	printf("\n\n"); 
+	//TODO: optimize loop below to integrate with loop above...
+	for (y=0; y<(imgHeight); y++)
+	{
+		unsigned int tmpsum = 0;
+		for (x=0; x<(imgWidth); x++)
+		{ 
+			tmpsum+=frame_buf[image_index(x,y) +1] > 0;
+		}
+		hist_y[y] = tmpsum;
+	}
+	
+	/*
+	for (ix=0;ix<imgWidth;ix++) {
+		printf(" %d, ",hist_x[ix]); 
+	}
+	printf("\n");
+	printf("\n");
+	
+	*/
+	
+	
+}
+unsigned int cmpfunc (const void * a, const void * b)
+{
+   return ( *(unsigned int*)a - *(unsigned int*)b );
+}
+unsigned int getMedian(unsigned int * hist,  unsigned int size) {
+	
+	unsigned int total = 0;
+	unsigned int tmptotal = 0;
+	
+	for (unsigned int i = 0 ; i< size; i++) {	
+		total+=hist[i];	
+	}
+	
+	for (unsigned int i = 0 ; i< size; i++) {
+		tmptotal+=hist[i];
+	if (tmptotal>total/2) 
+		return i;
+	}
+	return 0;	
+}
+
+void getxy(unsigned int max_y_ix, unsigned int * max_idx, unsigned int * max_idy) {	
 	max_y_ix/=2;
 	*max_idy = (max_y_ix / imgWidth);
 	*max_idx = (max_y_ix) - *max_idy*imgWidth;
 }
+
+
+
+
 
 
 /* entry point to initialize the plug-in
