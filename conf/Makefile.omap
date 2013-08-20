@@ -131,7 +131,7 @@ endif
 	  echo "mount --bind opt /opt";					\
 	  echo "chmod 777 initvideoall.sh";				\
 	  echo "chmod 777 $(TARGET).elf";				\
-	  echo "./initvideoall.sh &";				\
+#	  echo "./initvideoall.sh &";				\
 	  echo "sleep 3";				\
 	  echo "./$(TARGET).elf > /dev/null 2>&1 &";	\
 	} | telnet $(HOST)
