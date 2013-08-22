@@ -119,16 +119,16 @@ endif
 	  echo "insmod cp210x.ko";						\
 	  echo "insmod pl2303.ko";						\
 	  echo "insmod ftdi-sio.ko";					\
-	  echo "mkdir -p /opt/arm";						\
 #	  echo "tar -xzf arm_light.tgz";				\
-#	  echo "tar -xzf opt/arm/tidsp.tgz";			\
+#	  echo "rm opt/arm -r";			\
+#	  echo "mv arm opt/";			\
 	  echo "chmod 777 libExample.so";				\
 	  echo "mv libExample.so opt/arm/gst/lib/gstreamer-0.10/libExample.so";			\
-#	  echo "mv opt/arm/tidsp opt/arm/tidsp-binaries-23.i3.8";			\
+	  echo "mv opt/arm/tidsp opt/arm/tidsp-binaries-23.i3.8";			\
 	  echo "mount --bind opt /opt";					\
 	  echo "chmod 777 initvideoall.sh";				\
 	  echo "chmod 777 $(TARGET).elf";				\
-#	  echo "./initvideoall.sh &";				\
+	  echo "./initvideoall.sh &";				\
 	  echo "sleep 3";				\
 	  echo "./$(TARGET).elf > /dev/null 2>&1 &";	\
 	} | telnet $(HOST)
