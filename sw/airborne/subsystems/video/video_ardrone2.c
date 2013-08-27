@@ -151,7 +151,7 @@ void video_init(void) {
 	//-> no init is needed, framework is started automatically
 
 	//init the socket
-	//initSocket();
+	initSocket();
 }
 
 
@@ -159,7 +159,7 @@ void video_receive(void) {
   
 
 	//read the data from the video tcp socket
-/*	
+	
 	if (Read_msg_socket((char *) &gst2ppz,sizeof(gst2ppz))>=0) {
 		printf("Received data. x: %d, y: %d, counter: %d\n",gst2ppz.max_idx,gst2ppz.max_idy,gst2ppz.counter);
 		video_impl.maxY = gst2ppz.maxY;
@@ -170,11 +170,11 @@ void video_receive(void) {
 
 //testing
 
-	//electrical.vsupply = video_impl.max_idx; // for testing!!!
+	electrical.vsupply = video_impl.max_idx; // for testing!!!
 	//electrical.current = video_impl.max_idy; // for testing!!!
 	ppz2gst.heading = gst2ppz.counter;		// testing!
 	Write_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
-*/
+
 }
 
 
