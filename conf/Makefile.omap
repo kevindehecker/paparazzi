@@ -92,19 +92,16 @@ endif
 	} | telnet $(HOST)
 
 	#put the correct ip address in the starting up script to be run on the drone:
-	rm $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/initvideoall.sh
+	#rm $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/initvideoall.sh
 	cp $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/basescript.sh $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/initvideoall.sh
-	ip="$(ifconfig | grep  192.168.1 | cut -d ':' -f 2 |  cut -d ' ' -f 1)"
-
-	echo "gst-launch v4l2src device=/dev/video1 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=544, height=304 ! example tcp_port=2002 ! fakesink #dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=$ip port=5000" >> $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/initvideoall.sh
-
+	sh $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/generate_initvideoall.sh $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/
 
 	# Upload the drivers and new application
 	{																								\
 	  echo "binary";																				\
 	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_drivers/cdc-acm.ko /$(SUB_DIR)/cdc-acm.ko";		\
 	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/initvideoall.sh /$(SUB_DIR)/initvideoall.sh";	\
-	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/arm_light.tgz /$(SUB_DIR)/arm_light.tgz";	\
+#	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/arm_light.tgz /$(SUB_DIR)/arm_light.tgz";	\
 	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/gst-plugin_example/libExample.so /$(SUB_DIR)/libExample.so";	\
 	  echo "put $(OBJDIR)/$(TARGET).elf /$(SUB_DIR)/$(TARGET).elf";									\
 	  echo "quit";																					\
@@ -117,7 +114,7 @@ endif
 	  echo "mkdir -p /opt/arm";						\
 	  echo "chmod 777 libExample.so";				\
 	  echo "mv libExample.so opt/arm/gst/lib/gstreamer-0.10/libExample.so";			\
-	  echo "mount --bind opt /opt";					\
+	  echo "mv opt/arm/tidsp opt/arm/tidsp-binaries-23.i3.8";			\
 	  echo "chmod 777 initvideoall.sh";				\
 	  echo "chmod 777 $(TARGET).elf";				\
 	  echo "./initvideoall.sh &";				\
