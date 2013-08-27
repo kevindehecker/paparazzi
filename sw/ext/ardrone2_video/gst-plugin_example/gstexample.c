@@ -272,7 +272,8 @@ void *TCP_threat( void *ptr) {
 	while(1) {
 		int res = Read_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 		if	(res>0) {
-			g_print("Wow, stress!!! Data back: %d\n",ppz2gst.heading);
+			g_print("Received counter: %d\n",ppz2gst.heading);
+			ppz2gst.heading = 6;
 		} else {
 			g_print("Nothing received: %d\n",res);
 			usleep(100000);
@@ -296,28 +297,20 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
 	unsigned int max_idx, max_idy;
 	unsigned char maxY;
 	brightspotDetector(img,&max_idx,&max_idy);
-	
-		
-		//char * tmp = calloc(64,sizeof(char));
-		//sprintf(tmp, "MaxY;%d;id_x;%d;id_y;%d;count;%d\n",maxY,max_idx,max_idy,counter);
-		if (filter->silent == FALSE) {	
-		//	g_print("%s", tmp);
-		}
+			//g_print("Max_idx: %d Max_idy: %d Counter: %d\n",max_idx,max_idy,counter);
+
+
 		if (tcpport>0) { 	//if network was enabled by user
 			if (socketIsReady) { 
-				if (filter->silent == FALSE) {	
-					g_print("Sending data to ppz@port %d\n", tcpport);
-				}
 				gst2ppz.maxY = maxY;
 				gst2ppz.max_idx = max_idx;
 				gst2ppz.max_idy = max_idy;
 				gst2ppz.counter = counter;
 				Write_msg_socket((char *) &gst2ppz, sizeof(gst2ppz));
-				
 			}
 
 		}
-		//free(tmp);
+
 	counter++;
 	
 	  
@@ -334,18 +327,11 @@ void brightspotDetector(unsigned char *frame_buf, unsigned int * max_idx,unsigne
 	unsigned int * hist_x =(unsigned int *) calloc(imgWidth,sizeof(unsigned int));
 	unsigned int * hist_y = (unsigned int *)calloc(imgHeight,sizeof(unsigned int));
 	get1DHist(frame_buf,OneDHist);
-
-	
 	thresh = getThreshold(OneDHist);
-	//printf("Thresh: %d\n",thresh);
 	createBinaryImage(thresh,frame_buf);
-	
-	
 	get2DHist(frame_buf,hist_x,hist_y);
 	*max_idx = getMedian(hist_x,imgWidth);
-	*max_idy = getMedian(hist_y,imgHeight);
-	printf("max x: %d, max y: %d\n",*max_idx,*max_idy);
-	
+	*max_idy = getMedian(hist_y,imgHeight);	
 	
 	free(OneDHist);
 	free(hist_x);
@@ -362,14 +348,7 @@ void get1DHist(unsigned char *frame_buf, unsigned int * OneDHist) {
         OneDHist[frame_buf[ix+1]]++;
 		OneDHist[frame_buf[ix+3]]++;		
     }
-/*
-	for (ix=0;ix<256;ix++) {
-		printf(" %d, ",OneDHist[ix]); 
-	}
-	printf("\n");
-	printf("\n");
 
-*/
 } 
 
 unsigned char getThreshold(unsigned int * OneDHist) {
@@ -377,8 +356,6 @@ unsigned char getThreshold(unsigned int * OneDHist) {
 	unsigned int total= (unsigned int)((float)(imgWidth*imgHeight)*((float)threshtune/100));
 	unsigned char i;
 	unsigned int tmptotal = 0;
-	
-	//printf("Total: %d\n",total);
 	
 	for (i = 0; i<255; i++) {
 		tmptotal+=OneDHist[i];
@@ -419,13 +396,11 @@ void get2DHist(unsigned char * frame_buf, unsigned int * hist_x, unsigned int * 
 		{ 
 			ix = image_index(x,y);
 			tmpsum+=frame_buf[ix+1] > 0;
-			//printf(" %d, ",ix); 
 		}
-	//	printf(" %d, ",tmpsum); 
 		hist_x[x] = tmpsum;
 		
 	}
-	printf("\n\n"); 
+
 	//TODO: optimize loop below to integrate with loop above...
 	for (y=0; y<(imgHeight); y++)
 	{
@@ -436,16 +411,6 @@ void get2DHist(unsigned char * frame_buf, unsigned int * hist_x, unsigned int * 
 		}
 		hist_y[y] = tmpsum;
 	}
-	
-	/*
-	for (ix=0;ix<imgWidth;ix++) {
-		printf(" %d, ",hist_x[ix]); 
-	}
-	printf("\n");
-	printf("\n");
-	
-	*/
-	
 	
 }
 unsigned int cmpfunc (const void * a, const void * b)
