@@ -153,9 +153,9 @@ STATIC_INLINE void main_init( void ) {
 
   ins_init();
 
-//#if USE_VIDEO_ARDRONE // TODO: create working define
+#if USE_VIDEO_ARDRONE2
 	video_init();
-//#endif
+#endif
 
 #if USE_GPS
   gps_init();
@@ -185,7 +185,9 @@ STATIC_INLINE void main_init( void ) {
   electrical_tid = sys_time_register_timer(0.1, NULL);
   baro_tid = sys_time_register_timer(1./BARO_PERIODIC_FREQUENCY, NULL);
   telemetry_tid = sys_time_register_timer((1./TELEMETRY_FREQUENCY), NULL);
-  video_tid = sys_time_register_timer((1./VIDEO_FREQUENCY), NULL);
+	#if USE_VIDEO_ARDRONE2  
+		video_tid = sys_time_register_timer((1./VIDEO_FREQUENCY), NULL);
+	#endif
 }
 
 STATIC_INLINE void handle_periodic_tasks( void ) {
@@ -203,8 +205,10 @@ STATIC_INLINE void handle_periodic_tasks( void ) {
     baro_periodic();
   if (sys_time_check_and_ack_timer(telemetry_tid))
     telemetry_periodic();
+#if USE_VIDEO_ARDRONE2
   if (sys_time_check_and_ack_timer(video_tid))
     video_periodic();
+#endif
 }
 
 STATIC_INLINE void main_periodic( void ) {
