@@ -41,8 +41,10 @@ extern struct Video video;
  *  Needs to be implemented by each VIDEO algorithm.
  */
 extern void video_init(void);
+extern void video_start(void);
+extern void video_stop(void);
 
-/** Receive over tcp. 
+/** Receive over tcp.
  *  Needs to be implemented by each VIDEO algorithm.
  */
 extern void video_receive(void);

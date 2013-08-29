@@ -23,7 +23,7 @@
  * @file subsystems/video/video_ardrone2.h
  * Video implementation for ardrone2.
  *
- * Use the tcp output of a custom GStreamer framework plugin to receive 
+ * Use the tcp output of a custom GStreamer framework plugin to receive
  * telemetry based on video
  */
 
@@ -31,7 +31,7 @@
 #define VIDEO_ARDRONE2_H
 
 #include "std.h"
-#include "subsystems/video.h"
+#include "modules/video/video.h"
 
 
 struct VideoARDrone {
@@ -47,7 +47,7 @@ extern struct VideoARDrone video_impl;
 #include <unistd.h>             /*  for ssize_t data type  */
 
 #define LISTENQ        (1024)   /*  Backlog for listen()   */
-#define PORT	       (2002)  
+#define PORT	       (2002)
 
 
 /*  private function declarations  */
