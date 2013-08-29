@@ -3,7 +3,7 @@
 # 
 #
 
-VIDEO_CFLAGS  = -DUSE_VIDEO -DUSE_VIDEO_ARDRONE2
+VIDEO_CFLAGS  = -DUSE_VIDEO=0 -DUSE_VIDEO_ARDRONE2=0
 
 VIDEO_CFLAGS += -DVIDEO_TYPE_H=\"subsystems/video/video_ardrone2.h\"
 VIDEO_SRCS   += subsystems/video.c

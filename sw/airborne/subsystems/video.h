@@ -20,7 +20,7 @@
  */
 
 /**
- * @file subsystems/ahrs.h
+ * @file subsystems/video.h
  * Attitude and Heading Reference System interface.
  */
 
@@ -43,7 +43,7 @@ extern struct Video video;
 extern void video_init(void);
 
 /** Receive over tcp. 
- *  Needs to be implemented by each AHRS algorithm.
+ *  Needs to be implemented by each VIDEO algorithm.
  */
 extern void video_receive(void);
 

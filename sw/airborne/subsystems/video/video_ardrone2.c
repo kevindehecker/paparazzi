@@ -98,7 +98,7 @@ int initSocket() {
 
     if( connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
     {
-       printf("\n Error : Connect Failed \n");
+       printf("\n Error : Video Connect Failed. Is gst-launch running? \n");
        return 1;
     } 
 
