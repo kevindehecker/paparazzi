@@ -140,10 +140,10 @@
       <program name="Data Link">
         <arg flag="-udp"/>
       </program>
-      <program name="Messages (Python)"/>
       <program name="Joystick">
         <arg flag="-ac" constant="ardrone2_raw"/>
         <arg flag="extreme_3d_pro.xml"/>
+        <arg flag="-id" constant="2"/>
       </program>
     </session>
     <session name="Flight USB-serial@9600">
