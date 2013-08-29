@@ -27,12 +27,12 @@
     <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs" type="int_cmpl_quat"/>
     <subsystem name="ins" type="extended"/>
-    <subsystem name="video" type="ardrone2" />
 
   </firmware>
 
   <modules main_freq="512">
     <load name="gps_ubx_ucenter.xml"/>
+    <load name="video_ardrone2.xml" />
   </modules>
 
   <commands>

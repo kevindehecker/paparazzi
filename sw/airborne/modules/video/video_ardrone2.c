@@ -23,13 +23,13 @@
  * @file subsystems/video/video_ardrone2.c
  * Video implementation for ardrone2.
  *
- * Use the tcp output of a custom GStreamer framework plugin to receive 
+ * Use the tcp output of a custom GStreamer framework plugin to receive
  * telemetry based on video
  */
 
-#include "video_ardrone2.h"
+#include "modules/video/video_ardrone2.h"
 #include <stdio.h>
-#include "video_message_structs.h"
+#include "modules/video/video_message_structs.h"
 #include "subsystems/gps/gps_ardrone2.h"
 #include "subsystems/imu/imu_ardrone2_raw.h"
 
@@ -47,7 +47,7 @@
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <time.h> 
+#include <time.h>
 
 char** str_split(char* a_str, const char *  a_delim, unsigned int * amount);
 
@@ -92,7 +92,7 @@ int initSocket() {
     {
         printf("\n inet_pton error occured\n");
         return 1;
-    } 
+    }
 
 
 
@@ -100,7 +100,7 @@ int initSocket() {
     {
        printf("\n Error : Video Connect Failed. Is gst-launch running? \n");
        return 1;
-    } 
+    }
 
 
 
@@ -125,7 +125,7 @@ ssize_t Write_msg_socket(char * data, unsigned int size) {
     ssize_t     nwritten;
 	nleft  = size;
 	nwritten =0;
-	
+
     while ( nleft > 0 ) {
 	if ( (nwritten = write(list_s, data, nleft)) <= 0 ) {
 	    if ( errno == EINTR )
@@ -138,7 +138,7 @@ ssize_t Write_msg_socket(char * data, unsigned int size) {
     }
 
     return nwritten;
-	
+
 }
 
 void video_init(void) {
@@ -156,10 +156,10 @@ void video_init(void) {
 
 
 void video_receive(void) {
-  
+
 
 	//read the data from the video tcp socket
-	
+
 	if (Read_msg_socket((char *) &gst2ppz,sizeof(gst2ppz))>=0) {
 		printf("Received data. x: %d, y: %d, counter: %d\n",gst2ppz.max_idx,gst2ppz.max_idy,gst2ppz.counter);
 		video_impl.maxY = gst2ppz.maxY;
@@ -175,6 +175,17 @@ void video_receive(void) {
 	ppz2gst.heading = gst2ppz.counter;		// testing!
 	Write_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 
+}
+
+
+
+
+void video_start(void)
+{
+}
+
+void video_stop(void)
+{
 }
 
 

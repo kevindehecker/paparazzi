@@ -63,8 +63,6 @@
 #include "subsystems/ahrs.h"
 #include "subsystems/ins.h"
 
-#include "subsystems/video.h"
-
 #include "state.h"
 
 #include "firmwares/rotorcraft/main.h"
@@ -94,10 +92,6 @@ PRINT_CONFIG_VAR(MODULES_FREQUENCY)
 #endif
 PRINT_CONFIG_VAR(BARO_PERIODIC_FREQUENCY)
 
-#ifndef VIDEO_FREQUENCY
-#define VIDEO_FREQUENCY 15
-#endif
-PRINT_CONFIG_VAR(VIDEO_FREQUENCY)
 
 static inline void on_gyro_event( void );
 static inline void on_accel_event( void );
@@ -114,7 +108,6 @@ tid_t radio_control_tid; ///< id for radio_control_periodic_task() timer
 tid_t electrical_tid;    ///< id for electrical_periodic() timer
 tid_t baro_tid;          ///< id for baro_periodic() timer
 tid_t telemetry_tid;     ///< id for telemetry_periodic() timer
-tid_t video_tid;     	 ///< id for video_periodic() timer
 
 #ifndef SITL
 int main( void ) {
@@ -153,12 +146,6 @@ STATIC_INLINE void main_init( void ) {
 
   ins_init();
 
-
-#if USE_VIDEO_ARDRONE2
-	PRINT_CONFIG_VAR (USE_VIDEO_ARDRONE2)
-	video_init();
-#endif
-
 #if USE_GPS
   gps_init();
 #endif
@@ -187,9 +174,6 @@ STATIC_INLINE void main_init( void ) {
   electrical_tid = sys_time_register_timer(0.1, NULL);
   baro_tid = sys_time_register_timer(1./BARO_PERIODIC_FREQUENCY, NULL);
   telemetry_tid = sys_time_register_timer((1./TELEMETRY_FREQUENCY), NULL);
-	#if USE_VIDEO_ARDRONE2  
-		video_tid = sys_time_register_timer((1./VIDEO_FREQUENCY), NULL);
-	#endif
 }
 
 STATIC_INLINE void handle_periodic_tasks( void ) {
@@ -207,10 +191,6 @@ STATIC_INLINE void handle_periodic_tasks( void ) {
     baro_periodic();
   if (sys_time_check_and_ack_timer(telemetry_tid))
     telemetry_periodic();
-#if USE_VIDEO_ARDRONE2
-  if (sys_time_check_and_ack_timer(video_tid))
-    video_periodic();
-#endif
 }
 
 STATIC_INLINE void main_periodic( void ) {
@@ -232,10 +212,6 @@ STATIC_INLINE void main_periodic( void ) {
 
 STATIC_INLINE void telemetry_periodic(void) {
   PeriodicSendMain(DefaultChannel,DefaultDevice);
-}
-
-STATIC_INLINE void video_periodic(void) {
-  video_receive();
 }
 
 STATIC_INLINE void failsafe_check( void ) {

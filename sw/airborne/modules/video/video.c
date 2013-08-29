@@ -25,7 +25,7 @@
  */
 
 
-#include "subsystems/video.h"
+#include "modules/video/video.h"
 
 struct Video video;
 
