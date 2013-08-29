@@ -33,9 +33,6 @@
 #include "subsystems/gps/gps_ardrone2.h"
 #include "subsystems/imu/imu_ardrone2_raw.h"
 
-
-#include "subsystems/electrical.h" // for testing only, to set vsupply
-
 #include <sys/socket.h>       /*  socket definitions        */
 #include <sys/types.h>        /*  socket types              */
 #include <arpa/inet.h>        /*  inet (3) funtions         */
@@ -48,6 +45,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <time.h>
+
+#ifndef DOWNLINK_DEVICE
+#define DOWNLINK_DEVICE DOWNLINK_AP_DEVICE
+#endif
+#include "messages.h"
+#include "subsystems/datalink/downlink.h"
+
 
 char** str_split(char* a_str, const char *  a_delim, unsigned int * amount);
 
@@ -102,7 +106,7 @@ int initSocket() {
        return 1;
     }
 
-
+	printf("\n Video framework connected! \n");
 
 	return 1;
 }
@@ -143,15 +147,7 @@ ssize_t Write_msg_socket(char * data, unsigned int size) {
 
 void video_init(void) {
 
-	//init and start the GST framework
-	//for now this is being done by the makefile.omap from ppz center upload button
-	//the following code does not work properly:
-	//	int status = system("/data/video/kevin/initvideoall.sh");
-	//as it waits until script is done (which never happens)
-	//-> no init is needed, framework is started automatically
 
-	//init the socket
-	initSocket();
 }
 
 
@@ -166,11 +162,16 @@ void video_receive(void) {
 		video_impl.max_idx = gst2ppz.max_idx;
 		video_impl.max_idy = gst2ppz.max_idy;
 		video_impl.counter = gst2ppz.counter;
+
+    	DOWNLINK_SEND_VIDEO_TELEMETRY( DefaultChannel, DefaultDevice, &video_impl.max_idx, &video_impl.max_idy);  
+
+
+
 	}
 
 //testing
 
-	electrical.vsupply = video_impl.max_idx; // for testing!!!
+	//electrical.vsupply = video_impl.max_idx; // for testing!!!
 	//electrical.current = video_impl.max_idy; // for testing!!!
 	ppz2gst.heading = gst2ppz.counter;		// testing!
 	Write_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
@@ -182,10 +183,23 @@ void video_receive(void) {
 
 void video_start(void)
 {
+
+	//init and start the GST framework
+	//for now this is being done by the makefile.omap from ppz center upload button
+	//the following code does not work properly:
+	//	int status = system("/data/video/kevin/initvideoall.sh");
+	//as it waits until script is done (which never happens)
+	//-> no init is needed, framework is started automatically
+
+	//init the socket
+	initSocket();
+
+
 }
 
 void video_stop(void)
 {
+	closeSocket();
 }
 
 
