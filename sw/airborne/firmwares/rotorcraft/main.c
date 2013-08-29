@@ -94,6 +94,10 @@ PRINT_CONFIG_VAR(MODULES_FREQUENCY)
 #endif
 PRINT_CONFIG_VAR(BARO_PERIODIC_FREQUENCY)
 
+#ifndef VIDEO_FREQUENCY
+#define VIDEO_FREQUENCY 15
+#endif
+PRINT_CONFIG_VAR(VIDEO_FREQUENCY)
 
 static inline void on_gyro_event( void );
 static inline void on_accel_event( void );
