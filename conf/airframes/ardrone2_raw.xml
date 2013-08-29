@@ -225,10 +225,8 @@
 all:
 	echo "Compiling gst-example_plugin"
 	sb2 make -C ../ext/ardrone2_video/gst-plugin_example/ clean all
-clean:
-	#hmm, does not work
-	echo "Cleaning gst-example_plugin"
-	sb2 make -C ../ext/ardrone2_video/gst-plugin_example/ clean
+	echo "Compiling gst-MAVLab plugin"
+	sb2 make -C ../ext/ardrone2_video/gst-MAVLab/ clean all
 </makefile>
 
 </airframe>
