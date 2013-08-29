@@ -153,7 +153,9 @@ STATIC_INLINE void main_init( void ) {
 
   ins_init();
 
+
 #if USE_VIDEO_ARDRONE2
+	PRINT_CONFIG_VAR (USE_VIDEO_ARDRONE2)
 	video_init();
 #endif
 
