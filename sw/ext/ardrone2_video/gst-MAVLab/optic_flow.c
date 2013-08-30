@@ -8,7 +8,7 @@
 #define NO_MEMORY -1
 #define OK 0
 
-int IMG_WIDTH, IMG_HEIGHT;
+unsigned int IMG_WIDTH, IMG_HEIGHT;
 
 static inline void bluePixel(unsigned char *frame_buf, unsigned int ip)
 {
@@ -76,7 +76,7 @@ void getGradientPixelWH(unsigned char *frame_buf, int x, int y, int* dx, int* dy
 	unsigned int ix, Y1, Y2;
 	unsigned int xx, yy;
 	// currently we use [0 0 0; -1 0 1; 0 0 0] as mask for dx
-	if(x >= 0 && x < IMG_WIDTH && y >= 0 && y < IMG_HEIGHT)
+	if(x >= 0 && x < (int)IMG_WIDTH && y >= 0 && y < (int)IMG_HEIGHT)
 	{
 		if(x > 0)
 		{
@@ -92,7 +92,7 @@ void getGradientPixelWH(unsigned char *frame_buf, int x, int y, int* dx, int* dy
 			Y1 = (((unsigned int)frame_buf[ix+1] + (unsigned int)frame_buf[ix+3])) >> 1;
 		}
 	
-		if(x < IMG_WIDTH - 1)
+		if(x < (int)IMG_WIDTH - 1)
 		{
 			xx = x+1; yy = y;
 			ix = uint_index(xx,yy);
@@ -126,7 +126,7 @@ void getGradientPixelWH(unsigned char *frame_buf, int x, int y, int* dx, int* dy
 			Y1 = (((unsigned int)frame_buf[ix+1] + (unsigned int)frame_buf[ix+3])) >> 1;
 		}
 	
-		if(y < IMG_HEIGHT - 1)
+		if(y < (int)IMG_HEIGHT - 1)
 		{
 			xx = x; yy = y + 1;
 			ix = uint_index(xx,yy);
@@ -181,7 +181,7 @@ void excludeArea(unsigned int* Mask, int x, int y, int suppression_distance_squa
 	{
 		for(yy = y -suppression_distance_squared; yy < y+suppression_distance_squared; yy++)
 		{
-			if(yy >= 0 && yy < IMG_HEIGHT && xx >= 0 && xx < IMG_WIDTH)
+			if(yy >= 0 && yy < (int)IMG_HEIGHT && xx >= 0 && xx < (int)IMG_WIDTH)
 			{
 				ix = int_index(xx,yy);
 				Mask[ix] = 1;
@@ -202,9 +202,9 @@ int findLocalMaxima(int* Harris, int max_val, int MAX_POINTS, int* p_x, int* p_y
 	if(Mask == 0) return NO_MEMORY;
 	(*n_found_points) = 0;
 	// initialize with zeros (none excluded yet)
-	for(x = 0; x < IMG_WIDTH; x++)
+	for(x = 0; x < (int)IMG_WIDTH; x++)
 	{
-		for(y = 0; y < IMG_HEIGHT; y++)
+		for(y = 0; y < (int)IMG_HEIGHT; y++)
 		{	
 			ix = int_index(x,y);
 			Mask[ix] = 0;
@@ -214,9 +214,9 @@ int findLocalMaxima(int* Harris, int max_val, int MAX_POINTS, int* p_x, int* p_y
 	//printf("MAX_POINTS = %d\n\r", MAX_POINTS);
 
 	// Find local maxima, forget about the border pixels:	
-	for(x = 1; x < IMG_WIDTH-1; x++)
+	for(x = 1; x < (int)IMG_WIDTH-1; x++)
 	{
-		for(y = 1; y < IMG_HEIGHT-1; y++)
+		for(y = 1; y < (int)IMG_HEIGHT-1; y++)
 		{	
 			// stop if the maximum number of points has been reached:
 			if((*n_found_points) == MAX_POINTS) break;
@@ -275,9 +275,9 @@ int getMaximum(int * Im)
 	unsigned int ix;
 	int step = 1;
 	max_val = Im[0];
-	for(x = 0; x < IMG_WIDTH; x += step)
+	for(x = 0; x < (int)IMG_WIDTH; x += step)
 	{
-		for(y = 0; y < IMG_HEIGHT; y += step)
+		for(y = 0; y < (int)IMG_HEIGHT; y += step)
 		{
 			ix = int_index(x,y);
 			val = Im[ix];
@@ -294,9 +294,9 @@ int getMinimum(int * Im)
 	unsigned int ix;
 	int step = 1;
 	min_val = Im[0];
-	for(x = 0; x < IMG_WIDTH; x += step)
+	for(x = 0; x < (int)IMG_WIDTH; x += step)
 	{
-		for(y = 0; y < IMG_HEIGHT; y += step)
+		for(y = 0; y < (int)IMG_HEIGHT; y += step)
 		{
 			ix = int_index(x,y);
 			val = Im[ix];
@@ -315,9 +315,9 @@ void getHarris(int* DXX, int* DXY, int* DYY, int* Harris)
 	int reciprocal_K = 25;	
 	//int printed = 0;
 	//int PRECISION = 1;
-	for(x = 0; x < IMG_WIDTH; x++)
+	for(x = 0; x < (int)IMG_WIDTH; x++)
 	{
-		for(y = 0; y < IMG_HEIGHT; y++)
+		for(y = 0; y < (int)IMG_HEIGHT; y++)
 		{
 			ix = int_index(x,y);
 			sumDXXDYY = DXX[ix] + DYY[ix];
@@ -359,26 +359,26 @@ void smoothGaussian(int* Src, int* Dst)
 
 	// is the following necessary, or is it already filled with zeros?
 	// fill the borders with zeros:
-	for(x = 0; x < IMG_WIDTH; x += IMG_WIDTH-1)
+	for(x = 0; x < (int)IMG_WIDTH; x += (int)IMG_WIDTH-1)
 	{
-		for(y = 0; y < IMG_HEIGHT; y++)
+		for(y = 0; y < (int)IMG_HEIGHT; y++)
 		{
 			ix = int_index(x,y);
 			Dst[ix] = 0;
 		}
 	}
-	for(y = 0; y < IMG_HEIGHT; y += IMG_HEIGHT-1)
+	for(y = 0; y < (int)IMG_HEIGHT; y += (int)IMG_HEIGHT-1)
 	{
-		for(x = 0; x < IMG_WIDTH; x++)
+		for(x = 0; x < (int)IMG_WIDTH; x++)
 		{
 			ix = int_index(x,y);
 			Dst[ix] = 0;
 		}
 	}
 
-	for(x = 1; x < IMG_WIDTH-1; x++)
+	for(x = 1; x < (int)IMG_WIDTH-1; x++)
 	{
-		for(y = 1; y < IMG_HEIGHT-1; y++)
+		for(y = 1; y < (int)IMG_HEIGHT-1; y++)
 		{
 			min_x = x - 1;
 			min_y = y - 1;	
@@ -418,9 +418,9 @@ void thresholdImage(int* Harris, int max_val, int max_factor)
 	unsigned int ix;
 	threshold = max_val / max_factor;
 	n_remaining = 0;
-	for(x = 0; x < IMG_WIDTH; x++)
+	for(x = 0; x < (int)IMG_WIDTH; x++)
 	{
-		for(y = 0; y < IMG_HEIGHT; y++)
+		for(y = 0; y < (int)IMG_HEIGHT; y++)
 		{
 			ix = int_index(x,y);
 			if(Harris[ix] < threshold) Harris[ix] = 0;
@@ -579,7 +579,7 @@ int findCorners(unsigned char *frame_buf, int MAX_POINTS, int *x, int *y, int su
 
 		for(p = 0; p < (*n_found_points); p++)
 		{
-			if(x[p] >= 1 && y[p] >= 1 && x[p] < IMG_WIDTH - 1 && y[p] < IMG_HEIGHT - 1)
+			if(x[p] >= 1 && y[p] >= 1 && x[p] < (int)IMG_WIDTH - 1 && y[p] < (int)IMG_HEIGHT - 1)
 			{
 				// printf("(x,y) = (%d,%d)\n\r", x[p],y[p]);
 				for(i = -1; i <= 1; i++)
@@ -878,7 +878,7 @@ int opticFlowLK(unsigned char * new_image_buf, unsigned char * old_image_buf, in
 		//printf("Subpixel coordinate: (%d,%d)\n\r", p_x[p], p_y[p]);
 
 		// if the pixel is outside the ROI in the image, do not track it: 
-		if(!(p_x[p] > ((half_window_size+1) * subpixel_factor) && p_x[p] < (IMG_WIDTH-half_window_size) * subpixel_factor && p_y[p] > ((half_window_size+1) * subpixel_factor) && p_y[p] < (IMG_HEIGHT-half_window_size)*subpixel_factor))
+		if(!(p_x[p] > ((half_window_size+1) * subpixel_factor) && p_x[p] < ((int)IMG_WIDTH-half_window_size) * subpixel_factor && p_y[p] > ((half_window_size+1) * subpixel_factor) && p_y[p] < ((int)IMG_HEIGHT-half_window_size)*subpixel_factor))
 			{
 				//printf("Outside of ROI\n\r");
 				status[p] = 0;
@@ -934,7 +934,7 @@ int opticFlowLK(unsigned char * new_image_buf, unsigned char * old_image_buf, in
 			//printf("it = %d, (p_x+v_x,p_y+v_y) = (%d,%d)\n\r", it, p_x[p]+v_x, p_y[p]+v_y);
 			//printf("it = %d;", it);
 			// if the pixel goes outside the ROI in the image, stop tracking: 
-			if(!(p_x[p]+v_x > ((half_window_size+1) * subpixel_factor) && p_x[p]+v_x < (IMG_WIDTH-half_window_size) * subpixel_factor && p_y[p]+v_y > ((half_window_size+1) * subpixel_factor) && p_y[p]+v_y < (IMG_HEIGHT-half_window_size)*subpixel_factor))
+			if(!(p_x[p]+v_x > ((half_window_size+1) * subpixel_factor) && p_x[p]+v_x < ((int)IMG_WIDTH-half_window_size) * subpixel_factor && p_y[p]+v_y > ((half_window_size+1) * subpixel_factor) && p_y[p]+v_y < ((int)IMG_HEIGHT-half_window_size)*subpixel_factor))
 			{
 				//printf("Outside of ROI\n\r");
 				status[p] = 0;

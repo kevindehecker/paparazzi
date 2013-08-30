@@ -22,6 +22,7 @@ unsigned int blobx1[MAX_BLOBS], blobx2[MAX_BLOBS], bloby1[MAX_BLOBS], bloby2[MAX
 unsigned int hist0[256], hist1[256], mean[3];
 unsigned int x_sum[MAX_IMHEIGHT], y_sum[MAX_IMWIDTH];
 
+/*
 void init_colors() {
     unsigned int ii;
     
@@ -33,7 +34,7 @@ void init_colors() {
         vmax[ii] = 0;
         vmin[ii] = 0;
     }
-}
+}*/
 
 unsigned int vpix(unsigned char *frame_buf, unsigned int xx, unsigned int yy) {
         unsigned int ix;
@@ -49,7 +50,7 @@ void findCenter(unsigned char *frame_buf, unsigned int ii, int * coords)
 {
     unsigned int ix, xx, yy, y, u, v, total, half_total, tmp_x, tmp_y;
 
-    register int y1, y2, u1, u2, v1, v2;
+    unsigned int y1, y2, u1, u2, v1, v2;
     y1 = ymin[ii];
     y2 = ymax[ii];
     u1 = umin[ii];
@@ -141,7 +142,7 @@ unsigned int vblob(unsigned char *frame_buf, unsigned char *blob_buf, unsigned i
     unsigned int maxx, maxy;
     unsigned char *bbp, ctmp;
     int itmp, jtmp;
-    int y1, y2, u1, u2, v1, v2;
+    unsigned int y1, y2, u1, u2, v1, v2;
     
     y1 = ymin[ii];
     y2 = ymax[ii];
@@ -305,7 +306,8 @@ blobbreak:     // now sort blobs by size, largest to smallest pixel count
 void vhist(unsigned char *frame_buf) {
     unsigned int ix, iy, xx, yy, y1, u1, v1;
 
-    for (ix=0; ix<256; ix++) {          hist0[ix] = 0;  // accumulator 
+    for (ix=0; ix<256; ix++) {  
+        hist0[ix] = 0;  // accumulator 
         hist1[ix] = 0;  
     }
     for (xx=0; xx<imgWidth; xx+=2) {   
@@ -436,7 +438,7 @@ void edge_detect(unsigned char *inbuf, unsigned char *outbuf, int thresh) {
             v2 = *(ip+2+skip) - *(ip+2-skip); 
             gx = ((y2*y2)>>2) + u2*u2 + v2*v2;
  
-            if ((gx > thresh) || (gy > thresh)) {
+            if (((int)gx > thresh) || ((int)gy > thresh)) {
                 *op = 128;
                 *(op+2) = 128;
                 *(op+1) = 255;
@@ -469,8 +471,8 @@ unsigned int vscan(unsigned char *outbuf, unsigned char *inbuf, int thresh,
     for (ix=0; ix<columns; ix++)    // initialize output vector
         outvect[ix] = imgHeight;
         
-    for (y=0; y<imgHeight; y++) {  // now search from top to bottom, noting each hit in the appropriate column
-        for (x=0; x<imgWidth; x+=2) {  // note that edge detect used full UYVY per pixel position
+    for (y=0; y<(int)imgHeight; y++) {  // now search from top to bottom, noting each hit in the appropriate column
+        for (x=0; x<(int)imgWidth; x+=2) {  // note that edge detect used full UYVY per pixel position
             if (*pp & 0xC0) {   // look for edge hit 
                 outvect[((x * columns) / imgWidth)] = imgHeight - y;
                 hits++;
@@ -500,7 +502,7 @@ unsigned int vhorizon(unsigned char *outbuf, unsigned char *inbuf, int thresh,
         
     for (y=imgHeight-1; y>=0; y--) {  // now search from top to bottom, noting each hit in the appropriate column
         pp = outbuf + (y * imgWidth / 2);
-        for (x=0; x<imgWidth; x+=2) {  // note that edge detect used full UYVY per pixel position
+        for (x=0; x<(int)imgWidth; x+=2) {  // note that edge detect used full UYVY per pixel position
             if (*pp & 0xC0) {   // look for edge hit 
                 outvect[((x * columns) / imgWidth)] = y;
                 hits++;
@@ -536,7 +538,7 @@ unsigned int vhorizon(unsigned char *outbuf, unsigned char *inbuf, int thresh,
     }
 	*slope = (1000*sts)/stt;
 	*intercept = (sy*1000 - sx*(*slope))/(columns*1000);
-    if (*intercept > (imgHeight-1)) *intercept = imgHeight-1;
+    if (*intercept > ((int)imgHeight-1)) *intercept = (int)imgHeight-1;
     if (*intercept < 0) *intercept = 0;
 
     if (filter > 1) {
@@ -590,9 +592,9 @@ void svs_segcode(unsigned char *outbuf, unsigned char *inbuf, int thresh) {
  
             cc = ((*ip >> 2) & 0x38)       // threshold U to 0x38 position
                + ((*(ip+2) >> 5) & 0x07);  // threshold V to 0x07 position
-            if (gx > thresh)  
+            if ((int)gx > thresh)  
                 cc |= 0x80;               // add 0x80 flag if this is edge pixel
-            if (gy > thresh)  
+            if ((int)gy > thresh)  
                 cc |= 0x40;               // add 0x40 flag if this is edge pixel
             *op++ = cc;
         }
@@ -646,9 +648,9 @@ void addline(unsigned char *outbuf, int slope, int intercept)
 
     if (imgWidth > 640)   // buffer size limits this function to 640x480 resolution
         return;
-    for (xx=0; xx<imgWidth; xx+=2) {
+    for (xx=0; xx<(int)imgWidth; xx+=2) {
         yy = ((slope * xx) / 1000) + intercept; 
-        if (yy > (imgHeight-1)) yy = imgHeight - 1;
+        if (yy > ((int)imgHeight-1)) yy = (int)imgHeight - 1;
         if (yy < 0) yy = 0; 
         ix = index(xx, yy);
         outbuf[ix+1] =  outbuf[ix+3] = 72;

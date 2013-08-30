@@ -1,7 +1,7 @@
 #include "guido.h"
 #include "colors.h"
 #include <math.h>
-
+#include <stdlib.h>     /* abs */
 
 // *****************
 // INLINE FUNCTIONS:
@@ -31,7 +31,7 @@ static inline void blackDot(unsigned char *frame_buf, int x, int y)
 	{
 		for(yy = y-1; yy <= y+1; yy++)
 		{
-			if(xx >= 0 && xx < imgWidth && yy >= 0 && yy < imgHeight)
+			if(xx >= 0 && xx < (int)imgWidth && yy >= 0 && yy < (int)imgHeight)
 			{
 				ip = image_index(xx,yy);
 				frame_buf[ip] = 0x7f;
@@ -81,9 +81,9 @@ extern int getPatchTexture(unsigned char *frame_buf, int x, int y, int patch_siz
 	texture = 0;
 	// correct coordinates of center pixel if necessary:
 	x = (x < half_patch_size) ? half_patch_size : x;
-	x = (x >= imgWidth - half_patch_size) ? imgWidth - half_patch_size - 1 : x;	
+	x = (x >= (int)imgWidth - half_patch_size) ? (int)imgWidth - half_patch_size - 1 : x;	
 	y = (y < half_patch_size) ? half_patch_size : y;
-	y = (y >= imgWidth - half_patch_size) ? imgWidth - half_patch_size - 1 : y;
+	y = (y >= (int)imgWidth - half_patch_size) ? (int)imgWidth - half_patch_size - 1 : y;
 	
 	ix = image_index(x,y);
 	center_pixel = (int)((((unsigned int)frame_buf[ix+1] + (unsigned int)frame_buf[ix+3])) >> 1);
@@ -148,9 +148,9 @@ extern int getPatchMean(unsigned char *frame_buf, int x, int y, int patch_size)
 	mean = 0;
 	// correct coordinates of center pixel if necessary:
 	x = (x < half_patch_size) ? half_patch_size : x;
-	x = (x >= imgWidth - half_patch_size) ? imgWidth - half_patch_size - 1 : x;	
+	x = (x >= (int)imgWidth - half_patch_size) ? (int)imgWidth - half_patch_size - 1 : x;	
 	y = (y < half_patch_size) ? half_patch_size : y;
-	y = (y >= imgWidth - half_patch_size) ? imgWidth - half_patch_size - 1 : y;
+	y = (y >= (int)imgWidth - half_patch_size) ? (int)imgWidth - half_patch_size - 1 : y;
 	
 	for(dx = -half_patch_size; dx <= half_patch_size; dx++)
 	{
@@ -185,10 +185,10 @@ extern int getHarrisPixel(unsigned char *frame_buf, int x, int y)
 	
 	// determine the 3 x 3 patch around x,y:
 	if(x <= 0) min_x = 0;
-	else if(x >= imgWidth - 1) min_x = imgWidth - 2;
+	else if(x >= (int)imgWidth - 1) min_x = (int)imgWidth - 2;
 	else min_x = x - 1;
 	if(y <= 0) min_y = 0;
-	else if(y >= imgHeight - 1) min_y = imgHeight - 2;
+	else if(y >= (int)imgHeight - 1) min_y = (int)imgHeight - 2;
 	else min_y = y - 1;
 	
 	// use the patch to determine dx2, dxy, and dy2
@@ -238,10 +238,10 @@ extern int getNoblePixel(unsigned char *frame_buf, int x, int y)
 	
 	// determine the 3 x 3 patch around x,y:
 	if(x <= 0) min_x = 0;
-	else if(x >= imgWidth - 1) min_x = imgWidth - 2;
+	else if(x >= (int)imgWidth - 1) min_x = (int)imgWidth - 2;
 	else min_x = x - 1;
 	if(y <= 0) min_y = 0;
-	else if(y >= imgHeight - 1) min_y = imgHeight - 2;
+	else if(y >= (int)imgHeight - 1) min_y = (int)imgHeight - 2;
 	else min_y = y - 1;
 	
 	// use the patch to determine dx2, dxy, and dy2
@@ -359,7 +359,7 @@ extern void getGradientPixel(unsigned char *frame_buf, int x, int y, int* dx, in
 	unsigned int ix, Y1, Y2;
 	unsigned int xx, yy;
 	// currently we use [0 0 0; -1 0 1; 0 0 0] as mask for dx
-	if(x >= 0 && x < imgWidth && y >= 0 && y < imgHeight)
+	if(x >= 0 && x < (int)imgWidth && y >= 0 && y < (int)imgHeight)
 	{
 		if(x > 0)
 		{
@@ -375,7 +375,7 @@ extern void getGradientPixel(unsigned char *frame_buf, int x, int y, int* dx, in
 			Y1 = (((unsigned int)frame_buf[ix+1] + (unsigned int)frame_buf[ix+3])) >> 1;
 		}
 	
-		if(x < imgWidth - 1)
+		if(x < (int)imgWidth - 1)
 		{
 			xx = x+1; yy = y;
 			ix = image_index(xx,yy);
@@ -403,7 +403,7 @@ extern void getGradientPixel(unsigned char *frame_buf, int x, int y, int* dx, in
 			Y1 = (((unsigned int)frame_buf[ix+1] + (unsigned int)frame_buf[ix+3])) >> 1;
 		}
 	
-		if(y < imgHeight - 1)
+		if(y < (int)imgHeight - 1)
 		{
 			xx = x; yy = y + 1;
 			ix = image_index(xx,yy);
@@ -424,7 +424,7 @@ extern int getGradient(unsigned char *frame_buf, int x, int y)
 {
 	int dx, dy, gra;
 
-	if(x >= 0 && x < imgWidth && y >= 0 && y < imgHeight)
+	if(x >= 0 && x < (int)imgWidth && y >= 0 && y < (int)imgHeight)
 	{
 		getGradientPixel(frame_buf, x, y, &dx, &dy);
 		dx = abs(dx);
@@ -453,9 +453,9 @@ void segmentSkyUncertainty2(unsigned char *frame_buf, unsigned char *frame_buf2)
 	// the maximal illuminance is used in almost all sub-branches, so it is better to calculate it immediately once:
 	maxY = getMaximumY(frame_buf);
 		
-	for(x = 0; x < imgWidth; x++)
+	for(x = 0; x < (int)imgWidth; x++)
 	{
-		for(y = 0; y < imgHeight; y++) // we could divide imgHeight by 2 to speed things up
+		for(y = 0; y < (int)imgHeight; y++) // we could divide imgHeight by 2 to speed things up
 		{
 			ix = image_index(x,y);
 			
@@ -672,15 +672,15 @@ extern void segment_no_yco(unsigned char *frame_buf, unsigned char *frame_buf2)
 	// the second buffer (image) stores the uncertainties between 0 and 100.
 	int x, y, maxY, patch_size, patch_texture;
 	int FD_YCV, FD_CV;
-	unsigned int ix, Y, Cb, Cr;
+	unsigned int ix, Y, Cr;
 
 	// global variables, so that they are calculated / initialized only once:
 	maxY = getMaximumY(frame_buf);
 	patch_size = 10;
 
-	for(x = 0; x < imgWidth; x++)
+	for(x = 0; x < (int)imgWidth; x++)
 	{
-		for(y = 0; y < imgHeight; y++)
+		for(y = 0; y < (int)imgHeight; y++)
 		{
 			ix =image_index(x,y);
 
@@ -775,7 +775,7 @@ extern void segment_no_yco(unsigned char *frame_buf, unsigned char *frame_buf2)
 							else
 							{
 								Y = (((unsigned int)frame_buf[ix+1] + (unsigned int)frame_buf[ix+3])) >> 1;
-								if(Y <= (maxY * 60) / 100)
+								if(Y <= (unsigned int)(maxY * 60) / 100)
 								{
 									// ground: 76%
 									setUncertainty(frame_buf2, ix, 24);
@@ -811,7 +811,7 @@ extern void segment_no_yco_AdjustTree(unsigned char *frame_buf, unsigned char *f
 	// use a pre-defined tree to segment the image:
 	// the second buffer (image) stores the uncertainties between 0 and 100.
 	int x, y, maxY, adjust_rel_Y, patch_size, patch_texture, adjust_patch_texture, adjust_Y, adjust_Cb, adjust_Cr, FD_YCV, adjust_FD_YCV, FD_CV, adjust_FD_CV;
-	unsigned int ix, Y, Cb, Cr;
+	unsigned int ix, Y, Cr;
 
 	// global variables, so that they are calculated / initialized only once:
 	maxY = getMaximumY(frame_buf);
@@ -827,9 +827,9 @@ extern void segment_no_yco_AdjustTree(unsigned char *frame_buf, unsigned char *f
 	adjust_FD_CV = adjust_factor * -48;
 
 
-	for(x = 0; x < imgWidth; x++)
+	for(x = 0; x < (int)imgWidth; x++)
 	{
-		for(y = 0; y < imgHeight; y++)
+		for(y = 0; y < (int)imgHeight; y++)
 		{
 			ix = image_index(x,y);
 
@@ -837,7 +837,7 @@ extern void segment_no_yco_AdjustTree(unsigned char *frame_buf, unsigned char *f
 			if(FD_YCV <= 58 + adjust_FD_YCV)
 			{
 				Cr = (unsigned int)frame_buf[ix+2];
-				if(Cr <= 150 + adjust_Cr)
+				if(Cr <= 150 + (unsigned int)adjust_Cr)
 				{
 					FD_YCV = get_FD_YCV(frame_buf, x, y);
 					if(FD_YCV <= -77 + adjust_FD_YCV)
@@ -852,7 +852,7 @@ extern void segment_no_yco_AdjustTree(unsigned char *frame_buf, unsigned char *f
 						if(patch_texture <= 2 + adjust_patch_texture)
 						{
 							Cr = (unsigned int)frame_buf[ix+2];
-							if(Cr <= 126 + adjust_Cr)
+							if(Cr <= 126 + (unsigned int)adjust_Cr)
 							{
 								// sky: 74%
 								setUncertainty(frame_buf2, ix, 26);
@@ -924,7 +924,7 @@ extern void segment_no_yco_AdjustTree(unsigned char *frame_buf, unsigned char *f
 							else
 							{
 								Y = (((unsigned int)frame_buf[ix+1] + (unsigned int)frame_buf[ix+3])) >> 1;
-								if(Y <= (maxY * 66) / 100 + adjust_rel_Y)
+								if(Y <= (unsigned int)(maxY * 66) / 100 + adjust_rel_Y)
 								{
 									// ground: 76%
 									setUncertainty(frame_buf2, ix, 24);

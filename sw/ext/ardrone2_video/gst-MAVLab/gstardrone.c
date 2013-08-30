@@ -201,14 +201,18 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
   otherpad = (pad == filter->srcpad) ? filter->sinkpad : filter->srcpad;
   gst_object_unref (filter);
 
-    
-  //set the resolution into guido's algorithm framework:
+
+  //make the image size known
    const GstStructure *str;
+	str = gst_caps_get_structure (caps, 0);
+	gint tmp;
+	gst_structure_get_int (str, "width", &tmp);
+	imgWidth = (unsigned int)tmp;  
+	gst_structure_get_int (str, "height", &tmp);
+	imgHeight = (unsigned int)tmp;
+	g_print ("The video size is %dx%d\n", imgWidth, imgHeight);
+
   skipFrames=0;
-  str = gst_caps_get_structure (caps, 0);
-  gst_structure_get_int (str, "width", &imgWidth);
-  gst_structure_get_int (str, "height", &imgHeight);
-  g_print ("The video size is %dx%d\n", imgWidth, imgHeight);
   img_uncertainty= (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char)); //TODO: find place to put: free(img_uncertainty);
    
   return gst_pad_set_caps (otherpad, caps);

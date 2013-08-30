@@ -27,6 +27,7 @@
 #include "video_message_structs.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define image_index(xx, yy)  ((yy * imgWidth + xx) * 2)
 unsigned int imgWidth, imgHeight;
@@ -45,7 +46,7 @@ unsigned int sumX = 0;
 unsigned int sumY = 0;
 unsigned int minArea = 400;
 
-void brightspotDetector(unsigned char *frame_buf, unsigned int blob[], unsigned int * max_idx,unsigned int * max_idy) ;
+void brightspotDetector(unsigned char *frame_buf, int blob[], unsigned int * max_idx,unsigned int * max_idy) ;
 void get1DHist(unsigned char *frame_buf, unsigned int * OneDHist);
 unsigned char getThreshold(unsigned int * OneDHist);
 void createBinaryImage(unsigned char threshold, unsigned char * frame_buf);
@@ -278,7 +279,9 @@ void *TCP_threat( void *ptr) {
 	while(1) {
 		int res = Read_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 		if	(res>0) {
-			g_print("Received counter: %d\n",ppz2gst.heading);
+			int tmp;
+			tmp = (int)counter - (int)ppz2gst.heading;
+			g_print("Current counter: %d, Received counter: %d, diff: %d\n",counter, ppz2gst.heading, tmp);
 			ppz2gst.heading = 6;
 		} else {
 			g_print("Nothing received: %d\n",res);
@@ -303,7 +306,6 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
     signed int blobP[8];
     memset(blobP, 0, sizeof(blobP[0]) * 8);
 	unsigned int max_idx, max_idy;
-	unsigned char maxY;
 	brightspotDetector(img,blobP,&max_idx,&max_idy);
 
 			//g_print("Max_idx: %d Max_idy: %d Counter: %d\n",max_idx,max_idy,counter);
@@ -319,6 +321,7 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
 				gst2ppz.blob_y3 = blobP[5];
 				gst2ppz.blob_x4 = blobP[6];
 				gst2ppz.blob_y4 = blobP[7];
+				gst2ppz.counter = counter;
 				Write_msg_socket((char *) &gst2ppz, sizeof(gst2ppz));
 			}
 
@@ -333,7 +336,7 @@ static GstFlowReturn gst_example_chain (GstPad * pad, GstBuffer * buf)
 
 
 
-void brightspotDetector(unsigned char *frame_buf, unsigned int blob[], unsigned int * max_idx,unsigned int * max_idy) 
+void brightspotDetector(unsigned char *frame_buf, int blob[], unsigned int * max_idx,unsigned int * max_idy) 
 {
 	unsigned char thresh;
 	unsigned int * OneDHist =(unsigned int *) calloc(256,sizeof(unsigned int));
@@ -488,12 +491,13 @@ unsigned int getMedian(unsigned int * hist,  unsigned int size) {
 	return 0;	
 }
 
+/*
 void getxy(unsigned int max_y_ix, unsigned int * max_idx, unsigned int * max_idy) {	
 	max_y_ix/=2;
 	*max_idy = (max_y_ix / imgWidth);
 	*max_idx = (max_y_ix) - *max_idy*imgWidth;
 }
-
+*/
 void blobLabeling(unsigned char *frame_buf, unsigned int x, unsigned int y, unsigned int current_label)
 {
 	unsigned int ix;
