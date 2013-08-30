@@ -157,13 +157,11 @@ void video_receive(void) {
 	//read the data from the video tcp socket
 
 	if (Read_msg_socket((char *) &gst2ppz,sizeof(gst2ppz))>=0) {
-		printf("Received data. x: %d, y: %d, counter: %d\n",gst2ppz.max_idx,gst2ppz.max_idy,gst2ppz.counter);
-		video_impl.maxY = gst2ppz.maxY;
-		video_impl.max_idx = gst2ppz.max_idx;
-		video_impl.max_idy = gst2ppz.max_idy;
+		printf("Received data. x: %d, y: %d, counter: %d\n",gst2ppz.blob_x1,gst2ppz.blob_y1,gst2ppz.counter);
+
 		video_impl.counter = gst2ppz.counter;
 
-    	DOWNLINK_SEND_VIDEO_TELEMETRY( DefaultChannel, DefaultDevice, &video_impl.max_idx, &video_impl.max_idy);  
+    	DOWNLINK_SEND_VIDEO_TELEMETRY( DefaultChannel, DefaultDevice, &gst2ppz.blob_x1, &gst2ppz.blob_y1,&gst2ppz.blob_x2, &gst2ppz.blob_y2,&gst2ppz.blob_x3, &gst2ppz.blob_y3,&gst2ppz.blob_x4, &gst2ppz.blob_y4);  
 
 
 
