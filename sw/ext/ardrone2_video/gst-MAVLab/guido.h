@@ -21,4 +21,6 @@ extern void segmentSkyUncertainty2(unsigned char *frame_buf, unsigned char *fram
 extern void segment_no_yco(unsigned char *frame_buf, unsigned char *frame_buf2);
 extern void segment_no_yco_AdjustTree(unsigned char *frame_buf, unsigned char *frame_buf2, int adjust_factor);
 
+void skyseg_interface_i(char adjust_factor);
+
 #endif /* GUIDO */

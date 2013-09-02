@@ -954,3 +954,58 @@ extern void segment_no_yco_AdjustTree(unsigned char *frame_buf, unsigned char *f
 		}
 	}
 }
+
+/*
+void skyseg_interface_i(char adjust_factor) {
+//	case 'n': // with adjustable tree:
+		
+		if(adjust_factor < 3)
+		{
+			if(adjust_factor == 0) adjust_factor = -10;
+			if(adjust_factor == 1) adjust_factor = -5;
+			if(adjust_factor == 2) adjust_factor = -2;
+		}
+		else if(adjust_factor == 3)
+		{
+			adjust_factor = 0;
+		}
+		else
+		{
+			if(adjust_factor >= 4 && adjust_factor <= 6) adjust_factor -= 3;
+			if(adjust_factor == 7) adjust_factor = 5;
+			if(adjust_factor == 8) adjust_factor = 8;
+			if(adjust_factor == 9) adjust_factor = 11;
+			if(adjust_factor == 10) adjust_factor = 15;
+		}
+
+		max_count = 60000;
+		print_frequency = 5;
+
+		for(counter = 0; counter < max_count; counter++)
+		{
+			grab_frame();		//TODO: change
+			get_state_from_autopilot(&state); //TODO: change
+			segment_no_yco_AdjustTree((unsigned char *)FRAME_BUF, (unsigned char *)FRAME_BUF2, adjust_factor);
+			//segment_no_yco((unsigned char *)FRAME_BUF, (unsigned char *)FRAME_BUF2, adjust_factor);
+	    	// determine the amount of obstacle per orientation segment
+	    	getObstacles(obstacles, N_BINS, (unsigned char *)FRAME_BUF, &max_bin, &bin_total, MAX_BIN_VALUE);
+		send_obstacles_to_autopilot(max_bin, bin_total, obstacles, N_BINS); //TODO: change
+		    if(counter % print_frequency == 0)
+		    {
+				printf("*od*"); // protocol start for obstacle info
+				for(bin = 0; bin < N_BINS; bin++)
+				{
+				    printf("%d,", obstacles[bin]);
+				}
+		    	printf("u");
+		    	// determine the amount of uncertainty in the segmentation per orientation segment
+		    	getUncertainty(uncertainty, N_BINS, (unsigned char *)FRAME_BUF2);
+		    	for(bin = 0; bin < N_BINS; bin++)
+		    	{
+		    	    printf("%d,", uncertainty[bin]);
+		    	}
+		    	printf("s\n"); // protocol end
+		    }
+		}
+	}
+	*/
