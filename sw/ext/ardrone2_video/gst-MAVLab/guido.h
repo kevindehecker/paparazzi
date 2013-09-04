@@ -24,7 +24,12 @@ extern void segment_no_yco_AdjustTree(unsigned char *frame_buf, unsigned char *f
 void getObstacles(unsigned int* obstacles, unsigned int n_bins, unsigned char *frame_buf, unsigned int* max_bin, unsigned int* obstacle_total, int MAX_SIGNAL);
 void getUncertainty(unsigned int* uncertainty, unsigned int n_bins, unsigned char *frame_buf);
 void getObstacles2Way(unsigned int* obstacles, unsigned int n_bins, unsigned char *frame_buf, unsigned int* max_bin, unsigned int* obstacle_total, int MAX_SIGNAL, int pitch_pixels, int roll_angle);
+void horizonToLineParameters(int pitch_pixel, int roll_angle, int* a, int* b);
 
-void skyseg_interface_i(unsigned char *frame_buf, unsigned char *frame_buf2, char adjust_factor, unsigned int counter);
+void drawLine(unsigned char *frame_buf, int a, int b, int resolution);
+
+
+
+void skyseg_interface_i(unsigned char *frame_buf, unsigned char *frame_buf2, char adjust_factor, unsigned int counter, int pitch, int roll);
 
 #endif /* GUIDO */

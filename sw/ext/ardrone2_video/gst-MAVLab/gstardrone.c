@@ -29,8 +29,8 @@
 //#include "sky_segmentation.h"
 unsigned int imgWidth, imgHeight;
 gint adjust_factor;
-int skipFrames; // used to skip the first x frames in order to prevent a memory problem with the segmentation algorithm
 unsigned char * img_uncertainty;
+unsigned int counter;
 
 unsigned char * prev_image;
 
@@ -216,7 +216,7 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 	imgHeight = (unsigned int)tmp;
 	g_print ("The video size is %dx%d\n", imgWidth, imgHeight);
 
-  skipFrames=0;
+	counter = 0;
   img_uncertainty= (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char)); //TODO: find place to put: free(img_uncertainty);
   return gst_pad_set_caps (otherpad, caps);
 }
@@ -233,7 +233,8 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	unsigned char * img = GST_BUFFER_DATA(buf);   
 	
 	//if GST_BUFFER_SIZE(buf) <> imgheight*imgwidth*2 -> wrong color space!!!
-	segment_no_yco_AdjustTree(img,img_uncertainty,adjust_factor);
+	//segment_no_yco_AdjustTree(img,img_uncertainty,adjust_factor);
+	skyseg_interface_i(img, img_uncertainty, adjust_factor, counter++, 0, 5000);
 	if (filter->silent == FALSE) {
 		g_print(".");
 	}

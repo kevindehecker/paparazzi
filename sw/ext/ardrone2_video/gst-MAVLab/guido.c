@@ -1,14 +1,19 @@
 #include "guido.h"
 #include "colors.h"
-#include <math.h>
+//#include <math.h>
 #include <stdlib.h>     /* abs */
 #include <stdio.h> /* printf */
+#include "gps.h"
+
+#define uint8_t unsigned char
 
 #define N_BINS 10
 const int MAX_ROLL_ANGLE = 60;
 const int MAX_PITCH_ANGLE = 40;
 const int MAX_I2C_BYTE = 254;
 
+static inline uint8_t scale_to_range(int x, int min, int max, int range);
+static inline int pitch_angle_to_pitch_pixel(int pitch);
 // *****************
 // INLINE FUNCTIONS:
 // *****************
@@ -1005,7 +1010,13 @@ void getObstacles(unsigned int* obstacles, unsigned int n_bins, unsigned char *f
     }
 	(*obstacle_total) /= n_bins;
 }
-/*
+
+void horizonToLineParameters(int pitch_pixel, int roll_angle, int* a, int* b)
+{
+	(*b) = 1000 * (pitch_pixel + imgHeight / 2);
+	(*a) = -tan(roll_angle);
+}
+
 void getObstacles2Way(unsigned int* obstacles, unsigned int n_bins, unsigned char *frame_buf, unsigned int* max_bin, unsigned int* obstacle_total, int MAX_SIGNAL, int pitch_pixels, int roll_angle)
 {
 	// procedure:
@@ -1019,9 +1030,7 @@ void getObstacles2Way(unsigned int* obstacles, unsigned int n_bins, unsigned cha
 	int x1, y1, x2, y2, RESOLUTION;
 	int a2, b2, x12, y12, bin_size, step_x;
 	int xx, yy, x_start;
-	int bin_surface, total_pixels;
-	int start_bin, stop_bin;
-	int CENTER_BINS = 1;
+	int bin_surface;
 	halfWidth = imgWidth / 2;
 	halfHeight = imgHeight / 2;
 	bin_size = imgWidth / n_bins;
@@ -1051,7 +1060,7 @@ void getObstacles2Way(unsigned int* obstacles, unsigned int n_bins, unsigned cha
 	y12 = (a * x12 + b) / RESOLUTION;
 	
 	// only further process the image if the horizon line is entirely visible
-	if(y1 >= 0 && y1 < imgHeight && y2 >= 0 && y2 < imgHeight)
+	if(y1 >= 0 && y1 < (int)imgHeight && y2 >= 0 && y2 < (int)imgHeight)
 	{
 		// 3) determine the step_x in order to retain the same bin_size along the horizon line
 		step_x = (int)isqrt(
@@ -1073,7 +1082,7 @@ void getObstacles2Way(unsigned int* obstacles, unsigned int n_bins, unsigned cha
 				xx = x + halfWidth;
 				yy = y;
 				
-				if(xx >= 0 && xx < imgWidth && yy >= 0 && yy < imgHeight)
+				if(xx >= 0 && xx < (int)imgWidth && yy >= 0 && yy < (int)imgHeight)
 				{
 					ix = image_index(xx,yy);
 					if(isGroundPixel(frame_buf, ix))
@@ -1089,18 +1098,10 @@ void getObstacles2Way(unsigned int* obstacles, unsigned int n_bins, unsigned cha
 
 		// get the variables of interest and transform them to output form
 		bin_surface = bin_size * halfHeight;
-		total_pixels = imgWidth * halfHeight;
 	    // obstacles[bin] should have a maximum corresponding to MAX_SIGNAL
 		(*max_bin) = 0;
 		(*obstacle_total) = 0;
-		if(!CENTER_BINS)
-		{
-			start_bin = 0; stop_bin = n_bins;
-		}
-		else
-		{
-			start_bin = 2; stop_bin = n_bins - 2;
-		}
+
 	    for(bin = 0; bin < n_bins; bin++)
 	    {
 			obstacles[bin] *= MAX_SIGNAL;
@@ -1120,11 +1121,29 @@ void getObstacles2Way(unsigned int* obstacles, unsigned int n_bins, unsigned cha
 		(*obstacle_total) = 0;
 	}
 	// 1000 is the resolution of the tan-function
-	drawLine((unsigned char *)FRAME_BUF, a, y1*RESOLUTION, RESOLUTION);
-	blackDot((unsigned char *)FRAME_BUF, x12+halfWidth, y12);
+	drawLine((unsigned char *)frame_buf, a, y1*RESOLUTION, RESOLUTION);
+	blackDot((unsigned char *)frame_buf, x12+halfWidth, y12);
 }
 
-*/
+void drawLine(unsigned char *frame_buf, int a, int b, int resolution)
+{
+	int x, y, b_res;
+	unsigned int ix;
+
+	if(resolution == 0) resolution = 1;
+	b_res = b / resolution;
+
+	for(x = 0; x < (int)imgWidth; x++)
+	{
+		y = (a * x) / resolution + b_res;
+		if(y >= 0 && y < (int)imgHeight)
+		{
+			ix = image_index(x,y);
+			linePixel(frame_buf, ix);
+		}
+	}
+}
+
 
 void getUncertainty(unsigned int* uncertainty, unsigned int n_bins, unsigned char *frame_buf)
 {
@@ -1164,10 +1183,28 @@ void getUncertainty(unsigned int* uncertainty, unsigned int n_bins, unsigned cha
     uncertainty[n_bins-1] /= bin_size;
 }
 
-void skyseg_interface_i(unsigned char *frame_buf, unsigned char *frame_buf2, char adjust_factor, unsigned int counter) {
+static inline int pitch_angle_to_pitch_pixel(int pitch)
+{
+	int pitch_pixel = scale_to_range(pitch, -MAX_PITCH_ANGLE, MAX_PITCH_ANGLE, imgHeight);
+	pitch_pixel -= imgHeight / 2;
+	return pitch_pixel;
+}
+static inline uint8_t scale_to_range(int x, int min, int max, int range)
+{
+	if (x < min)
+		x = min;
+	else if (x > max)
+		x = max;
+
+	x -= min;
+	x *= range;
+	x /= (max - min);
+	return (uint8_t) x;
+}
+
+void skyseg_interface_i(unsigned char *frame_buf, unsigned char *frame_buf2, char adjust_factor, unsigned int counter, int pitch, int roll) {
 //	case 'n': // with adjustable tree:
 		
-		//TODO: change  below to be done global or atleast outside the loop
 		int MAX_BIN_VALUE = MAX_I2C_BYTE;
 		unsigned int obstacles[N_BINS];
 		unsigned int uncertainty[N_BINS];
@@ -1198,7 +1235,8 @@ void skyseg_interface_i(unsigned char *frame_buf, unsigned char *frame_buf2, cha
 		//get_state_from_autopilot(&state); //TODO: change
 		segment_no_yco_AdjustTree((unsigned char *)frame_buf, (unsigned char *)frame_buf2, adjust_factor);
 	    // determine the amount of obstacle per orientation segment
-	    getObstacles(obstacles, N_BINS, (unsigned char *)frame_buf, &max_bin, &bin_total, MAX_BIN_VALUE);
+	    //getObstacles(obstacles, N_BINS, (unsigned char *)frame_buf, &max_bin, &bin_total, MAX_BIN_VALUE);
+		getObstacles2Way(obstacles, N_BINS, (unsigned char *)frame_buf, &max_bin, &bin_total, MAX_BIN_VALUE, pitch_angle_to_pitch_pixel(pitch), roll);
 		//send_obstacles_to_autopilot(max_bin, bin_total, obstacles, N_BINS); //TODO: change
 		if(counter++ % print_frequency == 0)
 		{
