@@ -28,6 +28,7 @@
 #include "guido.h"
 //#include "sky_segmentation.h"
 unsigned int imgWidth, imgHeight;
+int mode;
 gint adjust_factor;
 unsigned char * img_uncertainty;
 unsigned int counter;
@@ -51,7 +52,8 @@ enum
 {
   PROP_0,
   PROP_SILENT,
-  ADJUST
+  ADJUST,
+  MODE
 };
 
 /* the capabilities of the inputs and outputs.
@@ -121,6 +123,10 @@ gst_mavlab_class_init (GstmavlabClass * klass)
 	g_object_class_install_property (gobject_class, ADJUST,
       g_param_spec_int ("adjust", "Adjust factor", "Change adjust factor for sky segmentation.",-1000,1000,
           0, G_PARAM_READWRITE));
+	
+	g_object_class_install_property (gobject_class, MODE,
+      g_param_spec_int ("mode", "Change the mode", "Change the mode to do either only segmentation [0] or the whole bunch [1].",0,10,
+          0, G_PARAM_READWRITE));
 }
 
 /* initialize the new element
@@ -164,6 +170,9 @@ gst_mavlab_set_property (GObject * object, guint prop_id,
     case ADJUST:
       adjust_factor = g_value_get_int (value);
       break;	  
+	case MODE:
+      mode = g_value_get_int (value);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -180,8 +189,11 @@ gst_mavlab_get_property (GObject * object, guint prop_id,
     case PROP_SILENT:
       g_value_set_boolean (value, filter->silent);
       break;
-	 case ADJUST:
+	case ADJUST:
       g_value_set_int (value, adjust_factor);
+      break;
+	case MODE:
+      g_value_set_int (value, mode);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -233,8 +245,11 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	unsigned char * img = GST_BUFFER_DATA(buf);   
 	
 	//if GST_BUFFER_SIZE(buf) <> imgheight*imgwidth*2 -> wrong color space!!!
-	//segment_no_yco_AdjustTree(img,img_uncertainty,adjust_factor);
-	skyseg_interface_i(img, img_uncertainty, adjust_factor, counter++, 0, 5000);
+	if (mode==0) 
+		{ segment_no_yco_AdjustTree(img,img_uncertainty,adjust_factor); }
+	else if (mode==1)
+		{ skyseg_interface_i(img, img_uncertainty, adjust_factor, counter++, 0, 45); }
+		
 	if (filter->silent == FALSE) {
 		g_print(".");
 	}
