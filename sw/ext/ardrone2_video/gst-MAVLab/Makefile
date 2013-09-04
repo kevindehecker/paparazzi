@@ -5,10 +5,10 @@ ifeq ($(PROCESSOR),x86)
 	override CFLAGS += -DDSP_API=$(DSP_API) -DSN_API=$(SN_API)
 else
 	include Makefile-ARM.conf
-	override CFLAGS += -std=c99 -D_GNU_SOURCE -DGST_DISABLE_DEPRECATED -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp -ftree-vectorize
+	override CFLAGS += -std=c99 -D_GNU_SOURCE -DGST_DISABLE_DEPRECATED -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp -ftree-vectorize 
 	override CFLAGS += -DDSP_API=$(DSP_API) -DSN_API=$(SN_API)
 endif
-
+override CFLAGS += -fno-builtin-cos -fno-builtin-sin -fno-builtin-tan -fno-builtin-acos -fno-builtin-asin -fno-builtin-atan
 
 all:
 
@@ -17,7 +17,7 @@ D = $(DESTDIR)
 
 gst_plugin := libMAVLab.so 
 
-$(gst_plugin):  gstardrone.o optic_flow.o colors.o guido.o
+$(gst_plugin):  gstardrone.o optic_flow.o colors.o guido.o gps.o
 $(gst_plugin): override CFLAGS += $(GST_CFLAGS) \
 	-D VERSION='"$(version)"' -D DSPDIR='"$(dspdir)"'
 $(gst_plugin): override LIBS += $(GST_LIBS)
