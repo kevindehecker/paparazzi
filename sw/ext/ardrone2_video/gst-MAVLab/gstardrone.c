@@ -280,8 +280,9 @@ void *TCP_threat( void *ptr) {
 		int res = Read_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 		if	(res>0) {
 			int tmp;
-			tmp = (int)counter - (int)ppz2gst.counter;
-			g_print("Current counter: %d, Received counter: %d, diff: %d\n",counter, ppz2gst.counter, tmp);
+			tmp = (int)counter - (int)ppz2gst.counter;			
+			//g_print("Current counter: %d, Received counter: %d, diff: %d\n",counter, ppz2gst.counter, tmp);
+			g_print("Roll: %d, Pitch: %d\n",ppz2gst.roll,ppz2gst.pitch);
 			ppz2gst.counter = 6;
 		} else {
 			g_print("Nothing received: %d\n",res);

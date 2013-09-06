@@ -153,9 +153,8 @@ void video_init(void) {
 
 void video_receive(void) {
 
-
-
-
+	struct Int32Eulers* att = stateGetNedToBodyEulers_i();
+	//printf("Roll: %d, Pitch: %d\n",att->phi,att->theta);
 
 	//read the data from the video tcp socket
 
@@ -163,7 +162,8 @@ void video_receive(void) {
 		video_impl.counter = gst2ppz.counter;
 
     	//DOWNLINK_SEND_VIDEO_TELEMETRY( DefaultChannel, DefaultDevice, &gst2ppz.blob_x1, &gst2ppz.blob_y1,&gst2ppz.blob_x2, &gst2ppz.blob_y2,&gst2ppz.blob_x3, &gst2ppz.blob_y3,&gst2ppz.blob_x4, &gst2ppz.blob_y4);  
-		printf("Counter (from gst): %d\n" , gst2ppz.counter);
+		
+		
 
 
 	}
@@ -173,6 +173,8 @@ void video_receive(void) {
 	//electrical.vsupply = video_impl.max_idx; // for testing!!!
 	//electrical.current = video_impl.max_idy; // for testing!!!
 	ppz2gst.counter = gst2ppz.counter;		// testing!
+	ppz2gst.roll = att->phi;
+	ppz2gst.pitch = att->theta;
 	Write_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 
 }
