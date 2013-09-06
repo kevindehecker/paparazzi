@@ -29,7 +29,7 @@
 
 #include "modules/video/video_ardrone2.h"
 #include <stdio.h>
-#include "modules/video/video_message_structs.h"
+#include "modules/video/video_message_structs_sky.h"
 #include "subsystems/gps/gps_ardrone2.h"
 #include "subsystems/imu/imu_ardrone2_raw.h"
 
@@ -55,11 +55,9 @@
 #include "subsystems/datalink/downlink.h"
 
 
-char** str_split(char* a_str, const char *  a_delim, unsigned int * amount);
-
 struct VideoARDrone video_impl;
-struct gst2ppz_message_struct gst2ppz;
-struct ppz2gst_message_struct ppz2gst;
+struct gst2ppz_message_struct_sky gst2ppz;
+struct ppz2gst_message_struct_sky ppz2gst;
 
 /*  Global constants  */
 
@@ -161,14 +159,11 @@ void video_receive(void) {
 
 	//read the data from the video tcp socket
 
-	if (Read_msg_socket((char *) &gst2ppz,sizeof(gst2ppz))>=0) {
-		//printf("Received data. x: %d, y: %d, counter: %d\n",gst2ppz.blob_x1,gst2ppz.blob_y1,gst2ppz.counter);
-		//printf("pos.x: %d, pos.y: %d, pos.z: %d\n",stateGetPositionEnu_f()->x,stateGetPositionEnu_f()->y,stateGetPositionEnu_f()->z);
-		//printf("speed.x: %d, speed.y: %d, speed.z: %d\n",stateGetSpeedEnu_f()->x,stateGetSpeedEnu_f()->y,stateGetSpeedEnu_f()->z);
+	if (Read_msg_socket((char *) &gst2ppz,sizeof(gst2ppz))>=0) {		
 		video_impl.counter = gst2ppz.counter;
 
-    	DOWNLINK_SEND_VIDEO_TELEMETRY( DefaultChannel, DefaultDevice, &gst2ppz.blob_x1, &gst2ppz.blob_y1,&gst2ppz.blob_x2, &gst2ppz.blob_y2,&gst2ppz.blob_x3, &gst2ppz.blob_y3,&gst2ppz.blob_x4, &gst2ppz.blob_y4);  
-
+    	//DOWNLINK_SEND_VIDEO_TELEMETRY( DefaultChannel, DefaultDevice, &gst2ppz.blob_x1, &gst2ppz.blob_y1,&gst2ppz.blob_x2, &gst2ppz.blob_y2,&gst2ppz.blob_x3, &gst2ppz.blob_y3,&gst2ppz.blob_x4, &gst2ppz.blob_y4);  
+		printf("Counter (from gst): %d\n" , gst2ppz.counter);
 
 
 	}
@@ -177,7 +172,7 @@ void video_receive(void) {
 
 	//electrical.vsupply = video_impl.max_idx; // for testing!!!
 	//electrical.current = video_impl.max_idy; // for testing!!!
-	ppz2gst.heading = gst2ppz.counter;		// testing!
+	ppz2gst.counter = gst2ppz.counter;		// testing!
 	Write_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 
 }

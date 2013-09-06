@@ -21,21 +21,30 @@
 #include <unistd.h>		//usleep
 #include <stdio.h> /* printf */
 
-#include <gst/gst.h>
+#include "socket.h"
+#include "video_message_structs_sky.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+#include <gst/gst.h>
 #include "gstardrone.h"
-//#include "optic_flow.h"
 #include "guido.h"
-//#include "sky_segmentation.h"
+
 unsigned int imgWidth, imgHeight;
 int mode;
 gint adjust_factor;
 unsigned char * img_uncertainty;
 unsigned int counter;
 
-unsigned char * prev_image;
+unsigned int socketIsReady;
+unsigned int tcpport;
+struct gst2ppz_message_struct_sky gst2ppz;
+struct ppz2gst_message_struct_sky ppz2gst;
+
 
 void makeCross(unsigned char * img, int x,int y, int imw, int imh);
+void *TCP_threat( void *ptr);
 
 GST_DEBUG_CATEGORY_STATIC (gst_mavlab_debug);
 #define GST_CAT_DEFAULT gst_mavlab_debug
@@ -52,6 +61,7 @@ enum
 {
   PROP_0,
   PROP_SILENT,
+  PROP_TCP,
   ADJUST,
   MODE
 };
@@ -116,9 +126,13 @@ gst_mavlab_class_init (GstmavlabClass * klass)
   gobject_class->set_property = gst_mavlab_set_property;
   gobject_class->get_property = gst_mavlab_get_property;
 
-  g_object_class_install_property (gobject_class, PROP_SILENT,
-      g_param_spec_boolean ("silent", "Silent", "Produce verbose output.",
-          FALSE, G_PARAM_READWRITE));
+	g_object_class_install_property (gobject_class, PROP_SILENT,
+    g_param_spec_boolean ("silent", "Silent", "Produce verbose output.",
+    FALSE, G_PARAM_READWRITE));
+		  
+	g_object_class_install_property (gobject_class, PROP_TCP,
+    g_param_spec_uint ("tcp_port", "TCP port", "Output results over tcp",0,65535,
+    0, G_PARAM_READWRITE));		  
 		  
 	g_object_class_install_property (gobject_class, ADJUST,
       g_param_spec_int ("adjust", "Adjust factor", "Change adjust factor for sky segmentation.",-1000,1000,
@@ -169,7 +183,10 @@ gst_mavlab_set_property (GObject * object, guint prop_id,
       break;
     case ADJUST:
       adjust_factor = g_value_get_int (value);
-      break;	  
+      break;	
+    case PROP_TCP:
+      tcpport = g_value_get_uint (value);
+      break;		  
 	case MODE:
       mode = g_value_get_int (value);
       break;
@@ -191,6 +208,9 @@ gst_mavlab_get_property (GObject * object, guint prop_id,
       break;
 	case ADJUST:
       g_value_set_int (value, adjust_factor);
+      break;
+	case PROP_TCP:
+      g_value_set_uint (value, tcpport);
       break;
 	case MODE:
       g_value_set_int (value, mode);
@@ -230,7 +250,44 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 
 	counter = 0;
   img_uncertainty= (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char)); //TODO: find place to put: free(img_uncertainty);
+  
+  
+  
+  	if (tcpport>0) {
+		//start seperate threat to connect
+		//seperate threat is needed because otherwise big delays can exist in the init or chain function
+		//causing the gst to crash
+	
+		pthread_t th1;
+		int th1_r;
+		pthread_create(&th1,NULL,TCP_threat,&th1_r);	
+	}
+  
   return gst_pad_set_caps (otherpad, caps);
+}
+
+void *TCP_threat( void *ptr) {
+	g_print("Waiting for connection on port %d\n",tcpport);
+	socketIsReady = initSocket(tcpport);
+   	if (!socketIsReady) { 
+		g_print("Error initialising connection\n");	
+	} else {
+		g_print("Connected!\n");
+	}
+
+
+	while(1) {
+		int res = Read_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
+		if	(res>0) {
+			int tmp;
+			tmp = (int)counter - (int)ppz2gst.counter;
+			g_print("Current counter: %d, Received counter: %d, diff: %d\n",counter, ppz2gst.counter, tmp);
+			ppz2gst.counter = 6;
+		} else {
+			g_print("Nothing received: %d\n",res);
+			usleep(100000);
+		}
+	}
 }
 
 /* chain function
@@ -248,10 +305,20 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	if (mode==0) 
 		{ segment_no_yco_AdjustTree(img,img_uncertainty,adjust_factor); }
 	else if (mode==1)
-		{ skyseg_interface_i(img, img_uncertainty, adjust_factor, counter++, 0, 45); }
+		{ skyseg_interface_n(img, img_uncertainty, adjust_factor, counter, 0, 0); }
 		
 	if (filter->silent == FALSE) {
 		g_print(".");
+	}
+	counter++; // to keep track of data through ppz communication
+
+	if (tcpport>0) { 	//if network was enabled by user
+		if (socketIsReady) { 
+			//gst2ppz.blob_x1 = blobP[0];
+			gst2ppz.counter = counter;
+			
+			Write_msg_socket((char *) &gst2ppz, sizeof(gst2ppz));
+		}
 	}
 	
 	//	GST_BUFFER_DATA(buf) = img_uncertainty;
