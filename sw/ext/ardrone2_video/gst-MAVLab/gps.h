@@ -3,7 +3,7 @@ int gps_parse();
 unsigned char read_ublox();
 int cos(int ix);
 int sin(int);
-int tan(int);
+int tan_zelf(int);
 int acos(int, int);
 int asin(int, int);
 int atan(int, int);

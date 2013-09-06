@@ -54,8 +54,9 @@ int cos(int ix)
     return 0;
 }
 
-int tan(int ix)
+int tan_zelf(int ix)
 {
+
     while (ix < 0)
         ix = ix + 360;
     while (ix >= 360)

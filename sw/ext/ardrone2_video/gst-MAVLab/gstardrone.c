@@ -249,8 +249,9 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 	g_print ("The video size is %dx%d\n", imgWidth, imgHeight);
 
 	counter = 0;
-  img_uncertainty= (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char)); //TODO: find place to put: free(img_uncertainty);
-  
+	img_uncertainty= (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char)); //TODO: find place to put: free(img_uncertainty);
+	ppz2gst.pitch = 0;
+	ppz2gst.roll = 0;
   
   
   	if (tcpport>0) {
@@ -282,7 +283,7 @@ void *TCP_threat( void *ptr) {
 			int tmp;
 			tmp = (int)counter - (int)ppz2gst.counter;			
 			//g_print("Current counter: %d, Received counter: %d, diff: %d\n",counter, ppz2gst.counter, tmp);
-			g_print("Roll: %d, Pitch: %d\n",ppz2gst.roll,ppz2gst.pitch);
+			//g_print("Roll: %d, Pitch: %d\n",ppz2gst.roll,ppz2gst.pitch);
 			ppz2gst.counter = 6;
 		} else {
 			g_print("Nothing received: %d\n",res);
@@ -306,7 +307,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	if (mode==0) 
 		{ segment_no_yco_AdjustTree(img,img_uncertainty,adjust_factor); }
 	else if (mode==1)
-		{ skyseg_interface_n(img, img_uncertainty, adjust_factor, counter, 0, 0); }
+		{ skyseg_interface_n(img, img_uncertainty, adjust_factor, counter, ppz2gst.pitch, ppz2gst.roll); }
 		
 	if (filter->silent == FALSE) {
 		g_print(".");

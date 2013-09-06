@@ -41,6 +41,8 @@
 #include <string.h> 		/* memset */
 
 #include "state.h" // for altitude
+#include "math/pprz_algebra_int.h"
+
 
 #include <stdlib.h>
 
@@ -154,7 +156,7 @@ void video_init(void) {
 void video_receive(void) {
 
 	struct Int32Eulers* att = stateGetNedToBodyEulers_i();
-	//printf("Roll: %d, Pitch: %d\n",att->phi,att->theta);
+	//printf("Roll: %d, Pitch: %d\n",att->phi/71,att->theta/71); // maybe a shift by 6 also ok?
 
 	//read the data from the video tcp socket
 
@@ -173,8 +175,8 @@ void video_receive(void) {
 	//electrical.vsupply = video_impl.max_idx; // for testing!!!
 	//electrical.current = video_impl.max_idy; // for testing!!!
 	ppz2gst.counter = gst2ppz.counter;		// testing!
-	ppz2gst.roll = att->phi;
-	ppz2gst.pitch = att->theta;
+	ppz2gst.roll = att->phi/36; // a shift of NT32_ANGLE_FRAC (=12) * pi/180 = 4096*(pi/180) = 71,5
+	ppz2gst.pitch = att->theta/36;
 	Write_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 
 }
