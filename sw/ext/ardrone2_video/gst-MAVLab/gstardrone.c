@@ -230,7 +230,6 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 
 	counter = 0;
   img_uncertainty= (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char)); //TODO: find place to put: free(img_uncertainty);
-   
   return gst_pad_set_caps (otherpad, caps);
 }
 
