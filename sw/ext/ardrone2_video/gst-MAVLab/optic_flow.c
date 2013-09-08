@@ -1028,3 +1028,38 @@ int opticFlowLK(unsigned char * new_image_buf, unsigned char * old_image_buf, in
 	// no errors:
 	return OK;
 }
+
+extern void showFlow(unsigned char * frame_buf, int* x, int* y, int* status, int n_found_points, int* new_x, int* new_y, int imgW, int imgH)
+{
+	int p, i, j;
+	unsigned int ix;
+
+	IMG_WIDTH = imgW;
+	IMG_HEIGHT = imgH;
+	// in this simple version, we do not draw lines:
+	for(p = 0; p < n_found_points; p++)
+	{
+		//printf("Point %d, status = %d, (x, y) = (%d, %d), (new_x, new_y) = (%d, %d)\n\r", p, status[p], x[p], y[p], new_x[p], new_y[p]);
+		if(x[p] >= 1 && y[p] >= 1 && x[p] < (int)IMG_WIDTH - 1 && y[p] < (int)IMG_HEIGHT - 1)
+		{
+			for(i = -1; i <= 1; i++)
+			{
+				for(j = -1; j <= 1; j++)
+				{
+					if(status[p] == 1)
+					{
+						ix = uint_index((unsigned int) (x[p]+i), (unsigned int) (y[p]+j));
+						redPixel(frame_buf, ix); 
+						ix = uint_index((unsigned int) (new_x[p]+i), (unsigned int) (new_y[p]+j));
+						greenPixel(frame_buf, ix); 					
+					}
+					else
+					{
+						ix = uint_index((unsigned int) (x[p]+i), (unsigned int) (y[p]+j));
+						bluePixel(frame_buf, ix);
+					}
+				}
+			}
+		}
+	}
+}
