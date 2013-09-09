@@ -51,6 +51,8 @@
 #include "math/pprz_geodetic_int.h"
 #include "subsystems/ins.h"
 
+#include <stdio.h>
+
 #define IdOfMsg(x) (x[1])
 
 void dl_parse_msg(void) {
@@ -133,6 +135,7 @@ void dl_parse_msg(void) {
         DL_RC_4CH_roll(dl_buffer),
         DL_RC_4CH_pitch(dl_buffer),
         DL_RC_4CH_yaw(dl_buffer));
+		//printf("mode: %d, trhottle: %d, roll: %d, pitch: %d, yaw: %d\n",DL_RC_4CH_mode(dl_buffer),DL_RC_4CH_throttle(dl_buffer), DL_RC_4CH_roll(dl_buffer), DL_RC_4CH_pitch(dl_buffer),DL_RC_4CH_yaw(dl_buffer) );
     break;
 #endif // RADIO_CONTROL_TYPE_DATALINK
   default:

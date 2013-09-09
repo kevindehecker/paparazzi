@@ -63,3 +63,13 @@ void parse_rc_4ch_datalink(
   rc_dl_frame_available = TRUE;
 }
 
+void parse_optic_2ch(
+    int8_t roll,
+    int8_t pitch)
+{
+  rc_dl_values[RADIO_ROLL] = roll;
+  rc_dl_values[RADIO_PITCH] = pitch;
+  
+  rc_dl_frame_available = TRUE;
+}
+

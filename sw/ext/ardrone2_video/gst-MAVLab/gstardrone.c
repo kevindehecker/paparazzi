@@ -359,11 +359,19 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				for (int i=0; i<n_found_points;i++) {
 					tot_x = tot_x+(new_x[i]-x[i]);
 					tot_y = tot_y+(new_y[i]-y[i]);		
-					g_print("x: %d, y: %d.....new_x: %d, new_y: %d\n",x[i],y[i],new_x[i],new_y[i]);					
+					//g_print("x: %d, y: %d.....new_x: %d, new_y: %d\n",x[i],y[i],new_x[i],new_y[i]);					
 				}
-				g_print("------------------------------------\nTot: x: %d, y: %d\n",tot_x,tot_y);
+				g_print("Optic flow: x: %d, y: %d\n",tot_x,tot_y);
 				
-				
+				if (tcpport>0) { 	//if network was enabled by user
+					if (socketIsReady) { 
+						//gst2ppz.blob_x1 = blobP[0];
+						gst2ppz.counter = counter;
+						gst2ppz.optic_flow_x = tot_x;
+						gst2ppz.optic_flow_y = tot_y;
+						Write_msg_socket((char *) &gst2ppz, sizeof(gst2ppz));
+					}
+				}
 				
 				
 			}			

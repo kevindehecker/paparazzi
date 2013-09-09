@@ -56,6 +56,8 @@
 #include "messages.h"
 #include "subsystems/datalink/downlink.h"
 
+#include "subsystems/radio_control.h"
+
 
 struct VideoARDrone video_impl;
 struct gst2ppz_message_struct_sky gst2ppz;
@@ -162,7 +164,24 @@ void video_receive(void) {
 
 	if (Read_msg_socket((char *) &gst2ppz,sizeof(gst2ppz))>=0) {		
 		video_impl.counter = gst2ppz.counter;
-
+		
+		//received new optical flow output:
+		int roll = gst2ppz.optic_flow_x/2;
+		int pitch = gst2ppz.optic_flow_y/2;
+		if (roll > 127) {
+			roll = 127;
+		} else if (roll < -127) {
+			roll = -127;
+		}
+		if (pitch > 127) {
+			pitch = 127;
+		} else if (pitch < -127) {
+			pitch = -127;
+		}
+		
+		printf("Optic flow: %d, %d\n", roll,pitch);
+		
+		//parse_optic_2ch(roll,pitch);
     	//DOWNLINK_SEND_VIDEO_TELEMETRY( DefaultChannel, DefaultDevice, &gst2ppz.blob_x1, &gst2ppz.blob_y1,&gst2ppz.blob_x2, &gst2ppz.blob_y2,&gst2ppz.blob_x3, &gst2ppz.blob_y3,&gst2ppz.blob_x4, &gst2ppz.blob_y4);  
 		
 		
@@ -170,11 +189,7 @@ void video_receive(void) {
 
 	}
 
-//testing
-
-	//electrical.vsupply = video_impl.max_idx; // for testing!!!
-	//electrical.current = video_impl.max_idy; // for testing!!!
-	ppz2gst.counter = gst2ppz.counter;		// testing!
+	ppz2gst.counter = gst2ppz.counter;	
 	ppz2gst.roll = att->phi/36; // a shift of NT32_ANGLE_FRAC (=12) * pi/180 = 4096*(pi/180) = 71,5
 	ppz2gst.pitch = att->theta/36;
 	Write_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
