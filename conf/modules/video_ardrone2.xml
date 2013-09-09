@@ -8,7 +8,7 @@
     <file name="video.h"/>
   </header>
   <init fun="video_init()"/>
-  <periodic fun="video_receive()" freq="30" start="video_start()" stop="video_stop()" autorun="FALSE"/>
+  <periodic fun="video_receive()" freq="200" start="video_start()" stop="video_stop()" autorun="FALSE"/>
   <makefile>
     <file name="video.c"/>
     <file name="video_ardrone2.c"/>

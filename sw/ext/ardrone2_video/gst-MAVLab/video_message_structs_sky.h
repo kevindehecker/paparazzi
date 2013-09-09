@@ -16,6 +16,7 @@ struct ppz2gst_message_struct_sky {
 	unsigned int counter;		//counter to keep track of data
 	int pitch;
 	int roll;
+	int alt; // sonar altitude
 };
 extern struct ppz2gst_message_struct_sky ppz2gst;
 

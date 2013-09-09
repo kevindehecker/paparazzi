@@ -59,12 +59,7 @@ extern void parse_rc_4ch_datalink(
     int8_t pitch,
     int8_t yaw);
 
-
-extern void parse_optic_2ch(
-    int8_t roll,
-    int8_t pitch);
-	
-	/**
+/**
  * Macro that normalize rc_dl_values to radio values
  */
 #define NormalizeRcDl(_in, _out) {                                \

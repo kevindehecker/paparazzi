@@ -36,7 +36,12 @@ unsigned int imgWidth, imgHeight;
 int mode;
 gint adjust_factor;
 unsigned char * img_uncertainty;
+
+//optical flow
 unsigned char * old_img;
+int old_pitch,old_roll,old_alt;
+
+
 unsigned int counter;
 
 unsigned int socketIsReady;
@@ -253,6 +258,9 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 	counter = 0;
 	img_uncertainty= (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char)); //TODO: find place to put: free(img_uncertainty);
 	old_img = (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char));
+	old_pitch = 0;
+	old_roll = 0;
+	old_alt=0;
 	ppz2gst.pitch = 0;
 	ppz2gst.roll = 0;
   
@@ -285,8 +293,8 @@ void *TCP_threat( void *ptr) {
 		if	(res>1) {
 			int tmp;
 			tmp = (int)counter - (int)ppz2gst.counter;			
-			if (tmp>0) {
-				g_print("Current counter: %d, Received counter: %d, diff: %d\n",counter, ppz2gst.counter, tmp);
+			if (tmp>6) {
+				g_print("Current counter: %d, Received counter: %d, diff: %d\n",counter, ppz2gst.counter, tmp); //delay of 3 is caused by the fact not every frame is used (15fps mod 3)
 			}	
 						
 		} else {
@@ -306,7 +314,6 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	filter = GST_MAVLAB (GST_OBJECT_PARENT (pad));
 
 	unsigned char * img = GST_BUFFER_DATA(buf);   
-	counter++; // to keep track of data through ppz communication
 	
 	//if GST_BUFFER_SIZE(buf) <> imgheight*imgwidth*2 -> wrong color space!!!
 	if (mode==0) 
@@ -315,7 +322,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	}
 	else if (mode==1)
 	{
-		skyseg_interface_n(img, img_uncertainty, adjust_factor, counter, ppz2gst.pitch, ppz2gst.roll); 
+		skyseg_interface_n(img, img_uncertainty, adjust_factor, counter, ppz2gst.pitch/36, ppz2gst.roll/36); 
 
 		if (tcpport>0) { 	//if network was enabled by user
 			if (socketIsReady) { 
@@ -330,6 +337,10 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		int MAX_POINTS, error;
 		int suppression_distance_squared,n_found_points,mark_points;
 		int *x, *y, *new_x, *new_y, *status;
+		
+		int current_pitch = ppz2gst.pitch;
+		int current_roll = ppz2gst.roll;
+		int current_alt = ppz2gst.alt;
 	
 		x = (int *) calloc(40,sizeof(int));
 		new_x = (int *) calloc(40,sizeof(int));
@@ -349,7 +360,15 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		if(error == 0)
 		{
 			error = opticFlowLK(img, old_img, x, y, n_found_points, imgWidth, imgHeight, new_x, new_y, status, 5, MAX_POINTS);	
+			
+			//remember the frame and meta info
 			memcpy(old_img,img,imgHeight*imgWidth*2);
+			old_pitch = current_pitch;
+			old_roll = current_roll;
+			old_alt = current_alt;
+			
+			
+			
 			if(error == 0)
 			{
 				showFlow(img, x, y, status, n_found_points, new_x, new_y, imgWidth, imgHeight);
@@ -361,7 +380,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 					tot_y = tot_y+(new_y[i]-y[i]);		
 					//g_print("x: %d, y: %d.....new_x: %d, new_y: %d\n",x[i],y[i],new_x[i],new_y[i]);					
 				}
-				g_print("Optic flow: x: %d, y: %d\n",tot_x,tot_y);
+				g_print("Optic flow: x: %d, y: %d, Pitch: %d, Roll: %d, Height: %d\n",tot_x,tot_y,current_pitch,current_roll,current_alt);
 				
 				if (tcpport>0) { 	//if network was enabled by user
 					if (socketIsReady) { 
@@ -374,19 +393,17 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				}
 				
 				
-			}			
-		}
+			} else g_print("error1\n");			
+		} else g_print("error2\n");	
 		
 		free(x);
 		free(new_x);
 		free(y);
 		free(new_y);
 		free(status);
+			
+
 		
-		//for (int i = 0 ; i< n_found_points; i++) {
-		//	makeCross(img,x[i],y[i],imgWidth,imgHeight);	
-		//}
-	
 		if (filter->silent == FALSE) {
 			g_print("Errorh: %d, n_found_points: %d\n",error,n_found_points);
 		}
@@ -398,7 +415,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	}
 	
 
-	
+	counter++; // to keep track of data through ppz communication
 	
 	//	GST_BUFFER_DATA(buf) = img_uncertainty;
 	
