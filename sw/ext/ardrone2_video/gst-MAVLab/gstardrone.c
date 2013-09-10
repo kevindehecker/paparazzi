@@ -366,18 +366,20 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 
 		
 		//active corner:
+		/*
 		int *active;
 		active =(int *) calloc(40,sizeof(int));		
 		int GRID_ROWS = 5;
 		int ONLY_STOPPED = 0;		
 		error = findActiveCorners(img, GRID_ROWS, ONLY_STOPPED, x, y, active, &n_found_points, mark_points,imgWidth,imgHeight);
+		*/
 		
-		/*
 		//normal corner:
+		
 		int suppression_distance_squared;
 		suppression_distance_squared = 3 * 3;
 		error = findCorners(img, MAX_POINTS, x, y, suppression_distance_squared, &n_found_points, mark_points,imgWidth,imgHeight);
-		*/
+		
 		
 		if(error == 0)
 		{
@@ -414,24 +416,26 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 					tot_x = tot_x+(new_x[i]-x[i]);
 					tot_y = tot_y+(new_y[i]-y[i]);		
 				}
-								
+				
 				//convert pixels/frame to degrees/frame									
 				float scalef = 64.0/400.0; //64 is vertical camera diagonal view angle (sqrt(320²+240²)=400)
-				float opt_angle_x = tot_x*scalef; //= (tot_x/imgWidth) * (scalef*imgWidth); //->degrees/frame				
-				float opt_angle_y = tot_y*scalef;
+				float opt_angle_x = ((float)tot_x/(float)n_found_points)*scalef; //= (tot_x/imgWidth) * (scalef*imgWidth); //->degrees/frame				
+				float opt_angle_y = ((float)tot_y/(float)n_found_points)*scalef;
 				
-				if (abs(opt_angle_x-opt_angle_x_prev)> 3.0) {
+
+/*				if (abs(opt_angle_x-opt_angle_x_prev)> 7.0) {
 					opt_angle_x = opt_angle_x_prev;					
 				} else	{				
 					opt_angle_x_prev = opt_angle_x;
 				}
+
 			
-				if (abs(opt_angle_y-opt_angle_y_prev)> 3.0) {
+				if (abs(opt_angle_y-opt_angle_y_prev)> 7.0) {
 					opt_angle_y = opt_angle_y_prev;					
 				} else	{				
 					opt_angle_y_prev = opt_angle_y;
 				}
-				
+*/				
 				
 				//g_print("Opt_angle x: %f, diff_roll: %d; result: %f. Opt_angle_y: %f, diff_pitch: %d; result: %f. Height: %d\n",opt_angle_x,diff_roll,opt_angle_x-diff_roll,opt_angle_y,diff_pitch,opt_angle_y-diff_pitch,mean_alt);
 				
@@ -464,7 +468,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		free(y);
 		free(new_y);
 		free(status);
-		free(active);
+		//free(active);
 			
 
 		
