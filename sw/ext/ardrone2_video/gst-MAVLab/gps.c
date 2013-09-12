@@ -28,7 +28,7 @@ static int cosine[] = {
     0 
 };
 
-int sin(int ix)
+int sin_zelf(int ix)
 {
     while (ix < 0)
         ix = ix + 360;
@@ -41,7 +41,7 @@ int sin(int ix)
     return 0;
 }
 
-int cos(int ix)
+int cos_zelf(int ix)
 {
     while (ix < 0)
         ix = ix + 360;
@@ -70,7 +70,7 @@ int tan_zelf(int ix)
     return 0;
 }
 
-int asin(int y, int hyp)
+int asin_zelf(int y, int hyp)
 {
     int quot, sgn, ix;
     if ((y > hyp) || (y == 0))
@@ -92,7 +92,7 @@ int asin(int y, int hyp)
         return 90-ix;
 }
 
-int acos(int x, int hyp)
+int acos_zelf(int x, int hyp)
 {
     int quot, sgn, ix;
     if (x > hyp) 
@@ -137,7 +137,7 @@ int atan_zelf(int y, int x)
     return angle;
 } 
 
-unsigned int isqrt(unsigned int val) {
+unsigned int isqrt_zelf(unsigned int val) {
     unsigned int temp, g=0, b = 0x8000, bshft = 15;
     do {
         if (val >= (temp = (((g << 1) + b)<<bshft--))) {
@@ -150,7 +150,7 @@ unsigned int isqrt(unsigned int val) {
 
 /* calculates heading between two gps sets of gps coordinates
    heading angle corresponds to compass points (N = 0-deg) */
-int gps_head(int lat1, int lon1, int lat2, int lon2)
+int gps_head_zelf(int lat1, int lon1, int lat2, int lon2)
 {
     int x, y, sy, sx, ll, ang;
     
@@ -162,7 +162,7 @@ int gps_head(int lat1, int lon1, int lat2, int lon2)
     ll = lat1;  
     if (ll < 0) 
         ll = -lat1;
-    x = ((lon2 - lon1) * cos(ll / 1000000)) / 1000;
+    x = ((lon2 - lon1) * cos_zelf(ll / 1000000)) / 1000;
     if (x < 0) { sx = 1; x = -x; }
     
     ang = atan_zelf(y, x);
@@ -178,7 +178,7 @@ int gps_head(int lat1, int lon1, int lat2, int lon2)
 }
 
 /* calculates distance between two gps coordinates in meters */
-int gps_dist(int lat1, int lon1, int lat2, int lon2)
+int gps_dist_zelf(int lat1, int lon1, int lat2, int lon2)
 {
     int x, y, ll;
     
@@ -187,14 +187,14 @@ int gps_dist(int lat1, int lon1, int lat2, int lon2)
         ll = -lat1;
     y = lat2 - lat1;
     if (y < 0) y = -y;
-    x = ((lon2 - lon1) * cos(ll / 1000000)) / 1000;
+    x = ((lon2 - lon1) * cos_zelf(ll / 1000000)) / 1000;
     if (x < 0) x = -x;
     if ((x > 10000) || (y > 10000)) {
         x = x / 10000;
         y = y / 10000;
-        return isqrt(x*x + y*y) * 1113;   
+        return isqrt_zelf(x*x + y*y) * 1113;   
     } else {
-        return (isqrt(x*x + y*y) * 1113) / 10000;   
+        return (isqrt_zelf(x*x + y*y) * 1113) / 10000;   
     }
 }
 

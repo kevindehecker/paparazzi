@@ -21,6 +21,7 @@
 #include <unistd.h>		//usleep
 #include <stdio.h> /* printf */
 
+
 #include "socket.h"
 #include "video_message_structs_sky.h"
 #include <stdio.h>
@@ -32,6 +33,8 @@
 #include "guido.h"
 #include "optic_flow.h"
 #include "gps.h"
+#include <math.h>
+
 
 unsigned int imgWidth, imgHeight;
 int mode;
@@ -50,10 +53,16 @@ unsigned int tcpport;
 struct gst2ppz_message_struct_sky gst2ppz;
 struct ppz2gst_message_struct_sky ppz2gst;
 
+float x_buf[25];
+float y_buf[25];
+unsigned int buf_point;
+
 float opt_angle_y_prev;
 float opt_angle_x_prev;
 void makeCross(unsigned char * img, int x,int y, int imw, int imh);
 void *TCP_threat( void *ptr);
+void houghtrans_line(unsigned char * img, float a_res, unsigned int width, unsigned int height, int b_steps, int nLines, int drawlines);
+void getmax(int ** accumulator, int acount, int b_steps, int * x, int * y, int * max);
 
 GST_DEBUG_CATEGORY_STATIC (gst_mavlab_debug);
 #define GST_CAT_DEFAULT gst_mavlab_debug
@@ -340,7 +349,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		int MAX_POINTS, error;
 		int n_found_points,mark_points;
 		int *x, *y, *new_x, *new_y, *status;
-		mark_points = 0;
+		mark_points = 0; //settings this to one destroys result...
 				
 		//save most recent values of attitude for the currently available frame
 		int current_pitch = ppz2gst.pitch;
@@ -354,6 +363,11 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		status = (int *) calloc(40,sizeof(int));
 
 		
+		
+		//test copy image to tmp variables:
+		//unsigned char * img_copy = (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char));
+		//memcpy(img_copy,img,imgHeight*imgWidth*2);
+		
 		if (tcpport==0) {
 			//test code if no network ppz communication is available
 			current_alt = 100;
@@ -366,19 +380,35 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 
 		
 		//active corner:
-		/*
+		
 		int *active;
 		active =(int *) calloc(40,sizeof(int));		
 		int GRID_ROWS = 5;
 		int ONLY_STOPPED = 0;		
 		error = findActiveCorners(img, GRID_ROWS, ONLY_STOPPED, x, y, active, &n_found_points, mark_points,imgWidth,imgHeight);
-		*/
+		
 		
 		//normal corner:
-		
+		/*
 		int suppression_distance_squared;
 		suppression_distance_squared = 3 * 3;
 		error = findCorners(img, MAX_POINTS, x, y, suppression_distance_squared, &n_found_points, mark_points,imgWidth,imgHeight);
+		*/
+		
+		//middle of the picture
+		/*
+		x[0] = 20;
+		y[0] = 12;	 
+		x[1] = imgWidth-20;
+		y[1] = 12;			
+		x[2] = 20;
+		y[2] = imgHeight - 12;			
+		x[3] = imgWidth-20;
+		y[3] = imgHeight - 12;			
+		
+		n_found_points=4;
+		error=0;
+		*/
 		
 		
 		if(error == 0)
@@ -387,8 +417,8 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			
 			
 			//calculate roll and pitch diff:
-			float diff_roll = (float)(current_roll- old_roll)/36.0; // 72 factor is to convert to degrees
-			float diff_pitch = (float)(current_pitch- old_pitch)/36.0;
+			float diff_roll = (float)(current_roll- old_roll)/144.0; // 72 factor is to convert to degrees, mysterious factor 2 is needed for extra mystery
+			float diff_pitch = (float)(current_pitch- old_pitch)/144.0;
 			
 			//calculate mean altitude between the to samples:
 			int mean_alt;
@@ -412,34 +442,48 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				
 				int tot_x=0;
 				int tot_y=0;
+				int total_weight = 0;
+				//int n_used_points = 0;
+				int weight_stopped = 2;
+				int weight_active = 1;
 				for (int i=0; i<n_found_points;i++) {
-					tot_x = tot_x+(new_x[i]-x[i]);
-					tot_y = tot_y+(new_y[i]-y[i]);		
+					if(status[i] == 1)
+					{
+						//n_used_points++;
+						if (active[i]) // not really seems to have much effect
+						{
+							tot_x = tot_x+weight_active*(new_x[i]-x[i]);
+							tot_y = tot_y+weight_active*(new_y[i]-y[i]);		
+							total_weight += weight_active;
+						}
+						else
+						{
+							tot_x = tot_x+weight_stopped*(new_x[i]-x[i]);
+							tot_y = tot_y+weight_stopped*(new_y[i]-y[i]);		
+							total_weight += weight_stopped;
+						}
+					}
 				}
+				if (total_weight) {
+			//apply a moving average of 5
+					x_buf[buf_point] = (tot_x*1000)/total_weight;
+					y_buf[buf_point] = (tot_y*1000)/total_weight;
+					buf_point = (buf_point+1) %5;
+				}
+				float x_avg = 0;
+				float y_avg = 0;
+				for (int i=0;i<5;i++) {
+					x_avg+=x_buf[i];
+					y_avg+=y_buf[i];
+				}
+				x_avg /=5000;
+				y_avg /=5000;
 				
 				//convert pixels/frame to degrees/frame									
 				float scalef = 64.0/400.0; //64 is vertical camera diagonal view angle (sqrt(320²+240²)=400)
-				float opt_angle_x = ((float)tot_x/(float)n_found_points)*scalef; //= (tot_x/imgWidth) * (scalef*imgWidth); //->degrees/frame				
-				float opt_angle_y = ((float)tot_y/(float)n_found_points)*scalef;
-				
-
-/*				if (abs(opt_angle_x-opt_angle_x_prev)> 7.0) {
-					opt_angle_x = opt_angle_x_prev;					
-				} else	{				
-					opt_angle_x_prev = opt_angle_x;
-				}
-
-			
-				if (abs(opt_angle_y-opt_angle_y_prev)> 7.0) {
-					opt_angle_y = opt_angle_y_prev;					
-				} else	{				
-					opt_angle_y_prev = opt_angle_y;
-				}
-*/				
-				
-				//g_print("Opt_angle x: %f, diff_roll: %d; result: %f. Opt_angle_y: %f, diff_pitch: %d; result: %f. Height: %d\n",opt_angle_x,diff_roll,opt_angle_x-diff_roll,opt_angle_y,diff_pitch,opt_angle_y-diff_pitch,mean_alt);
-				
-
+				float opt_angle_x = x_avg*scalef; //= (tot_x/imgWidth) * (scalef*imgWidth); //->degrees/frame				
+				float opt_angle_y = y_avg*scalef;
+						
 				//compensate optic flow for attitude (roll,pitch) change:
 				opt_angle_x -=  diff_roll; 
 				opt_angle_y -= diff_pitch; 
@@ -448,7 +492,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				float opt_trans_x = (float)tan_zelf(opt_angle_x)/1000.0*(float)mean_alt;
 				float opt_trans_y = (float)tan_zelf(opt_angle_y)/1000.0*(float)mean_alt;
 				
-				g_print("%f;%f;%f;%f;%f;%f;%d;%f;%f\n",opt_angle_x+diff_roll,diff_roll,opt_angle_x,opt_angle_y+diff_pitch,diff_pitch,opt_angle_y,mean_alt,opt_trans_x,opt_trans_y);
+				g_print("006;%f;%f;%f;%f;%f;%f;%d;%f;%f\n",opt_angle_x+diff_roll,diff_roll,opt_angle_x,opt_angle_y+diff_pitch,diff_pitch,opt_angle_y,mean_alt,opt_trans_x,opt_trans_y);
 				
 				if (tcpport>0) { 	//if network was enabled by user
 					if (socketIsReady) { 
@@ -468,14 +512,26 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		free(y);
 		free(new_y);
 		free(status);
-		//free(active);
-			
+		free(active);
+			//GST_BUFFER_DATA(buf) = old_img;
+		//free(img_copy);
 
 		
 //		if (filter->silent == FALSE) {
 //			g_print("Errorh: %d, n_found_points: %d\n",error,n_found_points);
 //		}
 	
+	} else if (mode==3) {	
+		//segment image:
+		//TODO: improve this simplistic segmentation...
+		for (unsigned int i =1;i<imgHeight*imgWidth*2;i+=2) {
+			if (img[i] < 100)
+				img[i] = 255;
+			else
+				img[i] = 0;
+		}
+			// detect lines
+		houghtrans_line(img,0.1,imgWidth,imgHeight,250,5,1);	
 	}
 		
 	counter++; // to keep track of data through ppz communication
@@ -528,3 +584,123 @@ GST_PLUGIN_DEFINE (
     "MAVLab",
     "http://gstreamer.net/"
 )
+
+
+
+
+void houghtrans_line(unsigned char * img, float a_res, unsigned int width, unsigned int height, int b_steps, int nLines, int drawlines) {
+	int i,j,k;
+	float a_max = (float)1.4137;
+	float a_steps = (2*a_max)/a_res;
+	int ** accumulator;
+	float b_size;
+	float b_min;
+	int acount = (int)((2*a_max)/a_res)+1;
+	float * a = (float *) calloc(acount, sizeof(float));
+	
+
+	//fill a
+	float tmp = -a_max;
+	for (i = 0 ; i<a_steps; i++) {		
+		a[i] = tan(tmp);
+		tmp+=a_res;
+	}
+
+	//determine how big b needs to be:
+	int bcount = 0;
+	for (i=0; i<(int)height;i++) {
+		for (j=0; j<(int)width;j++) {
+			if (img[(i + j*width)*2])		{
+				bcount++;
+			}		
+		}	
+	}
+
+	//fill b
+	b_min = 99999;
+	float b_max = -99999;	
+	float ** b = (float **) calloc(bcount, sizeof(float *));
+	bcount = 0;
+	for (i=0; i<(int)height;i++) {
+		for (j=0; j<(int)width;j++) {
+			if (img[(i + j*width)*2])		{				
+				b[bcount] = (float *) calloc(acount, sizeof(float )); //assign mem for b
+				for (k=0;k<acount;k++) {
+					b[bcount][k] = (j+1)-a[k]*(i+1);	//fill b, +1 to keep same as matlab
+					
+					//keep track of min and max of b
+					if (b[bcount][k] < b_min)
+						b_min = b[bcount][k];
+					if (b[bcount][k] > b_max)
+						b_max = b[bcount][k];
+				}
+				bcount++;
+			}		
+		}	
+	}
+
+b_size = (b_max- b_min)/b_steps;
+accumulator = (int **) calloc(acount, sizeof(int *));
+//fill accumulator
+	for (i=0; i<acount;i++) {
+		accumulator[i] = (int *) calloc(b_steps, sizeof(int)); 
+		for (j=0; j<b_steps;j++) {
+			float y = y = b_min + (j+1) * (b_size);
+			int acc = 0;
+			for (k=0;k<bcount;k++) {
+				if (((y-b_size) < b[k][i]) && (b[k][i] < (y+ b_size)))
+					acc++;						
+			}				
+			accumulator[i][j]=acc;
+		}
+	}
+
+	if (drawlines) {
+		for (i = 0 ; i<nLines;i++) {
+			int x,y,max;
+			getmax(accumulator,acount,b_steps,&x,&y,&max);
+			accumulator[x][y]=0;
+			drawLine(img,x,y,100);
+		}
+	}
+
+	//free allocated memory
+	free(a);
+	/*
+	for (i=0;i<bcount;i++) {
+		free(b[i]);
+	}
+	free(b);
+	*/
+	
+		for (i=0;i<acount;i++) {
+		free(accumulator[i]);
+	}
+	free(accumulator);
+	
+	
+
+}
+
+
+void getmax(int ** accumulator, int acount, int b_steps, int * x, int * y, int * max) {
+	int i,j;
+	*max = -1;
+	*x = 0;
+	*y = 0;
+	for (i=0;i<acount;i++) {
+		for (j=0;j<b_steps;j++) {
+			if (*max < accumulator[i][j]){
+				*max = accumulator[i][j];
+				*x = i;
+				*y = j;
+			}
+		}
+	}
+	
+
+
+}
+
+
+

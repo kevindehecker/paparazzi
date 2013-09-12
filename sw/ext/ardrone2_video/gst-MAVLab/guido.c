@@ -38,7 +38,7 @@ void getUncertainty(unsigned int* uncertainty, unsigned int n_bins, unsigned cha
 void getObstacles2Way(unsigned int* obstacles, unsigned int n_bins, unsigned char *frame_buf, unsigned int* max_bin, unsigned int* obstacle_total, int MAX_SIGNAL, int pitch_pixels, int roll_angle);
 void horizonToLineParameters(int pitch_pixel, int roll_angle, int* a, int* b);
 
-void drawLine(unsigned char *frame_buf, int a, int b, int resolution);
+
 
 static inline uint8_t scale_to_range(int x, int min, int max, int range);
 static inline int pitch_angle_to_pitch_pixel(int pitch);
@@ -1099,7 +1099,7 @@ void getObstacles2Way(unsigned int* obstacles, unsigned int n_bins, unsigned cha
 	if(y1 >= 0 && y1 < (int)imgHeight && y2 >= 0 && y2 < (int)imgHeight)
 	{
 		// 3) determine the step_x in order to retain the same bin_size along the horizon line
-		step_x = (int)isqrt(
+		step_x = (int)isqrt_zelf(
 			(unsigned int) (bin_size * bin_size) / (((a*a) / (RESOLUTION*RESOLUTION)) + 1)
 		);
 
