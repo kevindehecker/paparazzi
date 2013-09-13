@@ -35,6 +35,7 @@
 #include "gps.h"
 #include <math.h>
 
+#define image_index(xx, yy)  ((yy * imgWidth + xx) * 2) & 0xFFFFFFFE  // always a multiple of 2
 
 unsigned int imgWidth, imgHeight;
 int mode;
@@ -44,7 +45,7 @@ unsigned char * img_uncertainty;
 //optical flow
 unsigned char * old_img;
 int old_pitch,old_roll,old_alt;
-
+int *accum;
 
 unsigned int counter;
 
@@ -66,6 +67,8 @@ void makeCross(unsigned char * img, int x,int y, int imw, int imh);
 void *TCP_threat( void *ptr);
 void houghtrans_line(unsigned char * img, float a_res, unsigned int width, unsigned int height, int b_steps, int nLines, int drawlines);
 void getmax(int ** accumulator, int acount, int b_steps, int * x, int * y, int * max);
+void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned int height, float rho, float theta,int threshold, int linesMax , float * rhos_out, float * thetas_out);
+int cmpfunc (const void * a, const void * b);
 
 GST_DEBUG_CATEGORY_STATIC (gst_mavlab_debug);
 #define GST_CAT_DEFAULT gst_mavlab_debug
@@ -539,16 +542,38 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	
 	} else if (mode==3) {	
 		//segment image:
-		//TODO: improve this simplistic segmentation...
+		//TODO: improve this simplistic segmentation...	
+
+
+/*
+    for(int i = 0; i < (int)imgHeight; i++ )
+        for(int j = 0; j < (int)imgWidth; j++ )
+        {
+			int id = image_index(j,i);
+			img[id+1] = 0;
+		}
+*/
+
 		
 		for (unsigned int i =1;i<imgHeight*imgWidth*2;i+=2) {
-			if (img[i] < 50)
+			if (img[i] < 70) {
 				img[i] = 255;
-			else
+				//img[i-1] = 255;  //color
+			}
+			else {
 				img[i] = 0;
-		} 
+				//img[i-1] = 0; 
+			}
+		}
+		
+		
+		int linesMax = 2;
+		
+		float * rhos_out = (float *) calloc(linesMax,sizeof(float));
+		float * thetas_out = (float *) calloc(linesMax,sizeof(float));
+		icvHoughLinesStandard( img, imgWidth, imgHeight, 4, 3.14/180/4,128, linesMax , rhos_out, thetas_out);
 
-		houghtrans_line(img,0.1,imgWidth,imgHeight,500,5,1);			
+//		houghtrans_line(img,0.1,imgWidth,imgHeight,500,5,1);			
 	}
 		
 	counter++; // to keep track of data through ppz communication
@@ -602,6 +627,100 @@ GST_PLUGIN_DEFINE (
     "http://gstreamer.net/"
 )
 
+
+
+
+void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned int height, float rho, float theta,int threshold, int linesMax , float * rhos_out, float * thetas_out)
+{
+        
+    int numangle, numrho;
+    int total = 0;
+    int i, j;
+    float irho = 1 / rho;
+    double scale;
+    
+    numangle = 3.1416 / theta;
+    numrho = ((width + height) * 2 + 1) / rho;
+
+	//g_print("\n%d; %d\n", numrho,numangle);
+	
+    float *tabSin = (float *) calloc(numangle,sizeof(float));
+	float *tabCos = (float *) calloc(numangle,sizeof(float));
+	int *sort_buf = (int *) calloc(numangle* numrho,sizeof(int));
+	accum = (int *) calloc((numangle+2) * (numrho+2),sizeof(int));
+
+    memset( accum, 0, sizeof(accum[0]) * (numangle+2) * (numrho+2) ); // unnecessary?
+
+    float ang = 0;
+    for(int n = 0; n < numangle; ang += theta, n++ )
+    {
+        tabSin[n] = (float)(sin((double)ang) * irho);
+        tabCos[n] = (float)(cos((double)ang) * irho);
+    }
+	
+    // stage 1. fill accumulator
+    for( i = 0; i < (int)height; i++ )
+        for( j = 0; j < (int)width; j+=2 )
+        {
+			int id = image_index(j,i);
+			
+			if( image[id+1] != 0 )
+			{
+                for(int n = 0; n < numangle; n++ )
+                {
+                    int r = j * tabCos[n] + i * tabSin[n];
+                    r += (numrho - 1) / 2;
+                    accum[(n+1) * (numrho+2) + r+1]++;
+					//printf("harrow %d", accum[(n+1) * (numrho+2) + r+1]);
+                }
+			}				
+        }
+		
+		/*
+		for (int i = 0; i<numangle;i++) {
+			for (int j = 0; i<numangle;i++) {
+				printf("%d"
+		
+		
+			}
+			printf("\n");
+		}
+		*/
+
+    // stage 2. find local maximums
+    for(int r = 0; r < numrho; r++ )
+        for(int n = 0; n < numangle; n++ )
+        {
+            int base = (n+1) * (numrho+2) + r+1;
+            if( accum[base] > threshold &&
+                accum[base] > accum[base - 1] && accum[base] >= accum[base + 1] &&
+                accum[base] > accum[base - numrho - 2] && accum[base] >= accum[base + numrho + 2] )
+                sort_buf[total++] = base;
+				
+        }
+		
+    // stage 4. store the first min(total,linesMax) lines to the output buffer   
+   qsort(sort_buf, total, sizeof(int), cmpfunc);
+
+	g_print("008;");
+    scale = 1./(numrho+2);
+    for( i = 0; i < linesMax; i++ )
+    {        
+        int idx = sort_buf[i];
+        int n = idx*scale - 1;
+        int r = idx - (n+1)*(numrho+2) - 1;
+        rhos_out[i] = (r - (numrho - 1)*0.5f) * rho;	//length
+        thetas_out[i] = n * theta;    //angle
+		g_print("%f;%f;",rhos_out[i] ,thetas_out[i]);
+    }
+	g_print("\n");
+	free(tabSin);
+	free(tabCos);
+	free(sort_buf);
+	free(accum);
+	
+	
+}
 
 
 
@@ -740,3 +859,12 @@ void getmax(int ** accumulator, int acount, int b_steps, int * x, int * y, int *
 
 
 
+int cmpfunc (const void * a, const void * b)
+{
+int id1 = *(int*)a;
+int id2 = *(int*)b;
+
+
+
+   return ( accum[id1]-accum[id2] );
+}
