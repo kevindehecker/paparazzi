@@ -53,9 +53,12 @@ unsigned int tcpport;
 struct gst2ppz_message_struct_sky gst2ppz;
 struct ppz2gst_message_struct_sky ppz2gst;
 
-float x_buf[25];
-float y_buf[25];
+int x_buf[24];
+int y_buf[24];
+int diff_roll_buf[24];
+int diff_pitch_buf[24];
 unsigned int buf_point;
+unsigned int buf_imu_point;
 
 float opt_angle_y_prev;
 float opt_angle_x_prev;
@@ -327,7 +330,11 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	filter = GST_MAVLAB (GST_OBJECT_PARENT (pad));	
 	unsigned char * img = GST_BUFFER_DATA(buf);   
 	
-	//if GST_BUFFER_SIZE(buf) <> imgheight*imgwidth*2 -> wrong color space!!!
+	if (GST_BUFFER_SIZE(buf) != imgHeight*imgWidth*2) // -> wrong color space!!!
+		g_print("GGGGGGGGGGGGGGGGRRRRRRRRRRRRRRRRRRRR");
+
+
+	
 	if (mode==0) 
 	{
 		segment_no_yco_AdjustTree(img,img_uncertainty,adjust_factor); 
@@ -417,8 +424,17 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			
 			
 			//calculate roll and pitch diff:
-			float diff_roll = (float)(current_roll- old_roll)/144.0; // 72 factor is to convert to degrees, mysterious factor 2 is needed for extra mystery
-			float diff_pitch = (float)(current_pitch- old_pitch)/144.0;
+			int diff_roll = (current_roll- old_roll)*1024; 
+			int diff_pitch = (current_pitch- old_pitch)*1024;
+			
+			//remember the last 6 values of the imu values, because of the better subtraction, due to the delay from the moving average on the opitcal flow
+			diff_roll_buf[buf_imu_point] = diff_roll;
+			diff_pitch_buf[buf_imu_point] = diff_pitch;
+			buf_imu_point = (buf_imu_point+1) %24;
+			
+			//use delayed values for IMU, to compensate for moving average. Phase delay of moving average is about 50% of window size.
+			diff_roll = diff_roll_buf[(buf_imu_point+12)%24];
+			diff_pitch = diff_pitch_buf[(buf_imu_point+12)%24];
 			
 			//calculate mean altitude between the to samples:
 			int mean_alt;
@@ -464,35 +480,35 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 						}
 					}
 				}
+				
+				//apply a moving average of 24
 				if (total_weight) {
-			//apply a moving average of 5
-					x_buf[buf_point] = (tot_x*1000)/total_weight;
-					y_buf[buf_point] = (tot_y*1000)/total_weight;
-					buf_point = (buf_point+1) %5;
+				
+					//magical scaling needed in order to calibrate opt flow angles to imu angles
+					int scalex = 1400; //1024*(1/0.75) 
+					int scaley = 1400; //1024*(1/0.76)				
+				
+					x_buf[buf_point] = (tot_x*scalex)/total_weight;
+					y_buf[buf_point] = (tot_y*scaley)/total_weight;
+					buf_point = (buf_point+1) %24;
 				}
-				float x_avg = 0;
-				float y_avg = 0;
-				for (int i=0;i<5;i++) {
+				int x_avg = 0;
+				int y_avg = 0;
+				for (int i=0;i<24;i++) {
 					x_avg+=x_buf[i];
 					y_avg+=y_buf[i];
 				}
-				x_avg /=5000;
-				y_avg /=5000;
-				
-				//convert pixels/frame to degrees/frame									
-				float scalef = 64.0/400.0; //64 is vertical camera diagonal view angle (sqrt(320²+240²)=400)
-				float opt_angle_x = x_avg*scalef; //= (tot_x/imgWidth) * (scalef*imgWidth); //->degrees/frame				
-				float opt_angle_y = y_avg*scalef;
+						
 						
 				//compensate optic flow for attitude (roll,pitch) change:
-				opt_angle_x -=  diff_roll; 
-				opt_angle_y -= diff_pitch; 
+				x_avg -=  diff_roll; 
+				y_avg -= diff_pitch; 
 								
 				//calculate translation in cm/frame from optical flow in degrees/frame
-				float opt_trans_x = (float)tan_zelf(opt_angle_x)/1000.0*(float)mean_alt;
-				float opt_trans_y = (float)tan_zelf(opt_angle_y)/1000.0*(float)mean_alt;
+				int opt_trans_x = tan_zelf(x_avg/1024)*mean_alt/1000;
+				int opt_trans_y = tan_zelf(y_avg/1024)*mean_alt/1000;
 				
-				g_print("006;%f;%f;%f;%f;%f;%f;%d;%f;%f\n",opt_angle_x+diff_roll,diff_roll,opt_angle_x,opt_angle_y+diff_pitch,diff_pitch,opt_angle_y,mean_alt,opt_trans_x,opt_trans_y);
+				g_print("006;%d;%d;%d;%d;%d;%d;%d;%d;%d\n",x_avg+diff_roll,diff_roll,x_avg,y_avg+diff_pitch,diff_pitch,y_avg,mean_alt,opt_trans_x,opt_trans_y);
 				
 				if (tcpport>0) { 	//if network was enabled by user
 					if (socketIsReady) { 
@@ -524,14 +540,15 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	} else if (mode==3) {	
 		//segment image:
 		//TODO: improve this simplistic segmentation...
+		
 		for (unsigned int i =1;i<imgHeight*imgWidth*2;i+=2) {
-			if (img[i] < 100)
+			if (img[i] < 50)
 				img[i] = 255;
 			else
 				img[i] = 0;
-		}
-			// detect lines
-		houghtrans_line(img,0.1,imgWidth,imgHeight,250,5,1);	
+		} 
+
+		houghtrans_line(img,0.1,imgWidth,imgHeight,500,5,1);			
 	}
 		
 	counter++; // to keep track of data through ppz communication
@@ -589,7 +606,8 @@ GST_PLUGIN_DEFINE (
 
 
 void houghtrans_line(unsigned char * img, float a_res, unsigned int width, unsigned int height, int b_steps, int nLines, int drawlines) {
-	int i,j,k;
+	
+	
 	float a_max = (float)1.4137;
 	float a_steps = (2*a_max)/a_res;
 	int ** accumulator;
@@ -597,35 +615,45 @@ void houghtrans_line(unsigned char * img, float a_res, unsigned int width, unsig
 	float b_min;
 	int acount = (int)((2*a_max)/a_res)+1;
 	float * a = (float *) calloc(acount, sizeof(float));
-	
 
 	//fill a
 	float tmp = -a_max;
-	for (i = 0 ; i<a_steps; i++) {		
+	for (int i = 0 ; i<a_steps; i++) {		
 		a[i] = tan(tmp);
 		tmp+=a_res;
-	}
-
+	} 
+	
 	//determine how big b needs to be:
 	int bcount = 0;
-	for (i=0; i<(int)height;i++) {
-		for (j=0; j<(int)width;j++) {
-			if (img[(i + j*width)*2])		{
+	for (int i=0; i<(int)height;i++) {
+		for (int j=0; j<(int)width;j++) {
+			if (img[(i + j*height)*2+1])		{
 				bcount++;
 			}		
 		}	
 	}
+	
+	/*
+	int b2count = 0;
+	for (unsigned int i =1;i<imgHeight*imgWidth*2;i+=2) {
+		if (img[i] )
+			b2count++	;
+	} 
+	
+	if (bcount != b2count)
+		printf("HOERRR: %d, %d\n", bcount,b2count);
+	*/
 
 	//fill b
 	b_min = 99999;
 	float b_max = -99999;	
-	float ** b = (float **) calloc(bcount, sizeof(float *));
-	bcount = 0;
-	for (i=0; i<(int)height;i++) {
-		for (j=0; j<(int)width;j++) {
-			if (img[(i + j*width)*2])		{				
+	float ** b = (float **) calloc(bcount+1, sizeof(float *));	
+	bcount=0;
+	for (int i=0; i<(int)height;i++) {
+		for (int j=0; j<(int)width;j++) {
+			if (img[(i + j*height)*2+1])		{			
 				b[bcount] = (float *) calloc(acount, sizeof(float )); //assign mem for b
-				for (k=0;k<acount;k++) {
+				for (int k=0;k<acount;k++) {
 					b[bcount][k] = (j+1)-a[k]*(i+1);	//fill b, +1 to keep same as matlab
 					
 					//keep track of min and max of b
@@ -634,20 +662,22 @@ void houghtrans_line(unsigned char * img, float a_res, unsigned int width, unsig
 					if (b[bcount][k] > b_max)
 						b_max = b[bcount][k];
 				}
-				bcount++;
+				bcount++;	
 			}		
 		}	
 	}
 
-b_size = (b_max- b_min)/b_steps;
-accumulator = (int **) calloc(acount, sizeof(int *));
-//fill accumulator
-	for (i=0; i<acount;i++) {
+
+	b_size = (b_max- b_min)/b_steps;
+	accumulator = (int **) calloc(acount, sizeof(int *));
+	
+	//fill accumulator
+	for (int i=0; i<acount;i++) {
 		accumulator[i] = (int *) calloc(b_steps, sizeof(int)); 
-		for (j=0; j<b_steps;j++) {
+		for (int j=0; j<b_steps;j++) {
 			float y = y = b_min + (j+1) * (b_size);
 			int acc = 0;
-			for (k=0;k<bcount;k++) {
+			for (int k=0;k<bcount;k++) {
 				if (((y-b_size) < b[k][i]) && (b[k][i] < (y+ b_size)))
 					acc++;						
 			}				
@@ -656,24 +686,30 @@ accumulator = (int **) calloc(acount, sizeof(int *));
 	}
 
 	if (drawlines) {
-		for (i = 0 ; i<nLines;i++) {
+		for (int i = 0 ; i<nLines;i++) {
 			int x,y,max;
 			getmax(accumulator,acount,b_steps,&x,&y,&max);
 			accumulator[x][y]=0;
-			drawLine(img,x,y,100);
+			g_print("007;%d;%d\n", x,y);
+			drawLine(img,y,x,100);
 		}
 	}
 
+
+
+
+	
 	//free allocated memory
 	free(a);
-	/*
-	for (i=0;i<bcount;i++) {
+	
+	
+	for (int i=0;i<bcount;i++) {
 		free(b[i]);
 	}
 	free(b);
-	*/
+
 	
-		for (i=0;i<acount;i++) {
+	for (int i=0;i<acount;i++) {
 		free(accumulator[i]);
 	}
 	free(accumulator);
