@@ -35,7 +35,6 @@
 #include "gps.h"
 #include <math.h>
 
-#define image_index(xx, yy)  ((yy * imgWidth + xx) * 2) & 0xFFFFFFFE  // always a multiple of 2
 
 unsigned int imgWidth, imgHeight;
 int mode;
@@ -69,6 +68,8 @@ void houghtrans_line(unsigned char * img, float a_res, unsigned int width, unsig
 void getmax(int ** accumulator, int acount, int b_steps, int * x, int * y, int * max);
 void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned int height, float rho, float theta,int threshold, int linesMax , float * rhos_out, float * thetas_out);
 int cmpfunc (const void * a, const void * b);
+int image_index4(int xx, int yy);
+int image_index(int xx, int yy);
 
 GST_DEBUG_CATEGORY_STATIC (gst_mavlab_debug);
 #define GST_CAT_DEFAULT gst_mavlab_debug
@@ -542,38 +543,69 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	
 	} else if (mode==3) {	
 		//segment image:
-		//TODO: improve this simplistic segmentation...	
-
-
-/*
-    for(int i = 0; i < (int)imgHeight; i++ )
-        for(int j = 0; j < (int)imgWidth; j++ )
-        {
-			int id = image_index(j,i);
-			img[id+1] = 0;
-		}
-*/
-
 		
-		for (unsigned int i =1;i<imgHeight*imgWidth*2;i+=2) {
-			if (img[i] < 70) {
-				img[i] = 255;
-				//img[i-1] = 255;  //color
+		//calculate gradient over picture
+		unsigned int darkcount = 0;
+		unsigned int whitecount = 0;
+		unsigned char * img_copy = (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char));
+		memcpy(img_copy,img,imgHeight*imgWidth*2);
+		
+		unsigned int count = 0;
+		unsigned int imgWidth2 = imgWidth*2;
+		unsigned int maxcount = imgHeight * imgWidth *2 -4;
+		unsigned char noise;
+		while (count < maxcount) {
+			int id = count;
+			int idx= id+4;
+			int idy= id+imgWidth2;;
+			
+			
+			int py = abs((int)img[id] - (int)img[idy]);						
+			int px = abs((int)img[id] - (int)img[idx]);
+			int pxy = (px + py) >>1;
+			
+			//Y channels							
+			if (pxy > 10) {
+				img[count+1] =255;
+				img[count+3] =255;
+				whitecount++;
 			}
 			else {
-				img[i] = 0;
-				//img[i-1] = 0; 
+				darkcount++;
+				img[count+1] =0;
+				img[count+3] =0;
 			}
+			
+			//color channels
+			img[count] = 127; 
+			img[count+2] =127 ;				
+			
+
+		
+			count +=4;				
+			
+		}	
+		
+		//fix strange bug that crashes dsp if picture is to uniform
+		if (whitecount<180) {
+			memcpy(img,img_copy,imgHeight*imgWidth*2);
 		}
+		free(img_copy);
+	
 		
 		
+		
+		g_print("Harrow6 %d, %d, %d\n", counter,darkcount,whitecount);
+	
+		/*
 		int linesMax = 2;
-		
 		float * rhos_out = (float *) calloc(linesMax,sizeof(float));
 		float * thetas_out = (float *) calloc(linesMax,sizeof(float));
 		icvHoughLinesStandard( img, imgWidth, imgHeight, 4, 3.14/180/4,128, linesMax , rhos_out, thetas_out);
-
-//		houghtrans_line(img,0.1,imgWidth,imgHeight,500,5,1);			
+		free(rhos_out);
+		free(thetas_out);
+		*/
+		
 	}
 		
 	counter++; // to keep track of data through ppz communication
@@ -867,4 +899,12 @@ int id2 = *(int*)b;
 
 
    return ( accum[id1]-accum[id2] );
+}
+
+int image_index(int xx, int yy) {
+	return ((yy * imgWidth + xx) * 2) & 0xFFFFFFFE; // always a multiple of 2
+}
+
+int image_index4(int xx, int yy) {
+	return ((yy * imgWidth + xx) * 2) & 0xFFFFFFFC; // always a multiple of 4
 }

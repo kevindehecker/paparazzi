@@ -1,6 +1,6 @@
 echo kevins video initializer!
 kill -9 `pidof program.elf`
-kill -9 `pidof gst-launch-0.10`
+killall -9 gst-launch-0.10
 mkdir -p /opt
 mount --bind /data/video/raw/opt /opt
 export PATH=/opt/arm/gst/bin:$PATH

@@ -1,6 +1,6 @@
 echo kevins video initializer!
 kill -9 `pidof program.elf`
-kill -9 `pidof gst-launch-0.10`
+killall -9 gst-launch-0.10
 mkdir -p /opt
 mount --bind /data/video/raw/opt /opt
 export PATH=/opt/arm/gst/bin:$PATH
@@ -12,4 +12,5 @@ export DSP_PATH=/opt/arm/tidsp-binaries-23.i3.8/
 #gst-launch v4l2src device=/dev/video2 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=320, height=240 ! example tcp_port=2002 threshtune=99 ! dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.2 port=5000 > /dev/null 2>&1 &
 #gst-launch v4l2src device=/dev/video2 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=320, height=240 ! ffmpegcolorspace ! zbar ! dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.2 port=5000 > /dev/null 2>&1 &
 #gst-launch v4l2src device=/dev/video1 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=160, height=96 ! mavlab adjust=6 mode=1 tcp_port=2002 ! queue ! dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.2 port=5000 > /dev/null 2>&1 &
-gst-launch v4l2src device=/dev/video2 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=160, height=96 ! mavlab adjust=6 mode=2 tcp_port=2002 ! queue ! dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.2 port=5000 > /dev/null 2>&1 &
+#gst-launch v4l2src device=/dev/video2 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=160, height=96 ! mavlab adjust=6 mode=2 tcp_port=2002 ! queue ! dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.2 port=5000 > /dev/null 2>&1 &
+gst-launch v4l2src device=/dev/video2 ! mavlab mode=3 ! ffmpegcolorspace ! dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.2 port=5000 > /dev/null 2>&1 &
