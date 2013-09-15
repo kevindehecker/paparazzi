@@ -68,13 +68,23 @@ void *line_threat( void *ptr);
 unsigned char * img_line;
 int new_line_im;
 
+//threshold variables
+unsigned char minU_blue;
+unsigned char maxU_blue;
+unsigned char minV_blue;
+unsigned char maxV_blue;
 
+unsigned char minU_orange;
+unsigned char maxU_orange;
+unsigned char minV_orange;
+unsigned char maxV_orange;
 
+unsigned char min_gradient;
 
 
 void houghtrans_line(unsigned char * img, float a_res, unsigned int width, unsigned int height, int b_steps, int nLines, int drawlines);
 void getmax(int ** accumulator, int acount, int b_steps, int * x, int * y, int * max);
-void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned int height, float rho, float theta,int threshold, int linesMax , float * rhos_out, float * thetas_out);
+void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned int height, float rho, float theta,int threshold, int linesMax , int * rhos_out, float * thetas_out);
 int cmpfunc (const void * a, const void * b);
 int image_index4(int xx, int yy);
 int image_index(int xx, int yy);
@@ -302,6 +312,20 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 		int th1_r;
 		pthread_create(&th1,NULL,TCP_threat,&th1_r);	
 	}
+	
+	
+	minU_blue = 127;
+	maxU_blue = 255;
+	minV_blue = 30;
+	maxV_blue = 115;
+
+	minU_orange = 60;
+	maxU_orange = 127;
+	minV_orange = 140;
+	maxV_orange = 180;
+
+	min_gradient = 20;
+	
 	
 	
 	
@@ -569,34 +593,21 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		if (!img_copy)
 			printf( "Mem errorrrrrr\n");
 		memcpy(img_copy,img,imgHeight*imgWidth*2);
-		
-
-		unsigned long color_U = 0;
-		unsigned long color_V = 0;
-		
+				
 		unsigned int count = 0;
 		unsigned int imgWidth2 = imgWidth*2;
-		unsigned int maxcount = imgHeight * imgWidth *2 -4;		
-
+		unsigned int maxcount = imgHeight * imgWidth *2 -4;				
 		while (count < maxcount) {
 			int id = count;
 			int idx= id+4;
 			int idy= id+imgWidth2;;
-			
-			
-			
-			
-			
-			color_U+=img[id];
-			color_V+=img[id+2];
-			
 			int pxy = 0;
 			
-			int res1 = ((img[id] > 127) && (img[id] < 255) && (img[id+2] > 30) && (img[id+2] < 115));
-			int res2 = ((img[id] > 60) && (img[id] < 127) && (img[id+2] > 160) && (img[id+2] < 200));
+			//int res1 = ((img[id] > minU_blue) && (img[id] < maxU_blue) && (img[id+2] > minV_blue) && (img[id+2] < maxV_blue));
+			int res2 = ((img[id] > minU_orange) && (img[id] < maxU_orange) && (img[id+2] > minV_orange) && (img[id+2] < maxV_orange));
 			
 			
-			if  ( res1 || res2 ) { // perform blue|orange segmentation				
+			if  (  res2 ) { // perform blue|orange segmentation				
 				//calculate gradients
 				int py1 = abs((int)img[id] - (int)img[idy]);						
 				int px1 = abs((int)img[id] - (int)img[idx]);
@@ -604,15 +615,15 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				int px2 = abs((int)img[id+2] - (int)img[idx+2]);
 				pxy = (px1 + py1 + px2 + py2) ;
 				
-				//blue: 96,45 U,V
-				//blue: 44,121 U,V
 				whitecount++;
-			}
-			/*
+			} 
+			
 			//Y channels							
-			if (pxy > 40 &&img[id] ) { // segment on edges
+			if (pxy > min_gradient && img[id] ) { // segment on edges
 				img[count+1] =255;
 				img[count+3] =255;
+				img[count] = 127; 
+				img[count+2] =127 ;
 				whitecount++;
 			}
 			else {
@@ -622,24 +633,42 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			}
 			
 			//color channels
-			img[count] = 127; 
-			img[count+2] =127 ;				
-			*/
-			
-			if (pxy==0) {
-
-				img[count+1] =0;
-				img[count+3] =0;
-				img[count] = 127; 
-				img[count+2] =127;
-			
-			}
-			
-
+			//img[count] = 127; 
+			//img[count+2] =127 ;
 		
 			count +=4;				
 			
 		}	
+		
+		
+		
+		//clear the line around the screen:
+		//horizontal
+		int count_end = imgWidth*(imgHeight)*2-4;
+		for (int i = 0 ; i < (int)imgWidth*4; i+=4) {
+			
+			//img[i] = 127;
+			img[i+1] = 0;
+			//img[i+2] = 127;
+			img[i+3] = 0;
+			
+			//img[count_end] = 127;
+			img[count_end+1] = 0;
+			//img[count_end+2] = 127;
+			img[count_end+3] = 0;
+			count_end-=4;
+		}
+		//vertical	
+		for (int i = 2*(int)imgWidth ; i < 2*(int)imgWidth*(int)imgHeight; i+=2*(int)imgWidth) {			
+			for (int j = -4; j<4;j+=4) {
+				if (i+j>0) {
+					//img[i+j] = 127;
+					img[i+1+j] = 0;
+					//img[i+2+j] = 127;
+					img[i+3+j] = 0;
+				}
+			}
+		}
 		
 		
 		//printf("Mean U: %lu, V: %lu\n",color_U/(imgWidth*imgHeight),color_V/(imgWidth*imgHeight) );
@@ -720,13 +749,13 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		//send new segmented image to line thread if needed
 		if (new_line_im == 1) {
 			new_line_im = 0; // todo, replace by mutex
-			memcpy(img_line,img_copy,imgHeight*imgWidth*2);
+			memcpy(img_line,img,imgHeight*imgWidth*2);
 		}
 		
 		//g_print("Harrow6 %d, %d, %d\n", counter,darkcount,whitecount);
 		//fix strange bug that crashes dsp if picture is to uniform
 		if (whitecount<170) {
-			memcpy(img,img_copy,imgHeight*imgWidth*2);				
+		//	memcpy(img,img_copy,imgHeight*imgWidth*2);				
 		}
 		
 		free(img_copy);		
@@ -821,7 +850,7 @@ GST_PLUGIN_DEFINE (
 
 
 
-void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned int height, float rho, float theta,int threshold, int linesMax , float * rhos_out, float * thetas_out)
+void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned int height, float rho, float theta,int threshold, int linesMax , int * rhos_out, float * thetas_out)
 {
         
     int numangle, numrho;
@@ -859,7 +888,7 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
 			{
                 for(int n = 0; n < numangle; n++ )
                 {
-                    int r = j * tabCos[n] + i * tabSin[n];
+                    int r = (j>>1) * tabCos[n] + i * tabSin[n];		//j/2 because uyvy image
                     r += (numrho - 1) / 2;
                     accum[(n+1) * (numrho+2) + r+1]++;					
                 }
@@ -881,7 +910,7 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
     // stage 4. store the first min(total,linesMax) lines to the output buffer   
    qsort(sort_buf, total, sizeof(int), cmpfunc);
 
-	g_print("008;");
+	
     scale = 1./(numrho+2);
     for( i = 0; i < linesMax; i++ )
     {        
@@ -890,9 +919,37 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
         int r = idx - (n+1)*(numrho+2) - 1;
         rhos_out[i] = (r - (numrho - 1)*0.5f) * rho;	//length
         thetas_out[i] = n * theta;    //angle
-		g_print("%f;%f;",rhos_out[i] ,thetas_out[i]);
+
+		
+		//g_print("%d;%.2f;%d \n",rhos_out[i] ,thetas_out[i],accum[idx]);
     }
-	g_print("\n");
+	//g_print(" nLines: %d\n\n",total);
+	g_print("1/%d line: %d;%.2f;%d  -- ",total,rhos_out[0] ,thetas_out[0],accum[sort_buf[0]]);
+	
+	
+	//if (accum[0] > 150)
+		
+	if (total > 1) {
+		int foundedge = 0;
+		for (i = 1; i<linesMax;i++) {
+		
+			if (i < total ) {
+					float diff = fabs(thetas_out[0] -thetas_out[i]);
+					if (!(diff < 0.2 || diff > 2.94)) {
+						g_print("Edge detected? %d; %d;%.2f;%d \n",i,rhos_out[i],thetas_out[i],accum[sort_buf[i]]);
+						foundedge = 1;
+						break;
+					}	 					
+			}	
+		}
+		if (!foundedge)
+			g_print("\n");
+	} else {
+		g_print("\n");
+	}
+	
+	
+	
 	free(tabSin);
 	free(tabCos);
 	free(sort_buf);
@@ -903,8 +960,8 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
 
 void *line_threat( void *ptr) {
 
-	int linesMax = 2;
-	float * rhos_out = (float *) calloc(linesMax,sizeof(float));
+	int linesMax = 50;
+	int * rhos_out = (int *) calloc(linesMax,sizeof(int));
 	float * thetas_out = (float *) calloc(linesMax,sizeof(float));
 		
 
