@@ -62,8 +62,16 @@ unsigned int buf_imu_point;
 
 float opt_angle_y_prev;
 float opt_angle_x_prev;
-void makeCross(unsigned char * img, int x,int y, int imw, int imh);
 void *TCP_threat( void *ptr);
+
+void *line_threat( void *ptr);
+unsigned char * img_line;
+int new_line_im;
+
+
+
+
+
 void houghtrans_line(unsigned char * img, float a_res, unsigned int width, unsigned int height, int b_steps, int nLines, int drawlines);
 void getmax(int ** accumulator, int acount, int b_steps, int * x, int * y, int * max);
 void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned int height, float rho, float theta,int threshold, int linesMax , float * rhos_out, float * thetas_out);
@@ -294,6 +302,16 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 		int th1_r;
 		pthread_create(&th1,NULL,TCP_threat,&th1_r);	
 	}
+	
+	
+	
+	img_line = (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char));
+	if (!img_line)
+		printf( "Mem errorrrrrr 1\n");
+	new_line_im = 1;
+	pthread_t th2;
+	int th2_r;
+	pthread_create(&th2,NULL,line_threat,&th2_r);	
   
   return gst_pad_set_caps (otherpad, caps);
 }
@@ -548,24 +566,51 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		unsigned int darkcount = 0;
 		unsigned int whitecount = 0;
 		unsigned char * img_copy = (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char));
+		if (!img_copy)
+			printf( "Mem errorrrrrr\n");
 		memcpy(img_copy,img,imgHeight*imgWidth*2);
+		
+
+		unsigned long color_U = 0;
+		unsigned long color_V = 0;
 		
 		unsigned int count = 0;
 		unsigned int imgWidth2 = imgWidth*2;
-		unsigned int maxcount = imgHeight * imgWidth *2 -4;
-		unsigned char noise;
+		unsigned int maxcount = imgHeight * imgWidth *2 -4;		
+
 		while (count < maxcount) {
 			int id = count;
 			int idx= id+4;
 			int idy= id+imgWidth2;;
 			
 			
-			int py = abs((int)img[id] - (int)img[idy]);						
-			int px = abs((int)img[id] - (int)img[idx]);
-			int pxy = (px + py) >>1;
 			
+			
+			
+			color_U+=img[id];
+			color_V+=img[id+2];
+			
+			int pxy = 0;
+			
+			int res1 = ((img[id] > 127) && (img[id] < 255) && (img[id+2] > 30) && (img[id+2] < 115));
+			int res2 = ((img[id] > 60) && (img[id] < 127) && (img[id+2] > 160) && (img[id+2] < 200));
+			
+			
+			if  ( res1 || res2 ) { // perform blue|orange segmentation				
+				//calculate gradients
+				int py1 = abs((int)img[id] - (int)img[idy]);						
+				int px1 = abs((int)img[id] - (int)img[idx]);
+				int py2 = abs((int)img[id+2] - (int)img[idy+2]);						
+				int px2 = abs((int)img[id+2] - (int)img[idx+2]);
+				pxy = (px1 + py1 + px2 + py2) ;
+				
+				//blue: 96,45 U,V
+				//blue: 44,121 U,V
+				whitecount++;
+			}
+			/*
 			//Y channels							
-			if (pxy > 10) {
+			if (pxy > 40 &&img[id] ) { // segment on edges
 				img[count+1] =255;
 				img[count+3] =255;
 				whitecount++;
@@ -579,6 +624,16 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			//color channels
 			img[count] = 127; 
 			img[count+2] =127 ;				
+			*/
+			
+			if (pxy==0) {
+
+				img[count+1] =0;
+				img[count+3] =0;
+				img[count] = 127; 
+				img[count+2] =127;
+			
+			}
 			
 
 		
@@ -586,30 +641,134 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			
 		}	
 		
-		//fix strange bug that crashes dsp if picture is to uniform
-		if (whitecount<180) {
-			memcpy(img,img_copy,imgHeight*imgWidth*2);
-		}
-		free(img_copy);
-	
+		
+		//printf("Mean U: %lu, V: %lu\n",color_U/(imgWidth*imgHeight),color_V/(imgWidth*imgHeight) );
+		
+
 		
 		
-		
-		g_print("Harrow6 %d, %d, %d\n", counter,darkcount,whitecount);
-	
 		/*
-		int linesMax = 2;
-		float * rhos_out = (float *) calloc(linesMax,sizeof(float));
-		float * thetas_out = (float *) calloc(linesMax,sizeof(float));
-		icvHoughLinesStandard( img, imgWidth, imgHeight, 4, 3.14/180/4,128, linesMax , rhos_out, thetas_out);
-		free(rhos_out);
-		free(thetas_out);
+			//dilation
+		count=0;
+		while (count < maxcount) {
+			int id = count+1;
+			int idx= id+4;
+			int idy= id+imgWidth2;;
+
+			if (img[idy]==255) {
+				
+				if (img[idx]==0) {
+					img[idx] = 255;
+					img[idx+2] = 255;
+					whitecount++;
+					darkcount--;
+				}
+				if (img[id] == 0) {
+					img[id] = 255;
+					img[id+2] = 255;
+					whitecount++;
+					darkcount--;
+				}
+			}
+			
+			count +=4;				
+		}	
+		
+				//erosion:	
+		int erocount = 0;
+		count=0;
+		while (count < maxcount) {
+			int id = count+1;
+			int idx= id+4;
+			int idy= id+imgWidth2;;
+
+			if (!(img[id] && img[idx] && img[idy]) ){
+				if (img[id]) {
+					img[id] = 0;
+					img[id+2] = 0;
+					whitecount--;
+					darkcount++;
+					erocount++;
+				}
+			}
+					
+			count +=4;				
+		}	
+	
+
+		//erosion:	
+		count=0;
+		while (count < maxcount) {
+			int id = count+1;
+			int idx= id+4;
+			int idy= id+imgWidth2;;
+
+			if (!(img[id] && img[idx] && img[idy]) ){
+				if (img[id]) {
+					img[id] = 0;
+					img[id+2] = 0;
+					whitecount--;
+					darkcount++;
+					erocount++;
+				}
+			}
+					
+			count +=4;				
+		}		
 		*/
 		
+		//send new segmented image to line thread if needed
+		if (new_line_im == 1) {
+			new_line_im = 0; // todo, replace by mutex
+			memcpy(img_line,img_copy,imgHeight*imgWidth*2);
+		}
+		
+		//g_print("Harrow6 %d, %d, %d\n", counter,darkcount,whitecount);
+		//fix strange bug that crashes dsp if picture is to uniform
+		if (whitecount<170) {
+			memcpy(img,img_copy,imgHeight*imgWidth*2);				
+		}
+		
+		free(img_copy);		
 	}
 		
 	counter++; // to keep track of data through ppz communication
 	
+	  
+	  
+	  /*
+	  		//clear last line:
+		int count_end = imgWidth*(imgHeight)*2-4;
+		for (int i = 0 ; i < imgWidth*4; i+=4) {
+			
+			img[i] = i%255;
+			img[i+1] = i%255;
+			img[i+2] = i%255;
+			img[i+3] = i%255;
+			
+			img[count_end] = i%255;
+			img[count_end+1] = i%255;
+			img[count_end+2] = i%255;
+			img[count_end+3] = i%255;
+			count_end-=4;
+		}
+
+		
+				
+		for (int i = 2*imgWidth ; i < 2*imgWidth*imgHeight; i+=2*imgWidth) {
+			
+			for (int j = -8; j<8;j+=4) {
+				if (i+j>0) {
+					img[i+j] = i%255;
+					img[i+1+j] = i%255;
+					img[i+2+j] = i%255;
+					img[i+3+j] = i%255;
+				}
+			}
+		}
+	  
+	  */
+	  
 	  
   return gst_pad_push (filter->srcpad, buf);
 }
@@ -702,22 +861,10 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
                 {
                     int r = j * tabCos[n] + i * tabSin[n];
                     r += (numrho - 1) / 2;
-                    accum[(n+1) * (numrho+2) + r+1]++;
-					//printf("harrow %d", accum[(n+1) * (numrho+2) + r+1]);
+                    accum[(n+1) * (numrho+2) + r+1]++;					
                 }
 			}				
-        }
-		
-		/*
-		for (int i = 0; i<numangle;i++) {
-			for (int j = 0; i<numangle;i++) {
-				printf("%d"
-		
-		
-			}
-			printf("\n");
-		}
-		*/
+        }		
 
     // stage 2. find local maximums
     for(int r = 0; r < numrho; r++ )
@@ -754,142 +901,32 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
 	
 }
 
+void *line_threat( void *ptr) {
 
+	int linesMax = 2;
+	float * rhos_out = (float *) calloc(linesMax,sizeof(float));
+	float * thetas_out = (float *) calloc(linesMax,sizeof(float));
+		
 
-void houghtrans_line(unsigned char * img, float a_res, unsigned int width, unsigned int height, int b_steps, int nLines, int drawlines) {
-	
-	
-	float a_max = (float)1.4137;
-	float a_steps = (2*a_max)/a_res;
-	int ** accumulator;
-	float b_size;
-	float b_min;
-	int acount = (int)((2*a_max)/a_res)+1;
-	float * a = (float *) calloc(acount, sizeof(float));
-
-	//fill a
-	float tmp = -a_max;
-	for (int i = 0 ; i<a_steps; i++) {		
-		a[i] = tan(tmp);
-		tmp+=a_res;
-	} 
-	
-	//determine how big b needs to be:
-	int bcount = 0;
-	for (int i=0; i<(int)height;i++) {
-		for (int j=0; j<(int)width;j++) {
-			if (img[(i + j*height)*2+1])		{
-				bcount++;
-			}		
-		}	
-	}
-	
-	/*
-	int b2count = 0;
-	for (unsigned int i =1;i<imgHeight*imgWidth*2;i+=2) {
-		if (img[i] )
-			b2count++	;
-	} 
-	
-	if (bcount != b2count)
-		printf("HOERRR: %d, %d\n", bcount,b2count);
-	*/
-
-	//fill b
-	b_min = 99999;
-	float b_max = -99999;	
-	float ** b = (float **) calloc(bcount+1, sizeof(float *));	
-	bcount=0;
-	for (int i=0; i<(int)height;i++) {
-		for (int j=0; j<(int)width;j++) {
-			if (img[(i + j*height)*2+1])		{			
-				b[bcount] = (float *) calloc(acount, sizeof(float )); //assign mem for b
-				for (int k=0;k<acount;k++) {
-					b[bcount][k] = (j+1)-a[k]*(i+1);	//fill b, +1 to keep same as matlab
-					
-					//keep track of min and max of b
-					if (b[bcount][k] < b_min)
-						b_min = b[bcount][k];
-					if (b[bcount][k] > b_max)
-						b_max = b[bcount][k];
-				}
-				bcount++;	
-			}		
-		}	
-	}
-
-
-	b_size = (b_max- b_min)/b_steps;
-	accumulator = (int **) calloc(acount, sizeof(int *));
-	
-	//fill accumulator
-	for (int i=0; i<acount;i++) {
-		accumulator[i] = (int *) calloc(b_steps, sizeof(int)); 
-		for (int j=0; j<b_steps;j++) {
-			float y = y = b_min + (j+1) * (b_size);
-			int acc = 0;
-			for (int k=0;k<bcount;k++) {
-				if (((y-b_size) < b[k][i]) && (b[k][i] < (y+ b_size)))
-					acc++;						
-			}				
-			accumulator[i][j]=acc;
+	while (1) {
+			
+		if (!new_line_im) {
+			icvHoughLinesStandard( img_line, imgWidth, imgHeight, 4, 3.14/180/4,128, linesMax , rhos_out, thetas_out);
+		
+			new_line_im =1;
+		} else {		
+			usleep(1000); // TODO: replace by mutex
 		}
-	}
 
-	if (drawlines) {
-		for (int i = 0 ; i<nLines;i++) {
-			int x,y,max;
-			getmax(accumulator,acount,b_steps,&x,&y,&max);
-			accumulator[x][y]=0;
-			g_print("007;%d;%d\n", x,y);
-			drawLine(img,y,x,100);
-		}
-	}
-
-
-
-
-	
-	//free allocated memory
-	free(a);
-	
-	
-	for (int i=0;i<bcount;i++) {
-		free(b[i]);
-	}
-	free(b);
-
-	
-	for (int i=0;i<acount;i++) {
-		free(accumulator[i]);
-	}
-	free(accumulator);
-	
-	
-
-}
-
-
-void getmax(int ** accumulator, int acount, int b_steps, int * x, int * y, int * max) {
-	int i,j;
-	*max = -1;
-	*x = 0;
-	*y = 0;
-	for (i=0;i<acount;i++) {
-		for (j=0;j<b_steps;j++) {
-			if (*max < accumulator[i][j]){
-				*max = accumulator[i][j];
-				*x = i;
-				*y = j;
-			}
-		}
 	}
 	
+	free(rhos_out);
+	free(thetas_out);			
+		
+
 
 
 }
-
-
 
 int cmpfunc (const void * a, const void * b)
 {
@@ -898,7 +935,7 @@ int id2 = *(int*)b;
 
 
 
-   return ( accum[id1]-accum[id2] );
+   return ( accum[id2]-accum[id1] );
 }
 
 int image_index(int xx, int yy) {
