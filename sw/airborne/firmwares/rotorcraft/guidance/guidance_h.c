@@ -34,10 +34,15 @@
 
 #include "generated/airframe.h"
 
+#include "modules/video/video_ardrone2.h"
+
 /* error if some gains are negative */
 #if (GUIDANCE_H_PGAIN < 0) ||                   \
   (GUIDANCE_H_DGAIN < 0)   ||                   \
-  (GUIDANCE_H_IGAIN < 0)
+  (GUIDANCE_H_IGAIN < 0)   ||                   \
+  (GUIDANCE_H_VISION_PGAIN < 0)   ||                   \
+  (GUIDANCE_H_VISION_DGAIN < 0)   ||                   \
+  (GUIDANCE_H_VISION_IGAIN < 0)
 #error "ALL control gains have to be positive!!!"
 #endif
 
@@ -45,6 +50,14 @@
 #define GUIDANCE_H_AGAIN 0
 #else
 #if (GUIDANCE_H_AGAIN < 0)
+#error "ALL control gains have to be positive!!!"
+#endif
+#endif
+
+#ifndef GUIDANCE_H_VISION_AGAIN
+#define GUIDANCE_H_VISION_AGAIN 0
+#else
+#if (GUIDANCE_H_VISION_AGAIN < 0)
 #error "ALL control gains have to be positive!!!"
 #endif
 #endif
@@ -60,6 +73,8 @@ uint8_t guidance_h_mode;
 bool_t guidance_h_use_ref;
 
 struct Int32Vect2 guidance_h_pos_sp;
+struct Int32Vect2 guidance_h_bodypos_sp;
+struct Int32Vect2 guidance_h_bodyspeed_sp;
 struct Int32Vect2 guidance_h_pos_ref;
 struct Int32Vect2 guidance_h_speed_ref;
 struct Int32Vect2 guidance_h_accel_ref;
@@ -67,6 +82,9 @@ struct Int32Vect2 guidance_h_accel_ref;
 struct Int32Vect2 guidance_h_pos_err;
 struct Int32Vect2 guidance_h_speed_err;
 struct Int32Vect2 guidance_h_pos_err_sum;
+struct Int32Vect2 guidance_h_bodypos_err;
+struct Int32Vect2 guidance_h_bodyspeed_err;
+struct Int32Vect2 guidance_h_bodypos_err_sum;
 struct Int32Vect2 guidance_h_nav_err;
 
 struct Int32Eulers guidance_h_rc_sp;
@@ -78,6 +96,10 @@ int32_t guidance_h_pgain;
 int32_t guidance_h_dgain;
 int32_t guidance_h_igain;
 int32_t guidance_h_again;
+int32_t guidance_h_vision_pgain;
+int32_t guidance_h_vision_dgain;
+int32_t guidance_h_vision_igain;
+int32_t guidance_h_vision_again;
 
 int32_t transition_percentage;
 int32_t transition_theta_offset;
@@ -88,7 +110,7 @@ static void guidance_h_traj_run(bool_t in_flight);
 static void guidance_h_hover_enter(void);
 static void guidance_h_nav_enter(void);
 static inline void transition_run(void);
-
+static inline void guidance_h_traj_run_vision(bool_t in_flight);
 
 void guidance_h_init(void) {
 
@@ -97,12 +119,18 @@ void guidance_h_init(void) {
 
   INT_VECT2_ZERO(guidance_h_pos_sp);
   INT_VECT2_ZERO(guidance_h_pos_err_sum);
+  INT_VECT2_ZERO(guidance_h_bodypos_sp);
+  INT_VECT2_ZERO(guidance_h_bodypos_err_sum);
   INT_EULERS_ZERO(guidance_h_rc_sp);
   INT_EULERS_ZERO(guidance_h_command_body);
   guidance_h_pgain = GUIDANCE_H_PGAIN;
   guidance_h_igain = GUIDANCE_H_IGAIN;
   guidance_h_dgain = GUIDANCE_H_DGAIN;
   guidance_h_again = GUIDANCE_H_AGAIN;
+  guidance_h_vision_pgain = GUIDANCE_H_VISION_PGAIN;
+  guidance_h_vision_igain = GUIDANCE_H_VISION_IGAIN;
+  guidance_h_vision_dgain = GUIDANCE_H_VISION_DGAIN;
+  guidance_h_vision_again = GUIDANCE_H_VISION_AGAIN;
   transition_percentage = 0;
   transition_theta_offset = 0;
 }
@@ -159,6 +187,17 @@ void guidance_h_mode_changed(uint8_t new_mode) {
         stabilization_attitude_enter();
       break;
 
+    case GUIDANCE_H_MODE_VISION:
+        guidance_h_hover_enter();
+#if NO_ATTITUDE_RESET_ON_MODE_CHANGE
+	/* reset attitude stabilization if previous mode was not using it */
+	if (guidance_h_mode == GUIDANCE_H_MODE_KILL ||
+		guidance_h_mode == GUIDANCE_H_MODE_RATE ||
+		guidance_h_mode == GUIDANCE_H_MODE_RC_DIRECT)
+#endif
+		  stabilization_attitude_enter();
+	break;
+
     case GUIDANCE_H_MODE_NAV:
       guidance_h_nav_enter();
 #if NO_ATTITUDE_RESET_ON_MODE_CHANGE
@@ -202,6 +241,10 @@ void guidance_h_read_rc(bool_t  in_flight) {
       break;
 
     case GUIDANCE_H_MODE_HOVER:
+      stabilization_attitude_read_rc_setpoint_eulers(&guidance_h_rc_sp, in_flight);
+      break;
+
+    case GUIDANCE_H_MODE_VISION:
       stabilization_attitude_read_rc_setpoint_eulers(&guidance_h_rc_sp, in_flight);
       break;
 
@@ -250,6 +293,20 @@ void guidance_h_run(bool_t  in_flight) {
       guidance_h_command_body.psi = guidance_h_rc_sp.psi;
       /* compute roll and pitch commands and set final attitude setpoint */
       guidance_h_traj_run(in_flight);
+
+      stabilization_attitude_run(in_flight);
+      break;
+
+    case GUIDANCE_H_MODE_VISION:
+      if (!in_flight)
+        guidance_h_hover_enter();
+
+      //guidance_h_update_reference();
+
+      /* set psi command */
+      guidance_h_command_body.psi = guidance_h_rc_sp.psi;
+      /* compute roll and pitch commands and set final attitude setpoint */
+      guidance_h_traj_run_vision(in_flight);
 
       stabilization_attitude_run(in_flight);
       break;
@@ -371,6 +428,65 @@ static void guidance_h_traj_run(bool_t in_flight) {
 
   /* Set attitude setpoint from pseudo-euler commands */
   stabilization_attitude_set_cmd_i(&guidance_h_command_body);
+}
+
+static inline void guidance_h_traj_run_vision(bool_t in_flight)
+{
+	  /* read current relative horizontal position */
+	  read_pos();
+	  /* compute position error    */
+	  VECT2_DIFF(guidance_h_bodypos_err, guidance_h_bodypos_sp, bodyPos);
+	  /* saturate it               */
+	  VECT2_STRIM(guidance_h_bodypos_err, -MAX_POS_ERR, MAX_POS_ERR);
+
+	  /* compute speed error    */
+	  VECT2_DIFF(guidance_h_bodyspeed_err, guidance_h_bodyspeed_sp, bodySpeed);
+	  /* saturate it               */
+	  VECT2_STRIM(guidance_h_bodyspeed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
+
+	  /* update pos error integral, zero it if not in_flight */
+	  if (in_flight) {
+	    VECT2_ADD(guidance_h_bodypos_err_sum, guidance_h_bodypos_err);
+	    /* saturate it               */
+	    VECT2_STRIM(guidance_h_bodypos_err_sum, -MAX_POS_ERR_SUM, MAX_POS_ERR_SUM);
+	  } else {
+	    INT_VECT2_ZERO(guidance_h_bodypos_err_sum);
+	  }
+
+	  /* run PID */
+
+	  guidance_h_command_earth.y =
+	    -((guidance_h_vision_pgain * guidance_h_bodypos_err.x) << 1 )-
+	    ((guidance_h_vision_dgain * (guidance_h_bodyspeed_err.x >> 2)) ) -
+	    ((guidance_h_vision_igain * (guidance_h_bodypos_err_sum.x >> 12)) );;// +
+//	    ((guidance_h_vision_again * guidance_h_accel_ref.x) >> 8);
+	  guidance_h_command_earth.x =
+	    ((guidance_h_vision_pgain * guidance_h_bodypos_err.y) << 1) +
+	    ((guidance_h_vision_dgain * (guidance_h_bodyspeed_err.y >> 2)) ) +
+	    ((guidance_h_vision_igain * (guidance_h_bodypos_err_sum.y >> 12)) );// +
+//	    ((guidance_h_vision_again * guidance_h_accel_ref.y) >> 8);
+
+	  VECT2_STRIM(guidance_h_command_earth, -TRAJ_MAX_BANK, TRAJ_MAX_BANK);
+
+
+	  //Rotate to body frame
+	  int32_t s_psi, c_psi;
+	  int32_t psi = stateGetNedToBodyEulers_i()->psi;
+	  PPRZ_ITRIG_SIN(s_psi, psi);
+	  PPRZ_ITRIG_COS(c_psi, psi);
+
+	  // Restore angle ref resolution after rotation
+	  guidance_h_command_body.phi =
+	    ( - s_psi * guidance_h_command_earth.x + c_psi * guidance_h_command_earth.y) >> INT32_TRIG_FRAC;
+	  guidance_h_command_body.theta =
+	    - ( c_psi * guidance_h_command_earth.x + s_psi * guidance_h_command_earth.y) >> INT32_TRIG_FRAC;
+
+	  /* Add RC roll and pitch setpoints for emergency corrections */
+	  guidance_h_command_body.phi += guidance_h_rc_sp.phi;
+	  guidance_h_command_body.theta += guidance_h_rc_sp.theta;
+
+	  /* Set attitude setpoint from pseudo-euler commands */
+	  stabilization_attitude_set_cmd_i(&guidance_h_command_body);
 }
 
 static void guidance_h_hover_enter(void) {

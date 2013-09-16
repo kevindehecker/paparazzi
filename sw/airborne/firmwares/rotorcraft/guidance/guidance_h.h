@@ -49,7 +49,7 @@
 #define GUIDANCE_H_MODE_RC_DIRECT   5
 #define GUIDANCE_H_MODE_CARE_FREE   6
 #define GUIDANCE_H_MODE_FORWARD     7
-
+#define GUIDANCE_H_MODE_VISION      8
 
 extern uint8_t guidance_h_mode;
 extern bool_t guidance_h_use_ref;
@@ -59,6 +59,8 @@ extern bool_t guidance_h_use_ref;
  *  accuracy 0.0039, range 8388km
  */
 extern struct Int32Vect2 guidance_h_pos_sp;
+extern struct Int32Vect2 guidance_h_bodypos_sp;
+extern struct Int32Vect2 guidance_h_bodyspeed_sp;
 
 extern struct Int32Vect2 guidance_h_pos_ref;        ///< with #INT32_POS_FRAC
 extern struct Int32Vect2 guidance_h_speed_ref;      ///< with #INT32_SPEED_FRAC
@@ -67,6 +69,9 @@ extern struct Int32Vect2 guidance_h_accel_ref;      ///< with #INT32_ACCEL_FRAC
 extern struct Int32Vect2 guidance_h_pos_err;
 extern struct Int32Vect2 guidance_h_speed_err;
 extern struct Int32Vect2 guidance_h_pos_err_sum;
+extern struct Int32Vect2 guidance_h_bodypos_err;
+extern struct Int32Vect2 guidance_h_bodyspeed_err;
+extern struct Int32Vect2 guidance_h_bodypos_err_sum;
 extern struct Int32Vect2 guidance_h_nav_err;
 
 extern struct Int32Eulers guidance_h_rc_sp;         ///< with #INT32_ANGLE_FRAC
@@ -77,6 +82,10 @@ extern int32_t guidance_h_pgain;
 extern int32_t guidance_h_dgain;
 extern int32_t guidance_h_igain;
 extern int32_t guidance_h_again;
+extern int32_t guidance_h_vision_pgain;
+extern int32_t guidance_h_vision_dgain;
+extern int32_t guidance_h_vision_igain;
+extern int32_t guidance_h_vision_again;
 
 extern int32_t transition_percentage;
 extern int32_t transition_theta_offset;
