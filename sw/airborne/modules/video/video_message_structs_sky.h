@@ -17,6 +17,13 @@ struct ppz2gst_message_struct_sky {
 	int pitch;
 	int roll;
 	int alt; // sonar altitude
+	unsigned char minU_orange;
+	unsigned char maxU_orange;
+	unsigned char minV_orange;
+	unsigned char maxV_orange;
+
+	unsigned char min_gradient;
+	
 };
 extern struct ppz2gst_message_struct_sky ppz2gst;
 

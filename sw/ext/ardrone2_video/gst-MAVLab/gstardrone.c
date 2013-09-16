@@ -358,6 +358,24 @@ void *TCP_threat( void *ptr) {
 			if (tmp>6) {
 				g_print("Current counter: %d, Received counter: %d, diff: %d\n",counter, ppz2gst.counter, tmp); //delay of 3 is caused by the fact not every frame is used (15fps mod 3)
 			}	
+			
+			/*
+		minU_blue = ppz2gst.minU_blue;
+		maxU_blue = ppz2gst.maxU_blue;
+		minV_blue = ppz2gst.minV_blue;
+		maxV_blue = ppz2gst.maxV_blue;
+*/
+
+		minU_orange = ppz2gst.minU_orange;
+		maxU_orange = ppz2gst.maxU_orange;
+		minV_orange = ppz2gst.minV_orange;
+		maxV_orange = ppz2gst.maxV_orange;
+
+		min_gradient = ppz2gst.min_gradient;
+			
+			
+			
+			
 						
 		} else {
 			g_print("Nothing received: %d\n",res);
@@ -759,6 +777,16 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		}
 		
 		free(img_copy);		
+		
+		//send result
+		if (tcpport>0) { 	//if network was enabled by user
+			if (socketIsReady) { 
+				//gst2ppz.blob_x1 = blobP[0];
+				gst2ppz.counter = counter;
+				Write_msg_socket((char *) &gst2ppz, sizeof(gst2ppz));
+			}
+		}
+		
 	}
 		
 	counter++; // to keep track of data through ppz communication

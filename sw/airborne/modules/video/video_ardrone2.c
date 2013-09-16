@@ -184,6 +184,17 @@ void video_receive(void) {
 	ppz2gst.roll = att->phi;
 	ppz2gst.pitch = att->theta;
 	ppz2gst.alt = navdata_getHeight();
+	
+	
+	ppz2gst.minU_orange = minU_orange;
+	ppz2gst.maxU_orange = maxU_orange;
+	ppz2gst.minV_orange = minV_orange;
+	ppz2gst.maxV_orange = maxV_orange;
+
+	
+	ppz2gst.min_gradient = min_gradient;
+	
+	
 	Write_msg_socket((char *) &ppz2gst,sizeof(ppz2gst));
 
 	//printf("Roll: %d, Pitch: %d, height: %d\n",att->phi,att->theta,alt); 

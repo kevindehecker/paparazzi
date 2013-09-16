@@ -57,4 +57,12 @@ extern struct VideoARDrone video_impl;
 	int closeSocket(void);
 
 
+	unsigned char minU_orange;
+	unsigned char maxU_orange;
+	unsigned char minV_orange;
+	unsigned char maxV_orange;
+
+	unsigned char min_gradient;	
+	
+	
 #endif /* VIDEO_ARDRONE2_H */

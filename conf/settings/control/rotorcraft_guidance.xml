@@ -23,6 +23,15 @@
       <dl_setting var="guidance_h_pos_sp.y" MIN="-10" MAX="10" STEP="1"  module="guidance/guidance_h" shortname="sp_y_ned" unit="1/2^8m" alt_unit="m" alt_unit_coef="0.00390625"/>
       <dl_setting var="ins.hf_realign" min="0" step="1" max="1" module="subsystems/ins" shortname="hf_realign" values="OFF|ON"/>
     </dl_settings>
+	
+	<dl_settings NAME="Vision Loop">
+		<dl_setting var="minU_orange" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="min_U_Orange" param="minU_orange"/>
+		<dl_setting var="maxU_orange" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="max_U_Orange" param="maxU_orange"/>
+		<dl_setting var="minV_orange" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="min_V_Orange" param="minV_orange"/>
+		<dl_setting var="maxV_orange" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="max_V_Orange" param="maxV_orange"/>
+		
+		<dl_setting var="min_gradient" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="min_gradient" param="min_gradient"/>
+    </dl_settings>
 
     <dl_settings NAME="NAV">
       <dl_setting var="flight_altitude" MIN="0" STEP="0.1" MAX="400" module="navigation" unit="m" handler="SetFlightAltitude"/>
