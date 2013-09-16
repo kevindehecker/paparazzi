@@ -73,6 +73,8 @@ int       list_s;                /*  listening socket          */
 struct    sockaddr_in servaddr;  /*  socket address structure  */
 char      buffer[MAX_LINE];      /*  character buffer          */
 char     *endptr;                /*  for strtol()              */
+int _dx;
+int _dy;
 
 
 int closeSocket(void) {
@@ -170,9 +172,12 @@ void video_receive(void) {
 		int roll = gst2ppz.optic_flow_x;
 		int pitch = gst2ppz.optic_flow_y;
 		
-		//printf("Optic flow: %d, %d\n", roll,pitch);
+		bodyPos.x = gst2ppz.optic_flow_x;
+		bodyPos.y = gst2ppz.optic_flow_y;
 		
-    	//DOWNLINK_SEND_VIDEO_TELEMETRY( DefaultChannel, DefaultDevice, &gst2ppz.blob_x1, &gst2ppz.blob_y1,&gst2ppz.blob_x2, &gst2ppz.blob_y2,&gst2ppz.blob_x3, &gst2ppz.blob_y3,&gst2ppz.blob_x4, &gst2ppz.blob_y4);  
+		printf("Optic flow: %d, %d\n", roll,pitch);
+		
+    	DOWNLINK_SEND_VIDEO_TELEMETRY( DefaultChannel, DefaultDevice, &gst2ppz.optic_flow_x, &gst2ppz.optic_flow_y,&gst2ppz.counter, &gst2ppz.counter,&gst2ppz.counter, &gst2ppz.counter,&gst2ppz.counter, &gst2ppz.counter);  
 		
 		
 
@@ -201,8 +206,20 @@ void video_receive(void) {
 
 }
 
+//				bodyBlob[iBlob].x = (int32_t)(RotFree_Blob[iBlob].x*0.002902*(altSonar)); // inv(fy) cm
+//				bodyBlob[iBlob].y = (int32_t)(RotFree_Blob[iBlob].y*0.002994*(altSonar)); // inv(fx) cm
 
+void read_pos(void)
+{
+//	VECT3_COPY(bodyPos, bodyBlob[0]);
+	int dx = bodyPos.x - _dx;
+	int dy = bodyPos.y - _dy;
 
+	VECT3_ASSIGN(bodySpeed, dx, dy, 0);
+	_dx = bodyPos.x;
+	_dy = bodyPos.y;
+	
+}
 
 void video_start(void)
 {

@@ -55,7 +55,7 @@ extern struct VideoARDrone video_impl;
 	int Read_msg_socket(char * data, unsigned int size);
 	ssize_t Write_msg_socket(char * data, unsigned int size);
 	int closeSocket(void);
-
+	void read_pos(void);
 
 	unsigned char minU_orange;
 	unsigned char maxU_orange;
@@ -64,5 +64,15 @@ extern struct VideoARDrone video_impl;
 
 	unsigned char min_gradient;	
 	
+	
+	int GUIDANCE_H_VISION_PGAIN;
+	int GUIDANCE_H_VISION_IGAIN;
+	int GUIDANCE_H_VISION_DGAIN;
+	int GUIDANCE_H_VISION_AGAIN;
+struct NedCoor_i bodyPos;
+struct NedCoor_i bodySpeed;
+
+
+
 	
 #endif /* VIDEO_ARDRONE2_H */

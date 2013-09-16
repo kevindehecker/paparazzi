@@ -577,8 +577,8 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				if (tcpport>0) { 	//if network was enabled by user
 					if (socketIsReady) { 
 						gst2ppz.counter = counter;
-						gst2ppz.optic_flow_x = tot_x;
-						gst2ppz.optic_flow_y = tot_y;
+						gst2ppz.optic_flow_x = opt_trans_x;
+						gst2ppz.optic_flow_y = opt_trans_y;
 						Write_msg_socket((char *) &gst2ppz, sizeof(gst2ppz));
 					}
 				}
