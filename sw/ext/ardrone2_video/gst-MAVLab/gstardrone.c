@@ -57,8 +57,14 @@ int x_buf[24];
 int y_buf[24];
 int diff_roll_buf[24];
 int diff_pitch_buf[24];
+
+int opt_trans_x_buf[32];
+int opt_trans_y_buf[32];
+
+
 unsigned int buf_point;
 unsigned int buf_imu_point;
+unsigned int buf_opt_trans_point;
 
 float opt_angle_y_prev;
 float opt_angle_x_prev;
@@ -66,6 +72,11 @@ void *TCP_threat( void *ptr);
 
 void *line_threat( void *ptr);
 unsigned char * img_line;
+unsigned int bluecount_line;
+unsigned int orangecount_line;
+unsigned int alt_line;
+
+
 int new_line_im;
 
 //threshold variables
@@ -314,18 +325,17 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 	}
 	
 	
-	minU_blue = 127;
-	maxU_blue = 255;
-	minV_blue = 30;
-	maxV_blue = 115;
+	minU_blue = 107;
+	maxU_blue = 151;
+	minV_blue = 142;
+	maxV_blue = 195;
 
-	minU_orange = 60;
-	maxU_orange = 127;
-	minV_orange = 140;
-	maxV_orange = 180;
+	minU_orange = 129;
+	maxU_orange = 134;
+	minV_orange = 84;
+	maxV_orange = 126;
 
-	min_gradient = 20;
-	
+	min_gradient = 53;
 	
 	
 	
@@ -568,8 +578,19 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				y_avg -= diff_pitch; 
 								
 				//calculate translation in cm/frame from optical flow in degrees/frame
-				int opt_trans_x = tan_zelf(x_avg/1024)*mean_alt/1000;
-				int opt_trans_y = tan_zelf(y_avg/1024)*mean_alt/1000;
+				int opt_trans_x = 0;
+				int opt_trans_y = 0;				
+				opt_trans_x_buf[buf_opt_trans_point] = tan_zelf(x_avg/1024)*mean_alt/1000;
+				opt_trans_y_buf[buf_opt_trans_point] = tan_zelf(y_avg/1024)*mean_alt/1000;
+				buf_opt_trans_point = (buf_opt_trans_point + 1) % 32;
+				for (int i=0;i<32;i++) {
+					opt_trans_x+=opt_trans_x_buf[i];
+					opt_trans_y+=opt_trans_y_buf[i];
+				}
+				opt_trans_x = opt_trans_x /32;
+				opt_trans_y = opt_trans_y /32;
+				
+				
 				
 				g_print("006;%d;%d;%d;%d;%d;%d;%d;%d;%d\n",x_avg+diff_roll,diff_roll,x_avg,y_avg+diff_pitch,diff_pitch,y_avg,mean_alt,opt_trans_x,opt_trans_y);
 				
@@ -602,10 +623,13 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	
 	} else if (mode==3) {	
 		//segment image:
-		
+		int current_alt = ppz2gst.alt;
 		//calculate gradient over picture
 		unsigned int darkcount = 0;
 		unsigned int whitecount = 0;
+		
+		unsigned int bluecount;
+		unsigned int orangecount;
 		unsigned char * img_copy = (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char));
 		if (!img_copy)
 			printf( "Mem errorrrrrr\n");
@@ -621,8 +645,9 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			int pxy = 0;
 			
 			int res1 = ((img[id] > minU_blue) && (img[id] < maxU_blue) && (img[id+2] > minV_blue) && (img[id+2] < maxV_blue));
+			bluecount+=res1;
 			int res2 = ((img[id] > minU_orange) && (img[id] < maxU_orange) && (img[id+2] > minV_orange) && (img[id+2] < maxV_orange));
-			
+			orangecount+=res2;
 			
 			if  (  res1 || res2 ) { // perform blue|orange segmentation				
 				//calculate gradients
@@ -693,7 +718,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 
 		
 		
-		/*
+		
 			//dilation
 		count=0;
 		while (count < maxcount) {
@@ -719,7 +744,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			
 			count +=4;				
 		}	
-		
+		/*
 				//erosion:	
 		int erocount = 0;
 		count=0;
@@ -765,8 +790,11 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		
 		//send new segmented image to line thread if needed
 		if (new_line_im == 1) {
-			new_line_im = 0; // todo, replace by mutex
+			bluecount_line = bluecount;
+			orangecount_line = orangecount;
+			alt_line = current_alt;
 			memcpy(img_line,img,imgHeight*imgWidth*2);
+			new_line_im = 0; // todo, replace by mutex
 		}
 		
 		//g_print("Harrow6 %d, %d, %d\n", counter,darkcount,whitecount);
@@ -939,7 +967,7 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
 
 	
     scale = 1./(numrho+2);
-    for( i = 0; i < linesMax; i++ )
+    for( i = 0; i < linesMax && i < total; i++ )
     {        
         int idx = sort_buf[i];
         int n = idx*scale - 1;
@@ -948,14 +976,14 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
         thetas_out[i] = n * theta;    //angle
 
 		
-		//g_print("%d;%.2f;%d \n",rhos_out[i] ,thetas_out[i],accum[idx]);
+		g_print("%d;%.2f;%d \n",rhos_out[i] ,thetas_out[i],accum[idx]);
     }
-	//g_print(" nLines: %d\n\n",total);
-	g_print("1/%d line: %d;%.2f;%d  -- ",total,rhos_out[0] ,thetas_out[0],accum[sort_buf[0]]);
+	g_print(" nLines: %d\n\n",total);
+	//g_print("1/%d line: %d;%.2f;%d  \n ",total,rhos_out[0] ,thetas_out[0],accum[sort_buf[0]]);
 	
 	
 	//if (accum[0] > 150)
-		int foundedge;
+	
 	if (total > 1) {
 		int foundcorner = 0;
 		int falsepositives = 0;
@@ -964,16 +992,16 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
 			if (i < total ) {
 					float diff = fabs(thetas_out[0] -thetas_out[i]);
 					if (!(diff < 0.2 || diff > 2.94)) {
-						if ((diff > 1.4 && diff < 1.6)) {
+						if ((diff > 0.5 && diff < 2.5)) {
 							g_print("Corner detected? %d; %d;%.2f;%d \n",i,rhos_out[i],thetas_out[i],accum[sort_buf[i]]);
-							foundedge ++;
+							foundcorner ++;
 						} else {
 							falsepositives++;
 						}
 					}	 					
 			}	
 		}
-		if (!foundedge) {
+		if (!foundcorner) {
 			g_print("\n");
 			/*use theta to compensate Yaw
 			* theta can flip between 0 / pi,
@@ -1015,7 +1043,7 @@ void *line_threat( void *ptr) {
 	while (1) {
 			
 		if (!new_line_im) {
-			icvHoughLinesStandard( img_line, imgWidth, imgHeight, 4, 3.14/180/4,128, linesMax , rhos_out, thetas_out);
+			icvHoughLinesStandard( img_line, imgWidth, imgHeight, 4, 3.14/180/4,100, linesMax , rhos_out, thetas_out);
 		
 			new_line_im =1;
 		} else {		
