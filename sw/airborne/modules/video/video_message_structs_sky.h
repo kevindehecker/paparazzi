@@ -22,6 +22,11 @@ struct ppz2gst_message_struct_sky {
 	unsigned char minV_orange;
 	unsigned char maxV_orange;
 
+	unsigned char minU_blue;
+	unsigned char maxU_blue;
+	unsigned char minV_blue;
+	unsigned char maxV_blue;
+	
 	unsigned char min_gradient;
 	
 };

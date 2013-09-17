@@ -197,6 +197,11 @@ void video_receive(void) {
 	ppz2gst.maxV_orange = maxV_orange;
 
 	
+	ppz2gst.minU_blue = minU_blue;
+	ppz2gst.maxU_blue = maxU_blue;
+	ppz2gst.minV_blue = minV_blue;
+	ppz2gst.maxV_blue = maxV_blue;
+	
 	ppz2gst.min_gradient = min_gradient;
 	
 	

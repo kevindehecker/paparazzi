@@ -30,6 +30,12 @@
 		<dl_setting var="minV_orange" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="min_V_Orange" param="minV_orange"/>
 		<dl_setting var="maxV_orange" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="max_V_Orange" param="maxV_orange"/>
 		
+		
+		<dl_setting var="minU_blue" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="min_U_Blue" param="minU_blue"/>
+		<dl_setting var="maxU_blue" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="max_U_Blue" param="maxU_blue"/>
+		<dl_setting var="minV_blue" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="min_V_Blue" param="minV_blue"/>
+		<dl_setting var="maxV_blue" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="max_V_Blue" param="maxV_blue"/>
+		
 		<dl_setting var="min_gradient" min="0" step="1" max="255" module="modules/video/video_ardrone2" shortname="min_gradient" param="min_gradient"/>
     </dl_settings>
 

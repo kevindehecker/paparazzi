@@ -151,6 +151,13 @@
       <program name="Server"/>
       <program name="Messages"/>
     </session>
+    <session name="Kevin_nj">
+      <program name="Server"/>
+      <program name="GCS"/>
+      <program name="Data Link">
+        <arg flag="-udp"/>
+      </program>
+    </session>
     <session name="Vision Results">
       <program name="Vision"/>
     </session>

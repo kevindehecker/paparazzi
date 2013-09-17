@@ -359,12 +359,11 @@ void *TCP_threat( void *ptr) {
 				g_print("Current counter: %d, Received counter: %d, diff: %d\n",counter, ppz2gst.counter, tmp); //delay of 3 is caused by the fact not every frame is used (15fps mod 3)
 			}	
 			
-			/*
+			
 		minU_blue = ppz2gst.minU_blue;
 		maxU_blue = ppz2gst.maxU_blue;
 		minV_blue = ppz2gst.minV_blue;
 		maxV_blue = ppz2gst.maxV_blue;
-*/
 
 		minU_orange = ppz2gst.minU_orange;
 		maxU_orange = ppz2gst.maxU_orange;
@@ -621,11 +620,11 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			int idy= id+imgWidth2;;
 			int pxy = 0;
 			
-			//int res1 = ((img[id] > minU_blue) && (img[id] < maxU_blue) && (img[id+2] > minV_blue) && (img[id+2] < maxV_blue));
+			int res1 = ((img[id] > minU_blue) && (img[id] < maxU_blue) && (img[id+2] > minV_blue) && (img[id+2] < maxV_blue));
 			int res2 = ((img[id] > minU_orange) && (img[id] < maxU_orange) && (img[id+2] > minV_orange) && (img[id+2] < maxV_orange));
 			
 			
-			if  (  res2 ) { // perform blue|orange segmentation				
+			if  (  res1 || res2 ) { // perform blue|orange segmentation				
 				//calculate gradients
 				int py1 = abs((int)img[id] - (int)img[idy]);						
 				int px1 = abs((int)img[id] - (int)img[idx]);
@@ -956,22 +955,42 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
 	
 	
 	//if (accum[0] > 150)
-		
+		int foundedge;
 	if (total > 1) {
-		int foundedge = 0;
+		int foundcorner = 0;
+		int falsepositives = 0;
 		for (i = 1; i<linesMax;i++) {
 		
 			if (i < total ) {
 					float diff = fabs(thetas_out[0] -thetas_out[i]);
 					if (!(diff < 0.2 || diff > 2.94)) {
-						g_print("Edge detected? %d; %d;%.2f;%d \n",i,rhos_out[i],thetas_out[i],accum[sort_buf[i]]);
-						foundedge = 1;
-						break;
+						if ((diff > 1.4 && diff < 1.6)) {
+							g_print("Corner detected? %d; %d;%.2f;%d \n",i,rhos_out[i],thetas_out[i],accum[sort_buf[i]]);
+							foundedge ++;
+						} else {
+							falsepositives++;
+						}
 					}	 					
 			}	
 		}
-		if (!foundedge)
+		if (!foundedge) {
 			g_print("\n");
+			/*use theta to compensate Yaw
+			* theta can flip between 0 / pi,
+			* use length to compensate x/y
+			* 
+			*/
+			
+			
+			//
+			
+			
+			
+			
+			
+			}
+			
+			
 	} else {
 		g_print("\n");
 	}

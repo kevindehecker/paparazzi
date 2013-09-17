@@ -61,6 +61,11 @@ extern struct VideoARDrone video_impl;
 	unsigned char maxU_orange;
 	unsigned char minV_orange;
 	unsigned char maxV_orange;
+	
+	unsigned char minU_blue;
+	unsigned char maxU_blue;
+	unsigned char minV_blue;
+	unsigned char maxV_blue;
 
 	unsigned char min_gradient;	
 	
@@ -69,8 +74,8 @@ extern struct VideoARDrone video_impl;
 	int GUIDANCE_H_VISION_IGAIN;
 	int GUIDANCE_H_VISION_DGAIN;
 	int GUIDANCE_H_VISION_AGAIN;
-struct NedCoor_i bodyPos;
-struct NedCoor_i bodySpeed;
+	struct NedCoor_i bodyPos;
+	struct NedCoor_i bodySpeed;
 
 
 
