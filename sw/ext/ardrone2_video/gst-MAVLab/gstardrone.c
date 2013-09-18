@@ -335,7 +335,7 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 	minV_orange = 84;
 	maxV_orange = 126;
 
-	min_gradient = 53;
+	min_gradient = 36;
 	
 	
 	
@@ -558,8 +558,8 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				if (total_weight) {
 				
 					//magical scaling needed in order to calibrate opt flow angles to imu angles
-					int scalex = 1400; //1024*(1/0.75) 
-					int scaley = 1400; //1024*(1/0.76)				
+					int scalex = 1024; //1024*(1/0.75) 
+					int scaley = 1024; //1024*(1/0.76)				
 				
 					x_buf[buf_point] = (tot_x*scalex)/total_weight;
 					y_buf[buf_point] = (tot_y*scaley)/total_weight;
@@ -574,15 +574,23 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 						
 						
 				//compensate optic flow for attitude (roll,pitch) change:
-				x_avg -=  diff_roll; 
+				x_avg -= diff_roll; 
 				y_avg -= diff_pitch; 
 								
 				//calculate translation in cm/frame from optical flow in degrees/frame
 				int opt_trans_x = 0;
-				int opt_trans_y = 0;				
-				opt_trans_x_buf[buf_opt_trans_point] = tan_zelf(x_avg/1024)*mean_alt/1000;
-				opt_trans_y_buf[buf_opt_trans_point] = tan_zelf(y_avg/1024)*mean_alt/1000;
-				buf_opt_trans_point = (buf_opt_trans_point + 1) % 32;
+				int opt_trans_y = 0;	
+
+
+				opt_trans_x = tan_zelf(x_avg/1024)*mean_alt/1000;
+				opt_trans_y = tan_zelf(y_avg/1024)*mean_alt/1000;
+				
+				
+				if (abs(opt_trans_y) < 1000 && abs(opt_trans_x) < 1000) {
+					opt_trans_x_buf[buf_opt_trans_point] = opt_trans_x;
+					opt_trans_y_buf[buf_opt_trans_point] = opt_trans_y;
+					buf_opt_trans_point = (buf_opt_trans_point + 1) % 32;
+				}
 				for (int i=0;i<32;i++) {
 					opt_trans_x+=opt_trans_x_buf[i];
 					opt_trans_y+=opt_trans_y_buf[i];
@@ -986,6 +994,7 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
 	
 	if (total > 1) {
 		int foundcorner = 0;
+		int firstcorner;
 		int falsepositives = 0;
 		for (i = 1; i<linesMax;i++) {
 		
@@ -995,6 +1004,8 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
 						if ((diff > 0.5 && diff < 2.5)) {
 							g_print("Corner detected? %d; %d;%.2f;%d \n",i,rhos_out[i],thetas_out[i],accum[sort_buf[i]]);
 							foundcorner ++;
+							if (!firstcorner)
+								firstcorner = i;
 						} else {
 							falsepositives++;
 						}
@@ -1012,6 +1023,38 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
 			
 			//
 			
+			
+			
+			
+			
+			} else {//if found corner
+				//calculate corner position though intersection of the lines
+				g_print("Intersection %d\n",firstcorner );
+				
+				
+				
+				float rho1 = rhos_out[0];
+				float rho2 = rhos_out[firstcorner];
+				
+				float theta1 = thetas_out[1];
+				float theta2 = thetas_out[firstcorner];
+				
+				/*
+				//using y = p sin(t) - (x-p*cos(t)) * tan{t)
+				float a1 = rho1 * sin(theta1);
+				float b1 = rho1 * cos(theta1);
+				float c1 = tan(theta1);
+				
+				float a2 = rho2 * sin(theta2);
+				float b2 = rho2 * cos(theta2);
+				float c2 = tan(theta2);
+				
+				//using ax+b = ax+b to find intersection
+				float x = (a1-a2-(x-b1)*c1)/c2 +b2;
+				float y = a1 - (x-b1)*c1;
+				g_print("Intersection: %f, %f\n", x,y);
+			
+			*/
 			
 			
 			
