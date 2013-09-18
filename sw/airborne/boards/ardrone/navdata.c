@@ -341,17 +341,17 @@ void navdata_update()
 
 void navdata_height(int *height, int *speed) {
   if (navdata.ultrasound > 10000) {
-    height = previousUltrasoundHeight;
-	speed = previousUltrasoundSpeed;
+    height = -previousUltrasoundHeight;
+	speed = -previousUltrasoundSpeed;
 	return;
   }
 
   int16_t ultrasoundHeight = 0;
   ultrasoundHeight = (navdata.ultrasound - 880) / 26.553;
-  *speed = ultrasoundHeight - previousUltrasoundHeight;
+  *speed = -(ultrasoundHeight - previousUltrasoundHeight);
   previousUltrasoundHeight = ultrasoundHeight;
   previousUltrasoundSpeed = *speed;
-  *height = ultrasoundHeight;
+  *height = -ultrasoundHeight;
   return;
 }
 

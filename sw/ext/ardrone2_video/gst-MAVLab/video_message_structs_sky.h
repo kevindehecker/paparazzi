@@ -8,6 +8,9 @@ struct gst2ppz_message_struct_sky {
 	unsigned int counter;		//counter to keep track of data
 	int optic_flow_x;		//optical flow output, shift in x direction
 	int optic_flow_y;		//optical flow output, shift in y direction
+	float theta;
+	float rho;
+	char cornerdetected;
 
 };
 extern struct gst2ppz_message_struct_sky gst2ppz;

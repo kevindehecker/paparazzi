@@ -171,8 +171,11 @@ void ins_propagate() {
   if (baro.status == BS_RUNNING && ins_baro_initialised) {
     vff_propagate(z_accel_meas_float);
     ins_ltp_accel.z = ACCEL_BFP_OF_REAL(vff_zdotdot);
-    navdata_height(&ins_ltp_pos.z, &ins_ltp_speed.z);
+    int tmpz;
+	navdata_height(&ins_ltp_pos.z,&tmpz );
 	
+	ins_ltp_pos.z = (ins_ltp_pos.z << 8) / 100;
+	ins_ltp_speed.z = 0;
 	//ins_ltp_speed.z = SPEED_BFP_OF_REAL(vff_zdot);
     //ins_ltp_pos.z   = POS_BFP_OF_REAL(vff_z);
   }

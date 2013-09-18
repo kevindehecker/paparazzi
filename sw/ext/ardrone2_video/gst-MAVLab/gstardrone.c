@@ -1023,9 +1023,9 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
 			
 			//
 			
-			
-			
-			
+				gst2ppz.theta = thetas_out[0];
+				gst2ppz.rho = rhos_out[0];
+				gst2ppz.cornerdetected = 0;
 			
 			} else {//if found corner
 				//calculate corner position though intersection of the lines
@@ -1056,7 +1056,9 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
 			
 			*/
 			
-			
+				gst2ppz.theta = thetas_out[0];
+				gst2ppz.rho = rhos_out[0];
+				gst2ppz.cornerdetected = 1;
 			
 			
 			}
@@ -1094,6 +1096,8 @@ void *line_threat( void *ptr) {
 		}
 
 	}
+	
+ 
 	
 	free(rhos_out);
 	free(thetas_out);			
