@@ -33,6 +33,8 @@
 #include "subsystems/sensors/baro.h"
 #include "subsystems/gps.h"
 
+#include "boards/ardrone/navdata.h"
+
 #include "generated/airframe.h"
 #include "math/pprz_algebra_int.h"
 #include "math/pprz_algebra_float.h"
@@ -169,8 +171,10 @@ void ins_propagate() {
   if (baro.status == BS_RUNNING && ins_baro_initialised) {
     vff_propagate(z_accel_meas_float);
     ins_ltp_accel.z = ACCEL_BFP_OF_REAL(vff_zdotdot);
-    ins_ltp_speed.z = SPEED_BFP_OF_REAL(vff_zdot);
-    ins_ltp_pos.z   = POS_BFP_OF_REAL(vff_z);
+    navdata_height(&ins_ltp_pos.z, &ins_ltp_speed.z);
+	
+	//ins_ltp_speed.z = SPEED_BFP_OF_REAL(vff_zdot);
+    //ins_ltp_pos.z   = POS_BFP_OF_REAL(vff_z);
   }
   else { // feed accel from the sensors
     // subtract -9.81m/s2 (acceleration measured due to gravity, but vehivle not accelerating in ltp)

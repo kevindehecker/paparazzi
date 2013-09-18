@@ -49,6 +49,7 @@ static void navdata_cropbuffer(int cropsize);
 navdata_port nav_port;
 static int nav_fd = 0;
 static int16_t previousUltrasoundHeight;
+static int16_t previousUltrasoundSpeed;
 measures_t navdata;
 
 
@@ -151,6 +152,7 @@ bool_t navdata_init()
   navdata_baro_available = FALSE;
 
   previousUltrasoundHeight = 0;
+  previousUltrasoundSpeed = 0;
   nav_port.checksum_errors = 0;
   nav_port.bytesRead = 0;
   nav_port.totalBytesRead = 0;
@@ -337,15 +339,20 @@ void navdata_update()
   }
 }
 
-int16_t navdata_height(void) {
+void navdata_height(int *height, int *speed) {
   if (navdata.ultrasound > 10000) {
-    return previousUltrasoundHeight;
+    height = previousUltrasoundHeight;
+	speed = previousUltrasoundSpeed;
+	return;
   }
 
   int16_t ultrasoundHeight = 0;
   ultrasoundHeight = (navdata.ultrasound - 880) / 26.553;
+  *speed = ultrasoundHeight - previousUltrasoundHeight;
   previousUltrasoundHeight = ultrasoundHeight;
-  return ultrasoundHeight;
+  previousUltrasoundSpeed = *speed;
+  *height = ultrasoundHeight;
+  return;
 }
 
 static void navdata_cropbuffer(int cropsize)

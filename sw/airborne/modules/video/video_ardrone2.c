@@ -188,7 +188,8 @@ void video_receive(void) {
 	ppz2gst.counter = gst2ppz.counter;	
 	ppz2gst.roll = att->phi;
 	ppz2gst.pitch = att->theta;
-	ppz2gst.alt = navdata_height();
+	int tmp;
+	navdata_height(&ppz2gst.alt,&tmp);
 	
 	
 	ppz2gst.minU_orange = minU_orange;

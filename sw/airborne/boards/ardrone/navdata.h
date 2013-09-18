@@ -116,7 +116,7 @@ uint8_t baro_calibrated;
 bool_t navdata_init(void);
 void navdata_read(void);
 void navdata_update(void);
-int16_t navdata_height(void);
+void navdata_height(int *height, int *speed);
 
 ssize_t full_write(int fd, const uint8_t *buf, size_t count);
 ssize_t full_read(int fd, uint8_t *buf, size_t count);
