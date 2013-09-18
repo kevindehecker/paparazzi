@@ -261,7 +261,7 @@
         <arg flag="-udp"/>
       </program>
       <program name="Joystick">
-        <arg flag="-ac" constant="ardrone2_raw_181"/>
+        <arg flag="-ac" constant="ardrone2_raw_183"/>
         <arg flag="extreme_3d_pro.xml"/>
         <arg flag="-id" constant="2"/>
       </program>

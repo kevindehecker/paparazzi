@@ -9,7 +9,7 @@ struct gst2ppz_message_struct_sky {
 	int optic_flow_x;		//optical flow output, shift in x direction
 	int optic_flow_y;		//optical flow output, shift in y direction
 	float theta;
-	float rho;
+	int rho;
 	char cornerdetected;
 
 };

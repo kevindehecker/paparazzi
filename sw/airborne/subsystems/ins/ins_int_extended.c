@@ -32,8 +32,9 @@
 #include "subsystems/imu.h"
 #include "subsystems/sensors/baro.h"
 #include "subsystems/gps.h"
-
+#include "subsystems/sonar.h"
 #include "boards/ardrone/navdata.h"
+
 
 #include "generated/airframe.h"
 #include "math/pprz_algebra_int.h"
@@ -264,7 +265,7 @@ void ins_update_gps(void) {
 
 //#define INS_SONAR_VARIANCE_THRESHOLD 0.01
 
-#ifdef INS_SONAR_VARIANCE_THRESHOLD
+//#ifdef INS_SONAR_VARIANCE_THRESHOLD
 
 #include "messages.h"
 #include "mcu_periph/uart.h"
@@ -274,7 +275,7 @@ void ins_update_gps(void) {
 #define VAR_ERR_MAX 10
 float var_err[VAR_ERR_MAX];
 uint8_t var_idx = 0;
-#endif
+//#endif
 
 
 void ins_update_sonar() {
@@ -284,18 +285,19 @@ void ins_update_sonar() {
   ins_sonar_alt = update_median_filter(&sonar_median, sonar_meas);
   float sonar = (ins_sonar_alt - ins_sonar_offset) * INS_SONAR_SENS;
 
-#ifdef INS_SONAR_VARIANCE_THRESHOLD
+//#ifdef INS_SONAR_VARIANCE_THRESHOLD
   /* compute variance of error between sonar and baro alt */
   int32_t err = POS_BFP_OF_REAL(sonar) + ins_baro_alt; // sonar positive up, baro positive down !!!!
   var_err[var_idx] = POS_FLOAT_OF_BFP(err);
   var_idx = (var_idx + 1) % VAR_ERR_MAX;
   float var = variance_float(var_err, VAR_ERR_MAX);
-  DOWNLINK_SEND_INS_SONAR(DefaultChannel,DefaultDevice,&err, &sonar, &var);
+  RunOnceEvery(10, DOWNLINK_SEND_INS_SONAR(DefaultChannel,DefaultDevice,&err, &sonar, &var));
   //DOWNLINK_SEND_INS_SONAR(DefaultChannel,DefaultDevice,&ins_sonar_alt, &sonar, &var);
-#endif
+//#endifun
 
   /* update filter assuming a flat ground */
-  if (sonar < INS_SONAR_MAX_RANGE
+  if (
+  /*sonar < INS_SONAR_MAX_RANGE
 #ifdef INS_SONAR_MIN_RANGE
       && sonar > INS_SONAR_MIN_RANGE
 #endif
@@ -310,14 +312,13 @@ void ins_update_sonar() {
       && stabilization_cmd[COMMAND_YAW] < INS_SONAR_STAB_THRESHOLD
       && stabilization_cmd[COMMAND_YAW] > -INS_SONAR_STAB_THRESHOLD
 #endif
-#ifdef INS_SONAR_BARO_THRESHOLD
-      && ins_baro_alt > -POS_BFP_OF_REAL(INS_SONAR_BARO_THRESHOLD) /* z down */
-#endif
 #ifdef INS_SONAR_VARIANCE_THRESHOLD
       && var < INS_SONAR_VARIANCE_THRESHOLD
 #endif
       && ins_update_on_agl
-      && baro.status == BS_RUNNING) {
+      &&
+*/
+	  baro.status == BS_RUNNING) {
     vff_update_alt_conf(-sonar, VFF_R_SONAR_0 + VFF_R_SONAR_OF_M * fabs(sonar));
     last_offset = vff_offset;
   }
