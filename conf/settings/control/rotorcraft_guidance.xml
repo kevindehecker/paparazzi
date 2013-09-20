@@ -22,6 +22,11 @@
       <dl_setting var="guidance_h_pos_sp.x" MIN="-10" MAX="10" STEP="1"  module="guidance/guidance_h" shortname="sp_x_ned" unit="1/2^8m" alt_unit="m" alt_unit_coef="0.00390625"/>
       <dl_setting var="guidance_h_pos_sp.y" MIN="-10" MAX="10" STEP="1"  module="guidance/guidance_h" shortname="sp_y_ned" unit="1/2^8m" alt_unit="m" alt_unit_coef="0.00390625"/>
       <dl_setting var="ins.hf_realign" min="0" step="1" max="1" module="subsystems/ins" shortname="hf_realign" values="OFF|ON"/>
+      <dl_setting var="guidance_h_heading_pgain" min="0" step="1" max="400" module="guidance/guidance_h" shortname="heading_gain"/>
+	  <dl_setting var="guidance_h_heading_dgain" min="-400" step="1" max="400" module="guidance/guidance_h" shortname="heading_dgain"/>
+	  	  <dl_setting var="lateral_pgain" min="-100" step="1" max="100" module="guidance/guidance_h" shortname="lateral_pgain"/>
+		<dl_setting var="lateral_dgain" min="-100" step="1" max="100" module="guidance/guidance_h" shortname="lateral_dgain"/>
+				<dl_setting var="lateral_igain" min="-100" step="1" max="100" module="guidance/guidance_h" shortname="lateral_igain"/>
     </dl_settings>
 	
 	<dl_settings NAME="Vision Loop">

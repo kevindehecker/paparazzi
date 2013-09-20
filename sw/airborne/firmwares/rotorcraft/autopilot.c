@@ -264,7 +264,7 @@ void autopilot_set_mode(uint8_t new_autopilot_mode) {
         guidance_v_mode_changed(GUIDANCE_V_MODE_NAV);
         break;
       case AP_MODE_VISION:
-        guidance_v_mode_changed(GUIDANCE_V_MODE_HOVER);
+        guidance_v_mode_changed(GUIDANCE_V_MODE_RC_DIRECT);
         break;
       default:
         break;

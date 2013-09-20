@@ -42,7 +42,8 @@
   (GUIDANCE_H_IGAIN < 0)   ||                   \
   (GUIDANCE_H_VISION_PGAIN < 0)   ||                   \
   (GUIDANCE_H_VISION_DGAIN < 0)   ||                   \
-  (GUIDANCE_H_VISION_IGAIN < 0)
+  (GUIDANCE_H_VISION_IGAIN < 0)   ||                   \
+  (GUIDANCE_H_VISION_HEADING < 0)
 #error "ALL control gains have to be positive!!!"
 #endif
 
@@ -82,9 +83,9 @@ struct Int32Vect2 guidance_h_accel_ref;
 struct Int32Vect2 guidance_h_pos_err;
 struct Int32Vect2 guidance_h_speed_err;
 struct Int32Vect2 guidance_h_pos_err_sum;
-struct Int32Vect2 guidance_h_bodypos_err;
-struct Int32Vect2 guidance_h_bodyspeed_err;
-struct Int32Vect2 guidance_h_bodypos_err_sum;
+int32_t guidance_h_bodypos_err;
+int32_t guidance_h_bodyspeed_err;
+int32_t guidance_h_bodypos_err_sum;
 struct Int32Vect2 guidance_h_nav_err;
 
 struct Int32Eulers guidance_h_rc_sp;
@@ -100,6 +101,25 @@ int32_t guidance_h_vision_pgain;
 int32_t guidance_h_vision_dgain;
 int32_t guidance_h_vision_igain;
 int32_t guidance_h_vision_again;
+
+// line following
+int32_t guidance_h_vision_heading;
+int32_t omega;
+int32_t guidance_h_heading_pgain;
+int32_t guidance_h_heading_dgain;
+int32_t lateral_pgain;
+int32_t lateral_dgain;
+int32_t lateral_igain;
+int32_t guidance_h_heading_err;
+int32_t guidance_h_heading_sp;
+int32_t rho_prev;
+int32_t d_rho;
+int32_t viz_rho;
+float viz_theta;
+int32_t guidance_h_line_distance;
+int32_t line_distance_sum;
+int32_t line_distance_diff;
+int32_t guidance_h_line_distance_previous;
 
 int32_t transition_percentage;
 int32_t transition_theta_offset;
@@ -120,7 +140,7 @@ void guidance_h_init(void) {
   INT_VECT2_ZERO(guidance_h_pos_sp);
   INT_VECT2_ZERO(guidance_h_pos_err_sum);
   INT_VECT2_ZERO(guidance_h_bodypos_sp);
-  INT_VECT2_ZERO(guidance_h_bodypos_err_sum);
+  guidance_h_bodypos_err_sum = 0;
   INT_EULERS_ZERO(guidance_h_rc_sp);
   INT_EULERS_ZERO(guidance_h_command_body);
   guidance_h_pgain = GUIDANCE_H_PGAIN;
@@ -131,8 +151,38 @@ void guidance_h_init(void) {
   guidance_h_vision_igain = GUIDANCE_H_VISION_IGAIN;
   guidance_h_vision_dgain = GUIDANCE_H_VISION_DGAIN;
   guidance_h_vision_again = GUIDANCE_H_VISION_AGAIN;
+  guidance_h_vision_heading = GUIDANCE_H_VISION_HEADING;
   transition_percentage = 0;
   transition_theta_offset = 0;
+  omega = 0;
+  guidance_h_heading_pgain = 2;
+  guidance_h_heading_dgain = 6;
+lateral_pgain = 8;
+lateral_dgain = 0;
+lateral_igain = 0;
+  guidance_h_heading_err = 0;
+  guidance_h_heading_sp = 0;
+  rho_prev = 0;
+  d_rho = 0;
+ guidance_h_line_distance = 0;
+guidance_h_line_distance_previous = 0;
+ line_distance_sum = 0;
+ line_distance_diff = 0;
+
+
+	minU_orange = 129;
+	 maxU_orange = 134;
+ minV_orange  = 84;
+	maxV_orange = 126;
+	
+	minU_blue = 107;
+maxU_blue = 151;
+ minV_blue = 142;
+	maxV_blue = 195;
+ min_gradient = 36;	
+
+
+
 }
 
 
@@ -302,9 +352,6 @@ void guidance_h_run(bool_t  in_flight) {
         guidance_h_hover_enter();
 
       //guidance_h_update_reference();
-
-      /* set psi command */
-      guidance_h_command_body.psi = guidance_h_rc_sp.psi;
       /* compute roll and pitch commands and set final attitude setpoint */
       guidance_h_traj_run_vision(in_flight);
 
@@ -373,6 +420,9 @@ static void guidance_h_update_reference(void) {
 
 /** maximum bank angle: default 20 deg */
 #define TRAJ_MAX_BANK BFP_OF_REAL(GUIDANCE_H_MAX_BANK, INT32_ANGLE_FRAC)
+/** maximum indoor roll angle: default 10 deg */
+#define GUIDANCE_H_MAX_ROLL 0.174555556
+#define MAX_ROLL BFP_OF_REAL(GUIDANCE_H_MAX_ROLL, INT32_ANGLE_FRAC)
 
 static void guidance_h_traj_run(bool_t in_flight) {
 
@@ -432,58 +482,41 @@ static void guidance_h_traj_run(bool_t in_flight) {
 
 static inline void guidance_h_traj_run_vision(bool_t in_flight)
 {
-	  /* read current relative horizontal position */
-	  read_pos();
-	  /* compute position error    */
-	  VECT2_DIFF(guidance_h_bodypos_err, guidance_h_bodypos_sp, bodyPos);
-	  /* saturate it               */
-	  VECT2_STRIM(guidance_h_bodypos_err, -MAX_POS_ERR, MAX_POS_ERR);
+	  /* heading control */
+	  int32_t previous_guidance_h_heading_err = guidance_h_heading_err;
+	  guidance_h_heading_err = ANGLE_BFP_OF_REAL(line_angle);
 
-	  /* compute speed error    */
-	  VECT2_DIFF(guidance_h_bodyspeed_err, guidance_h_bodyspeed_sp, bodySpeed);
-	  /* saturate it               */
-	  VECT2_STRIM(guidance_h_bodyspeed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
+int32_t diff = guidance_h_heading_err - previous_guidance_h_heading_err;
 
-	  /* update pos error integral, zero it if not in_flight */
-	  if (in_flight) {
-	    VECT2_ADD(guidance_h_bodypos_err_sum, guidance_h_bodypos_err);
-	    /* saturate it               */
-	    VECT2_STRIM(guidance_h_bodypos_err_sum, -MAX_POS_ERR_SUM, MAX_POS_ERR_SUM);
-	  } else {
-	    INT_VECT2_ZERO(guidance_h_bodypos_err_sum);
-	  }
+	  omega = guidance_h_heading_pgain * guidance_h_heading_err + diff * guidance_h_heading_dgain;
+	  guidance_h_command_body.psi += omega/512;
 
-	  /* run PID */
+INT32_ANGLE_NORMALIZE(guidance_h_command_body.psi);
 
-	  guidance_h_command_earth.y =
-	    -((guidance_h_vision_pgain * guidance_h_bodypos_err.x) << 1 )-
-	    ((guidance_h_vision_dgain * (guidance_h_bodyspeed_err.x >> 2)) ) -
-	    ((guidance_h_vision_igain * (guidance_h_bodypos_err_sum.x >> 12)) );;// +
-//	    ((guidance_h_vision_again * guidance_h_accel_ref.x) >> 8);
-	  guidance_h_command_earth.x =
-	    ((guidance_h_vision_pgain * guidance_h_bodypos_err.y) << 1) +
-	    ((guidance_h_vision_dgain * (guidance_h_bodyspeed_err.y >> 2)) ) +
-	    ((guidance_h_vision_igain * (guidance_h_bodypos_err_sum.y >> 12)) );// +
-//	    ((guidance_h_vision_again * guidance_h_accel_ref.y) >> 8);
+if (fabs(line_angle) < 15.0/180.0*3.14) {
 
-	  VECT2_STRIM(guidance_h_command_earth, -TRAJ_MAX_BANK, TRAJ_MAX_BANK);
+	line_distance = abs(line_distance);
+
+int32_t line_distance_previous = guidance_h_line_distance;
+guidance_h_line_distance = (line_distance - 90);
+line_distance_diff = guidance_h_line_distance - guidance_h_line_distance_previous;
+
+if(in_flight){
+line_distance_sum += guidance_h_line_distance;}
+else{
+line_distance_sum = 0;}
+
+guidance_h_command_body.phi = guidance_h_line_distance*lateral_pgain + line_distance_diff*lateral_dgain + line_distance_sum*lateral_igain/1000; 
 
 
-	  //Rotate to body frame
-	  int32_t s_psi, c_psi;
-	  int32_t psi = stateGetNedToBodyEulers_i()->psi;
-	  PPRZ_ITRIG_SIN(s_psi, psi);
-	  PPRZ_ITRIG_COS(c_psi, psi);
 
-	  // Restore angle ref resolution after rotation
-	  guidance_h_command_body.phi =
-	    ( - s_psi * guidance_h_command_earth.x + c_psi * guidance_h_command_earth.y) >> INT32_TRIG_FRAC;
-	  guidance_h_command_body.theta =
-	    - ( c_psi * guidance_h_command_earth.x + s_psi * guidance_h_command_earth.y) >> INT32_TRIG_FRAC;
 
-	  /* Add RC roll and pitch setpoints for emergency corrections */
-	  guidance_h_command_body.phi += guidance_h_rc_sp.phi;
-	  guidance_h_command_body.theta += guidance_h_rc_sp.theta;
+}
+else {
+guidance_h_command_body.phi  = 0;
+}
+
+guidance_h_command_body.theta = 0;
 
 	  /* Set attitude setpoint from pseudo-euler commands */
 	  stabilization_attitude_set_cmd_i(&guidance_h_command_body);

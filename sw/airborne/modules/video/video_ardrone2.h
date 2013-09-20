@@ -57,6 +57,11 @@ extern struct VideoARDrone video_impl;
 	int closeSocket(void);
 	void read_pos(void);
 
+	
+	
+	
+
+
 	unsigned char minU_orange;
 	unsigned char maxU_orange;
 	unsigned char minV_orange;
@@ -69,11 +74,9 @@ extern struct VideoARDrone video_impl;
 
 	unsigned char min_gradient;	
 	
+	float line_angle;
+	int32_t line_distance;
 	
-	int GUIDANCE_H_VISION_PGAIN;
-	int GUIDANCE_H_VISION_IGAIN;
-	int GUIDANCE_H_VISION_DGAIN;
-	int GUIDANCE_H_VISION_AGAIN;
 	struct NedCoor_i bodyPos;
 	struct NedCoor_i bodySpeed;
 

@@ -175,7 +175,14 @@ void video_receive(void) {
 		bodyPos.x = gst2ppz.optic_flow_x;
 		bodyPos.y = gst2ppz.optic_flow_y;
 		
-		printf("Optic flow: %d, %d\n", roll,pitch);
+		
+		line_angle = gst2ppz.theta ;
+		if (line_angle>1.57)
+			line_angle = -(3.14 - line_angle);
+		line_distance =  gst2ppz.rho ;
+		
+		printf("Line_angle: %f, line_distance %f\n", line_angle,line_distance);
+		//printf("Optic flow: %d, %d\n", roll,pitch);
 		
     	DOWNLINK_SEND_VIDEO_TELEMETRY( DefaultChannel, DefaultDevice, &gst2ppz.optic_flow_x, &gst2ppz.optic_flow_y,&gst2ppz.counter, &gst2ppz.counter,&gst2ppz.counter, &gst2ppz.counter,&gst2ppz.counter, &gst2ppz.counter);  
 		

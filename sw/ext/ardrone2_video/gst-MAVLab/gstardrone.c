@@ -984,7 +984,7 @@ void icvHoughLinesStandard( unsigned char * image, unsigned int width, unsigned 
         thetas_out[i] = n * theta;    //angle
 
 		
-		g_print("%d;%.2f;%d \n",rhos_out[i] ,thetas_out[i],accum[idx]);
+		g_print("%d;%.2f;%d -- ",rhos_out[i] ,thetas_out[i],accum[idx]);
     }
 	g_print(" nLines: %d\n\n",total);
 	//g_print("1/%d line: %d;%.2f;%d  \n ",total,rhos_out[0] ,thetas_out[0],accum[sort_buf[0]]);

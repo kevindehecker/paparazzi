@@ -69,9 +69,9 @@ extern struct Int32Vect2 guidance_h_accel_ref;      ///< with #INT32_ACCEL_FRAC
 extern struct Int32Vect2 guidance_h_pos_err;
 extern struct Int32Vect2 guidance_h_speed_err;
 extern struct Int32Vect2 guidance_h_pos_err_sum;
-extern struct Int32Vect2 guidance_h_bodypos_err;
-extern struct Int32Vect2 guidance_h_bodyspeed_err;
-extern struct Int32Vect2 guidance_h_bodypos_err_sum;
+extern int32_t guidance_h_bodypos_err;
+extern int32_t guidance_h_bodyspeed_err;
+extern int32_t guidance_h_bodypos_err_sum;
 extern struct Int32Vect2 guidance_h_nav_err;
 
 extern struct Int32Eulers guidance_h_rc_sp;         ///< with #INT32_ANGLE_FRAC
@@ -86,7 +86,24 @@ extern int32_t guidance_h_vision_pgain;
 extern int32_t guidance_h_vision_dgain;
 extern int32_t guidance_h_vision_igain;
 extern int32_t guidance_h_vision_again;
+// line following
+extern int32_t guidance_h_vision_heading;
+extern int32_t omega;
+extern int32_t guidance_h_heading_pgain;
+extern int32_t guidance_h_heading_dgain;
+extern int32_t lateral_dgain;
+extern int32_t lateral_pgain;
+extern int32_t lateral_igain;
+extern int32_t guidance_h_heading_err;
+extern int32_t guidance_h_heading_sp;
 
+extern int32_t guidance_h_line_distance;
+extern int32_t guidance_h_line_distance_previous;
+extern int32_t line_distance_sum;
+extern int32_t line_distance_diff;
+
+extern int32_t viz_rho;
+extern float viz_theta;
 extern int32_t transition_percentage;
 extern int32_t transition_theta_offset;
 

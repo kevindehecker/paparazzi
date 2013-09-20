@@ -46,6 +46,13 @@
     <axis name="THRUST" failsafe_value="0"/>
   </commands>
 
+  <section name="GUIDANCE_H_VISION" prefix="GUIDANCE_H_VISION_">
+    <define name="PGAIN" value="0"/>
+    <define name="DGAIN" value="0"/>
+    <define name="IGAIN" value="0"/>
+    <define name="HEADING" value="10"/>
+  </section>
+
   <servos driver="Default">
     <servo name="TOP_LEFT" no="0" min="0" neutral="1" max="500"/>
     <servo name="TOP_RIGHT" no="1" min="0" neutral="1" max="500"/>
@@ -75,8 +82,8 @@
   </command_laws>
 
   <section name="IMU" prefix="IMU_">
-    <define name="ACCEL_X_NEUTRAL" value="2080"/>
-    <define name="ACCEL_Y_NEUTRAL" value="2052"/>
+    <define name="ACCEL_X_NEUTRAL" value="2064"/>
+    <define name="ACCEL_Y_NEUTRAL" value="2088"/>
     <define name="ACCEL_Z_NEUTRAL" value="2048"/>
 
     <define name="MAG_X_NEUTRAL" value="0"/>

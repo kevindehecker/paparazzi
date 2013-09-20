@@ -256,7 +256,9 @@
     </session>
     <session name="Kevin">
       <program name="Server"/>
-      <program name="GCS"/>
+      <program name="GCS">
+        <arg flag="-speech"/>
+      </program>
       <program name="Data Link">
         <arg flag="-udp"/>
       </program>
