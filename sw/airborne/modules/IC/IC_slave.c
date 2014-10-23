@@ -54,6 +54,7 @@ int       list_s;                /*  listening socket          */
 struct    sockaddr_in servaddr;  /*  socket address structure  */
 struct 	ICDataPackage video_impl;
 
+int32_t vision_threshold;
 // int main() {
 
 // 	initSocket();
@@ -134,6 +135,5 @@ extern void IC_periodic(void) {
 	
 	char * c = (char *) &video_impl; 
 	Read_socket(c,sizeof(video_impl));
-	printf("IC_periodic %d\n",video_impl.maxY);
-	
+	printf("IC gt: %d, nn: %d\n",video_impl.avgdisp_gt,video_impl.avgdisp_nn);	
 }

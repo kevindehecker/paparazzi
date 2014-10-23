@@ -28,12 +28,16 @@
 #define IC_SLAVE_H_
 
 #include <unistd.h>             /*  for ssize_t data type  */
-
+#include "std.h"
+ 
 struct ICDataPackage {
-  int maxY;             // test output variable
+  int avgdisp_gt;
+  int avgdisp_nn;
   char endl;             // endl fix :)
 };
 extern struct ICDataPackage video_impl;
+
+extern int32_t vision_threshold;
 
 #define PORT	6969
 

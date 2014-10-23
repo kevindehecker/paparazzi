@@ -3,6 +3,12 @@
 <settings>
   <dl_settings>
 
+
+<dl_settings NAME="Vision">
+      <dl_setting var="vision_threshold" min="0" step="1" max="255"   module="IC/IC_slave" shortname="t" param="Vision_Threshold"/>
+ </dl_settings>
+
+
     <dl_settings NAME="Vert Loop">
       <dl_setting var="guidance_v_kp" min="0" step="1" max="600"   module="guidance/guidance_v" shortname="kp" param="GUIDANCE_V_HOVER_KP"/>
       <dl_setting var="guidance_v_kd" min="0" step="1" max="600"   module="guidance/guidance_v" shortname="kd" param="GUIDANCE_V_HOVER_KD"/>
