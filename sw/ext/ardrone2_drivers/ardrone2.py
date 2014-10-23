@@ -422,7 +422,7 @@ elif args.command == 'upload_file_and_run':
     ftp.storbinary("STOR " + args.folder + "/" + f[1], file(args.file, "rb"))
     sleep(0.5)
     execute_command("chmod 777 /data/video/" + args.folder + "/" + f[1])
-    execute_command("/data/video/" + args.folder + "/" + f[1] + " > /dev/null 2>&1 &")
+    # execute_command("/data/video/" + args.folder + "/" + f[1] + " > /dev/null 2>&1 &")
     print("#pragma message: Upload and Start of ap.elf to ARDrone2 Succes!")
 
 elif args.command == 'upload_file':
