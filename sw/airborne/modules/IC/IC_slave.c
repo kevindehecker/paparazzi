@@ -135,5 +135,8 @@ extern void IC_periodic(void) {
 	
 	char * c = (char *) &video_impl; 
 	Read_socket(c,sizeof(video_impl));
-	printf("IC gt: %d, nn: %d\n",video_impl.avgdisp_gt,video_impl.avgdisp_nn);	
+	printf("IC gt: %d, nn: %d, thesh: %d\n",video_impl.avgdisp_gt,video_impl.avgdisp_nn, vision_threshold);	
 }
+
+
+//AP_MODE_ATTITUDE_Z_HOLD (A_ZH) , heading aanpassen

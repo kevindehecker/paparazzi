@@ -5,7 +5,7 @@
 
 
 <dl_settings NAME="Vision">
-      <dl_setting var="vision_threshold" min="0" step="1" max="255"   module="IC/IC_slave" shortname="t" param="Vision_Threshold"/>
+      <dl_setting var="vision_threshold" min="0" step="1" max="255"   module="IC/IC_slave" shortname="t" param="VISION_THRESHOLD"/>
  </dl_settings>
 
 
