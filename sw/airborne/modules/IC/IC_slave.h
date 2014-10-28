@@ -38,12 +38,17 @@ struct ICDataPackage {
 extern struct ICDataPackage video_impl;
 
 extern int32_t vision_threshold;
+extern float vision_turnspeed;
+extern bool vision_turnbutton;
+extern float vision_pitchangle;
 
 #define PORT	6969
 
 extern void IC_start(void);
 extern void IC_stop(void);
 extern void IC_periodic(void);
+
+extern void IC_slave_TurnButton(float whatever);
 
 #endif /* IC_SLAVE_H_ */
  

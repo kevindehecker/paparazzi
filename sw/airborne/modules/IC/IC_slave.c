@@ -43,6 +43,10 @@
 #include <time.h> 
 
 
+//#include "state.h" //needed????
+#include "firmwares/rotorcraft/guidance/guidance_h.h" // to set heading
+
+
 
  /*  private function declarations  */
 int initSocket(void) ;
@@ -55,17 +59,9 @@ struct    sockaddr_in servaddr;  /*  socket address structure  */
 struct 	ICDataPackage video_impl;
 
 int32_t vision_threshold;
-// int main() {
-
-// 	initSocket();
-// 	int i = 0;
-// 	while (i++<100) {
-// 		IC_periodic();
-// 	}
-// 	closeSocket();
-
-// }
-
+bool vision_turnbutton;
+float vision_turnspeed;
+float vision_pitchangle;
 
 int closeSocket(void) {
 	return close(list_s);
@@ -118,24 +114,43 @@ bool Read_socket(char * c, size_t maxlen) {
     return true;
 }
 
+
+extern void IC_slave_TurnButton(float whatever) {
+    vision_turnbutton = true;
+}
+
 extern void IC_start(void){
 		//init the socket	
-	initSocket();	
+	
+    vision_turnspeed = 0.1;
+    vision_threshold = 6;
+    vision_turnbutton = false;
+    vision_pitchangle=-2;
+
+    //initSocket();	
 	printf("IC module started\n");
 }
 
 
 extern void IC_stop(void) {	
-	closeSocket();
+	//closeSocket();
 	printf("IC module stopped\n");	
 }
 
 extern void IC_periodic(void) {
 	//read the data from the video tcp socket
 	
-	char * c = (char *) &video_impl; 
-	Read_socket(c,sizeof(video_impl));
-	printf("IC gt: %d, nn: %d, thesh: %d\n",video_impl.avgdisp_gt,video_impl.avgdisp_nn, vision_threshold);	
+	//char * c = (char *) &video_impl; 
+	//Read_socket(c,sizeof(video_impl));
+	//printf("IC gt: %d, nn: %d, thesh: %d\n",video_impl.avgdisp_gt,video_impl.avgdisp_nn, vision_threshold);	
+
+    setHeading_P(vision_turnspeed);
+    setAutoHeadingPitchAngle(vision_pitchangle);
+
+    if (vision_turnbutton) {
+        vision_turnbutton = false; // make it a one shot turn
+        setHeading(45.0);
+    }
 }
 
 

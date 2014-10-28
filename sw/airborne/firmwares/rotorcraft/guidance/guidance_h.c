@@ -98,6 +98,12 @@ int32_t guidance_h_vgain;
 int32_t transition_percentage;
 int32_t transition_theta_offset;
 
+struct Int32Eulers rpy_autoheading;
+int32_t autoHeading_P;
+int32_t autoHeading_sp;
+float   autoHeadingPitchAngle;
+
+
 
 static void guidance_h_update_reference(void);
 static void guidance_h_traj_run(bool_t in_flight);
@@ -169,6 +175,10 @@ void guidance_h_init(void) {
   guidance_h_mode = GUIDANCE_H_MODE_KILL;
   guidance_h_use_ref = GUIDANCE_H_USE_REF;
   guidance_h_approx_force_by_thrust = GUIDANCE_H_APPROX_FORCE_BY_THRUST;
+
+  INT_EULERS_ZERO(rpy_autoheading);
+  autoHeading_P = ANGLE_BFP_OF_REAL(RadOfDeg(0.1));
+  autoHeading_sp = 0;
 
   INT_VECT2_ZERO(guidance_h_pos_sp);
   INT_VECT2_ZERO(guidance_h_trim_att_integrator);
@@ -309,6 +319,17 @@ void guidance_h_read_rc(bool_t  in_flight) {
 
 }
 
+void setHeading(float heading_increment) {     
+  autoHeading_sp += ANGLE_BFP_OF_REAL(RadOfDeg(heading_increment));
+  INT32_ANGLE_NORMALIZE(autoHeading_sp);
+}
+void setHeading_P(float degreesSpeed) {     
+  autoHeading_P = ANGLE_BFP_OF_REAL(RadOfDeg(degreesSpeed));
+}
+
+void setAutoHeadingPitchAngle(float pitchAngle) {     
+  rpy_autoheading.theta = ANGLE_BFP_OF_REAL(RadOfDeg(pitchAngle));
+}
 
 void guidance_h_run(bool_t  in_flight) {
   switch ( guidance_h_mode ) {
@@ -345,7 +366,35 @@ void guidance_h_run(bool_t  in_flight) {
                                              guidance_h_heading_sp);
       stabilization_attitude_run(in_flight);
       break;
+    case GUIDANCE_H_MODE_AUTOHEADING:
+      if (!in_flight)
+        guidance_h_hover_enter();
 
+      /* set psi command */
+      guidance_h_heading_sp = guidance_h_rc_sp.psi;
+      
+      //turn to heading in a controlled fashion
+      int32_t tmp =rpy_autoheading.psi - autoHeading_sp;
+      INT32_ANGLE_NORMALIZE(tmp);
+      if  ( tmp < 0) {
+        rpy_autoheading.psi -=autoHeading_P;
+      }
+      else {
+        rpy_autoheading.psi +=autoHeading_P;
+      }
+      INT32_ANGLE_NORMALIZE(rpy_autoheading.psi);
+            
+      rpy_autoheading.phi = 0;
+      
+
+      stabilization_attitude_set_rpy_setpoint_i(&rpy_autoheading);
+      /* set final attitude setpoint */
+     // stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
+      //                                       guidance_h_heading_sp);
+      stabilization_attitude_run(in_flight);
+
+
+      break;
     case GUIDANCE_H_MODE_NAV:
       if (!in_flight)
         guidance_h_nav_enter();
@@ -387,7 +436,7 @@ static void guidance_h_update_reference(void) {
   /* compute reference even if usage temporarily disabled via guidance_h_use_ref */
 #if GUIDANCE_H_USE_REF
 #if GUIDANCE_H_USE_SPEED_REF
-  if(guidance_h_mode == GUIDANCE_H_MODE_HOVER)
+  if(guidance_h_mode == GUIDANCE_H_MODE_HOVER ) 
     gh_update_ref_from_speed_sp(guidance_h_speed_sp);
   else
 #endif

@@ -5,7 +5,10 @@
 
 
 <dl_settings NAME="Vision">
-      <dl_setting var="vision_threshold" min="0" step="1" max="255"   module="IC/IC_slave" shortname="t" param="VISION_THRESHOLD"/>
+      <dl_setting var="vision_threshold"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Tresh"/>
+      <dl_setting var="vision_turnspeed"  min="0.02" step="0.01" max="5"   module="IC/IC_slave" shortname="Turn speed"/>
+      <dl_setting var="vision_pitchangle"  min="-15" step="0.5" max="5"   module="IC/IC_slave" shortname="Pitch angle"/>
+      <dl_setting var="vision_turnbutton" min="0" step="1"    max="1"   module="IC/IC_slave" shortname="Turn" values="FALSE|TRUE" handler="TurnButton"/>
  </dl_settings>
 
 
