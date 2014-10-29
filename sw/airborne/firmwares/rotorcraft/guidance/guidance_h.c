@@ -243,6 +243,12 @@ void guidance_h_mode_changed(uint8_t new_mode) {
         stabilization_attitude_enter();
       break;
 
+    case GUIDANCE_H_MODE_AUTOHEADING:
+    rpy_autoheading.psi = stateGetNedToBodyEulers_i()->psi;
+    autoHeading_sp = stateGetNedToBodyEulers_i()->psi;
+
+
+    break;
     case GUIDANCE_H_MODE_HOVER:
       guidance_h_hover_enter();
 #if NO_ATTITUDE_RESET_ON_MODE_CHANGE
