@@ -200,12 +200,15 @@
 
  <modules main_freq="512">
    <load name="gps_ubx_ucenter.xml"/>
-   <load name="IC.xml"/>
+   <load name="AutoHeading.xml"/>
    <load name="send_imu_mag_current.xml"/>
  </modules>
 
   <firmware name="rotorcraft">
     <target name="ap" board="lisa_s_1.0">
+      <!-- <configure name="RADIO_CONTROL_LED" value="none" /> -->
+      <!-- <configure name="AHRS_ALIGNER_LED" value="none" /> -->
+      <configure name="SYS_TIME_LED" value="none" />
       <subsystem name="radio_control" type="superbitrf_rc">
 	<!-- To store the binding parameters for the superbit radio in your
              airframe file uncomment the following three lines and set the

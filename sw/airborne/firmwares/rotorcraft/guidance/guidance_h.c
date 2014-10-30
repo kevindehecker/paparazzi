@@ -325,7 +325,7 @@ void guidance_h_read_rc(bool_t  in_flight) {
 
 }
 
-void setHeading(float heading_increment) {     
+void incrementHeading(float heading_increment) {     
   autoHeading_sp += ANGLE_BFP_OF_REAL(RadOfDeg(heading_increment));
   INT32_ANGLE_NORMALIZE(autoHeading_sp);
 }

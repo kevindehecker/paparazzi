@@ -1,0 +1,28 @@
+ <!DOCTYPE module SYSTEM "module.dtd">
+
+ <module name="AutoHeading">
+  <doc>
+   <description>
+     AutoHeading vision module, Library demo project.     
+   </description>
+   </doc>
+  <settings>
+    <dl_settings name="control">
+      <dl_settings NAME="Beep">
+          <dl_setting var="vision_threshold"  min="0" step="1"    max="255" module="AutoHeading/autoheading" shortname="Tresh"/>
+          <dl_setting var="vision_turnspeed"  min="0.02" step="0.01" max="5"   module="AutoHeading/autoheading" shortname="Turn speed"/>
+          <dl_setting var="vision_pitchangle"  min="-15" step="0.5" max="5"   module="AutoHeading/autoheading" shortname="Pitch angle"/>
+          <dl_setting var="vision_turnStepSize"  min="-15" step="0.5" max="5"   module="AutoHeading/autoheading" shortname="Turn angle step size"/>
+          <dl_setting var="vision_turnbutton" min="0" step="1"    max="1"   module="AutoHeading/autoheading" shortname="Turn" values="FALSE|TRUE" handler="turnButton"/>
+      </dl_settings>
+    </dl_settings>
+  </settings>
+<header>
+    <file name="autoheading.h"/>
+  </header>
+  <periodic fun="autoheading_periodic()" start="autoheading_start()" stop="autoheading_stop()" autorun="TRUE" freq="10"/>
+  <makefile>
+    <raw> $(TARGET).CFLAGS +=  -DUSE_UART1 -DUART1_BAUD=B9600 </raw>
+    <file name="autoheading.c"/>
+  </makefile>
+ </module>
