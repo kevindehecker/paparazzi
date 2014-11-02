@@ -128,4 +128,3 @@ extern void autoheading_periodic(void) {
 }
 
 
-//AP_MODE_ATTITUDE_Z_HOLD (A_ZH) , heading aanpassen

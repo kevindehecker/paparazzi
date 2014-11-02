@@ -95,6 +95,8 @@
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1" value="AP_MODE_AUTOHEADING"/>
     <define name="MODE_AUTO2" value="AP_MODE_AUTOHEADING"/>
+
+    <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>    
  </section>
 
  <section name="BAT">
@@ -147,13 +149,13 @@
     <define name="REF_MAX_RDOT" value="RadOfDeg(900.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="150"/>
-    <define name="PHI_DGAIN" value="150"/>
-    <define name="PHI_IGAIN" value="50"/>
+    <define name="PHI_PGAIN" value="400"/>
+    <define name="PHI_DGAIN" value="200"/>
+    <define name="PHI_IGAIN" value="100"/>
 
-    <define name="THETA_PGAIN" value="150"/>
-    <define name="THETA_DGAIN" value="150"/>
-    <define name="THETA_IGAIN" value="50"/>
+    <define name="THETA_PGAIN" value="400"/>
+    <define name="THETA_DGAIN" value="200"/>
+    <define name="THETA_IGAIN" value="100"/>
 
     <define name="PSI_PGAIN" value="500"/>
     <define name="PSI_DGAIN" value="300"/>
