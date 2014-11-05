@@ -244,11 +244,11 @@ void guidance_h_mode_changed(uint8_t new_mode) {
       break;
 
     case GUIDANCE_H_MODE_AUTOHEADING:
-    rpy_autoheading.psi = stateGetNedToBodyEulers_i()->psi;
-    autoHeading_sp = stateGetNedToBodyEulers_i()->psi;
+      // rpy_autoheading.psi = stateGetNedToBodyEulers_i()->psi;
+      // autoHeading_sp = stateGetNedToBodyEulers_i()->psi;
 
 
-    break;
+     break;
     case GUIDANCE_H_MODE_HOVER:
       guidance_h_hover_enter();
 #if NO_ATTITUDE_RESET_ON_MODE_CHANGE
@@ -373,11 +373,12 @@ void guidance_h_run(bool_t  in_flight) {
       stabilization_attitude_run(in_flight);
       break;
     case GUIDANCE_H_MODE_AUTOHEADING:
-      if (!in_flight)
-        guidance_h_hover_enter();
+      if (!in_flight) {
+        // guidance_h_hover_enter();
+      }
 
-      /* set psi command */
-      guidance_h_heading_sp = guidance_h_rc_sp.psi;
+      // /* set psi command */
+      // guidance_h_heading_sp = guidance_h_rc_sp.psi;
       
       //turn to heading in a controlled fashion
       int32_t tmp =rpy_autoheading.psi - autoHeading_sp;

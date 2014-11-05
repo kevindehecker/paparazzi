@@ -47,12 +47,18 @@ float vision_pitchangle;
 
 float vision_turnStepSize;
 uint32_t hysteresesDelay;
+uint32_t vision_hysteresesDelayFactor;
+uint32_t vision_filterWidth;
+
+uint32_t noroofcnt;
 
 uint8_t maxU;
 uint8_t minU;
 uint8_t maxV;
 uint8_t minV;
 uint8_t str[2] = {};
+
+int debugcnt;
 
 extern void autoheading_turnButton(float whatever) {
     whatever = whatever;
@@ -78,6 +84,9 @@ extern void autoheading_start(void){
     vision_pitchangle=-4;
     hysteresesDelay=0;
     vision_turnStepSize=120;
+    vision_filterWidth = 3;
+    vision_hysteresesDelayFactor = 1;
+    noroofcnt = 0;
 
     maxU = 66;
     minU = 66;
@@ -96,28 +105,38 @@ extern void autoheading_stop(void) {
 static void stereo_parse(uint8_t c);
 static void stereo_parse(uint8_t c) {
     
-    /* debug message */
-    if (c > 127) {
-        str[1] = c; // roof/color
+    debugcnt =(debugcnt+1) % 10 ;
+    if (debugcnt == 0) {
+        /* debug message */
+        if (c > 127) {
+            str[1] = c-128; // roof/color
+        }
+        else {
+            str[0] = c; // objects
+        }
+        DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 2, str);
     }
-    else {
-        str[0] = c; // objects
-    }
-    DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 2, str);
-
     if (hysteresesDelay==0) {
         
         if (c > 127) { // roof detector byte
-            if (c < (vision_colorthreshold -127)) {  
-                hysteresesDelay = (vision_turnStepSize / vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ;
-                incrementHeading(vision_turnStepSize);           
-                LED_ON(1);                                
-            } 
+            if (c-128 < vision_colorthreshold) {  
+                noroofcnt++;
+                if (noroofcnt >= vision_filterWidth) {
+                    hysteresesDelay = vision_hysteresesDelayFactor * ((vision_turnStepSize / vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ);
+                    incrementHeading(vision_turnStepSize);           
+                    LED_ON(1);   
+                }                             
+            } else {
+                //reset movg avg
+                noroofcnt = 0;
+
+
+            }
         } else { // stereo detector byte
-            if (c < vision_objectthreshold) {  
-                hysteresesDelay = (vision_turnStepSize / vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ;
-                incrementHeading(vision_turnStepSize);                    
-                LED_ON(1); 
+            if (c >= vision_objectthreshold) {  
+                //hysteresesDelay = (vision_turnStepSize / vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ;
+               // incrementHeading(vision_turnStepSize);                    
+                //LED_ON(1); 
             } 
         }        
     } else {
