@@ -30,12 +30,17 @@
 #include <unistd.h>             /*  for ssize_t data type  */
 #include "std.h"
  
-extern uint8_t vision_threshold;
+extern uint8_t vision_objectthreshold;
+extern uint8_t vision_colorthreshold;
 extern float vision_turnspeed;
 extern bool vision_turnbutton;
 extern float vision_pitchangle;
 extern float vision_turnStepSize;
 
+extern uint8_t maxU;
+extern uint8_t minU;
+extern uint8_t maxV;
+extern uint8_t minV;
 
 
 extern void autoheading_start(void);
@@ -43,6 +48,7 @@ extern void autoheading_stop(void);
 extern void autoheading_periodic(void);
 
 extern void autoheading_turnButton(float whatever);
+extern void autoheading_setMaxU(uint8_t value);
 
 #endif /* AUTOHEADING_H_ */
  
