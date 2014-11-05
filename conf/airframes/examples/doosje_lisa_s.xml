@@ -175,10 +175,10 @@
   </section>
 
  <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-   <define name="HOVER_KP" value="276"/>
+   <define name="HOVER_KP" value="350"/>
    <define name="HOVER_KD" value="455"/>
-   <define name="HOVER_KI" value="100"/>
-   <define name="GUIDANCE_V_NOMINAL_HOVER_THROTTLE" value="0.5"/>
+   <define name="HOVER_KI" value="200"/>
+   <define name="GUIDANCE_V_NOMINAL_HOVER_THROTTLE" value="0.8"/>
   </section>
 
   <section name="AHRS" prefix="AHRS_">
