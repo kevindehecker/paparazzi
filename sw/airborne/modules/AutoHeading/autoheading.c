@@ -78,14 +78,14 @@ extern void autoheading_setMaxU(uint8_t value) {
 
 extern void autoheading_start(void){
     vision_turnspeed = 1;
-    vision_colorthreshold = 7;
+    vision_colorthreshold = 5;
     vision_objectthreshold = 5;
     vision_turnbutton = false;
-    vision_pitchangle=-4;
+    vision_pitchangle=-2.5;
     hysteresesDelay=0;
-    vision_turnStepSize=120;
-    vision_filterWidth = 3;
-    vision_hysteresesDelayFactor = 1;
+    vision_turnStepSize=95;
+    vision_filterWidth = 5;
+    vision_hysteresesDelayFactor = 2;
     noroofcnt = 0;
 
     maxU = 66;
