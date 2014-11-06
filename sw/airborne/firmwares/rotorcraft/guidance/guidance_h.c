@@ -384,10 +384,10 @@ void guidance_h_run(bool_t  in_flight) {
       int32_t tmp =rpy_autoheading.psi - autoHeading_sp;
       INT32_ANGLE_NORMALIZE(tmp);
       if  ( tmp < 0) {
-        rpy_autoheading.psi -=autoHeading_P;
+        rpy_autoheading.psi +=autoHeading_P;
       }
       else {
-        rpy_autoheading.psi +=autoHeading_P;
+        rpy_autoheading.psi -=autoHeading_P;
       }
       INT32_ANGLE_NORMALIZE(rpy_autoheading.psi);
             
