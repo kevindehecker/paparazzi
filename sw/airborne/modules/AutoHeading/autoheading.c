@@ -173,7 +173,7 @@ static void stereo_parse(uint8_t c) {
 
 extern void autoheading_periodic(void) {
     
-    stereo_parse(StereoLink(Getch()));               
+    //stereo_parse(StereoLink(Getch()));               
     if (UART1ChAvailable())
     {
       
@@ -184,7 +184,8 @@ extern void autoheading_periodic(void) {
     while (StereoLink(ChAvailable()))
         StereoLink(Getch());
     
-   
+    }
+
     if (hysteresesDelay>0) {
         hysteresesDelay--;        
     }
