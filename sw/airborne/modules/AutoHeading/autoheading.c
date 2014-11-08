@@ -46,11 +46,12 @@ float vision_turnspeed;
 float vision_pitchangle;
 
 float vision_turnStepSize;
-uint32_t hysteresesDelay;
+volatile uint32_t hysteresesDelay;
 uint32_t vision_hysteresesDelayFactor;
 uint32_t vision_filterWidth;
 
 uint32_t noroofcnt;
+volatile uint32_t objectcnt;
 
 uint8_t maxU;
 uint8_t minU;
@@ -60,9 +61,9 @@ uint8_t str[2] = {};
 
 int debugcnt;
 
-extern void autoheading_turnButton(float whatever) {
-    whatever = whatever;
-    vision_turnbutton = true;
+extern void autoheading_turnButton(uint8_t whatever) {
+    //whatever = whatever;
+    vision_turnbutton = whatever;
 }
 
 extern void autoheading_setMaxU(uint8_t value) {
@@ -79,20 +80,23 @@ extern void autoheading_setMaxU(uint8_t value) {
 extern void autoheading_start(void){
     vision_turnspeed = 1;
     vision_colorthreshold = 5;
-    vision_objectthreshold = 5;
+    vision_objectthreshold = 40;
     vision_turnbutton = false;
-    vision_pitchangle=-2.5;
-    hysteresesDelay=0;
+    vision_pitchangle=-3.9;
+    
     vision_turnStepSize=95;
-    vision_filterWidth = 5;
+    vision_filterWidth = 3;
     vision_hysteresesDelayFactor = 2;
-    noroofcnt = 0;
+    
 
     maxU = 66;
     minU = 66;
     maxV = 66;
     minV = 66;
 
+    hysteresesDelay=0;
+    noroofcnt = 0;
+    objectcnt = 0;
 
     UART1Init();
 }
@@ -105,7 +109,20 @@ extern void autoheading_stop(void) {
 static void stereo_parse(uint8_t c);
 static void stereo_parse(uint8_t c) {
     
-    debugcnt =(debugcnt+1) % 10 ;
+
+    uint32_t wtf = objectcnt;
+
+         DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &c,&hysteresesDelay, &vision_filterWidth, &wtf);
+
+
+    // if (vision_turnbutton) {
+    //     c = 100;
+
+    //     // vision_turnbutton = false; // make it a one shot turn
+    //     // incrementHeading(vision_turnStepSize);
+    // } else {c = 0;}
+
+    debugcnt =(debugcnt+1) % 1 ;
     if (debugcnt == 0) {
         /* debug message */
         if (c > 127) {
@@ -113,34 +130,43 @@ static void stereo_parse(uint8_t c) {
         }
         else {
             str[0] = c; // objects
+   
         }
-        DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 2, str);
+        // DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 2, str);
     }
     if (hysteresesDelay==0) {
         
         if (c > 127) { // roof detector byte
-            if (c-128 < vision_colorthreshold) {  
-                noroofcnt++;
-                if (noroofcnt >= vision_filterWidth) {
-                    hysteresesDelay = vision_hysteresesDelayFactor * ((vision_turnStepSize / vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ);
-                    incrementHeading(vision_turnStepSize);           
-                    LED_ON(1);   
-                }                             
-            } else {
-                //reset movg avg
-                noroofcnt = 0;
-
-
-            }
+        //     if (c-128 < vision_colorthreshold) {  
+        //         noroofcnt++;
+        //         if (noroofcnt >= vision_filterWidth) {
+        //             noroofcnt = 0;
+        //             hysteresesDelay = vision_hysteresesDelayFactor * ((vision_turnStepSize / vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ);
+        //             incrementHeading(vision_turnStepSize);           
+        //             LED_ON(1);   
+        //         }                             
+        //     } else {
+        //         //reset movg avg
+        //         noroofcnt = 0;            
+        //     }
         } else { // stereo detector byte
             if (c >= vision_objectthreshold) {  
-                //hysteresesDelay = (vision_turnStepSize / vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ;
-               // incrementHeading(vision_turnStepSize);                    
-                //LED_ON(1); 
-            } 
+                objectcnt++;
+                if (objectcnt > vision_filterWidth) {
+                    objectcnt=0;                    
+                    hysteresesDelay = vision_hysteresesDelayFactor * ((vision_turnStepSize / vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ);
+                   incrementHeading(vision_turnStepSize);                    
+                    LED_ON(1); 
+                } 
+
+            } else {
+                objectcnt=0;
+            }
         }        
     } else {
         LED_OFF(1); //off if nothing is happening
+        noroofcnt = 0;
+        objectcnt = 0;
     }
     
 }
@@ -150,9 +176,14 @@ extern void autoheading_periodic(void) {
     stereo_parse(StereoLink(Getch()));               
     if (UART1ChAvailable())
     {
-      while (StereoLink(ChAvailable()))
-        stereo_parse(StereoLink(Getch()));
-    }
+      
+    //receive one char
+    stereo_parse(StereoLink(Getch()));
+
+    //clear the uart buffer
+    while (StereoLink(ChAvailable()))
+        StereoLink(Getch());
+    
    
     if (hysteresesDelay>0) {
         hysteresesDelay--;        
@@ -160,10 +191,10 @@ extern void autoheading_periodic(void) {
     setHeading_P(vision_turnspeed);
     setAutoHeadingPitchAngle(vision_pitchangle);
 
-    if (vision_turnbutton) {
-        vision_turnbutton = false; // make it a one shot turn
-        incrementHeading(vision_turnStepSize);
-    }
+ //   if (vision_turnbutton) {
+        // vision_turnbutton = false; // make it a one shot turn
+        // incrementHeading(vision_turnStepSize);
+   // } 
 }
 
 

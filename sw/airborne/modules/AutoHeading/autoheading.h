@@ -51,7 +51,7 @@ extern void autoheading_start(void);
 extern void autoheading_stop(void);
 extern void autoheading_periodic(void);
 
-extern void autoheading_turnButton(float whatever);
+extern void autoheading_turnButton(uint8_t whatever);
 extern void autoheading_setMaxU(uint8_t value);
 
 
