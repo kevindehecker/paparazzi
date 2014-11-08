@@ -244,8 +244,8 @@ void guidance_h_mode_changed(uint8_t new_mode) {
       break;
 
     case GUIDANCE_H_MODE_AUTOHEADING:
-      // rpy_autoheading.psi = stateGetNedToBodyEulers_i()->psi;
-      // autoHeading_sp = stateGetNedToBodyEulers_i()->psi;
+      rpy_autoheading.psi = stateGetNedToBodyEulers_i()->psi;
+      autoHeading_sp = stateGetNedToBodyEulers_i()->psi;
 
 
      break;
