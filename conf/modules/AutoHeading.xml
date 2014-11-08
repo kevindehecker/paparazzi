@@ -23,7 +23,7 @@
 <header>
     <file name="autoheading.h"/>
   </header>
-  <periodic fun="autoheading_periodic()" start="autoheading_start()" stop="autoheading_stop()" autorun="TRUE" freq="10"/>
+  <periodic fun="autoheading_periodic()" start="autoheading_start()" stop="autoheading_stop()" autorun="TRUE" freq="30"/>
   <makefile>
     <raw> $(TARGET).CFLAGS +=  -DUSE_UART1 -DUART1_BAUD=B9600 </raw>
     <file name="autoheading.c"/>

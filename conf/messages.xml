@@ -1923,11 +1923,14 @@
     <field name="wn"          type="float"/>
   </message>
 
-  <message name="STEREO" id="215">
-    <field name="disp_count" type="uint8"/>
-    <field name="trigger" type="uint32"/>
-    <field name="equal_count" type="uint32"/>
-    <field name="objectcnt" type="uint32"/>
+  <message name="STEREO" id="215">       
+    <field name="color_tresh" type="uint8"/>
+    <field name="stereo_tresh" type="uint8"/>
+    <field name="cnt_L" type="uint8"/>
+    <field name="cnt_R" type="uint8"/>
+    <field name="cnt_stereo" type="uint8"/>
+    <field name="hysteres" type="uint32"/>
+
   </message>
  <!--216 is free -->
  <!--217 is free -->

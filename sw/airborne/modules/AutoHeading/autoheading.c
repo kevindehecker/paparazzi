@@ -52,22 +52,17 @@ uint32_t vision_filterWidth;
 
 uint32_t noroofcnt;
 volatile uint32_t objectcnt;
+uint8_t lastReceivedStereoCnt;
 
-uint8_t maxU;
-uint8_t minU;
-uint8_t maxV;
-uint8_t minV;
-uint8_t str[2] = {};
 
-int debugcnt;
 
 extern void autoheading_turnButton(uint8_t whatever) {
-    //whatever = whatever;
-    vision_turnbutton = whatever;
+    whatever = whatever; //kill warning
+    vision_turnbutton = true; // give the turn command to periodic()
 }
 
 extern void autoheading_setMaxU(uint8_t value) {
-    // maxU = value;
+     value = value;
     
     // unsigned char tmp[3];
     // tmp[0] = 'U';
@@ -80,19 +75,14 @@ extern void autoheading_setMaxU(uint8_t value) {
 extern void autoheading_start(void){
     vision_turnspeed = 1;
     vision_colorthreshold = 5;
-    vision_objectthreshold = 40;
+    vision_objectthreshold = 20;
     vision_turnbutton = false;
-    vision_pitchangle=-3.9;
+    vision_pitchangle=-4.1;
     
-    vision_turnStepSize=95;
-    vision_filterWidth = 3;
-    vision_hysteresesDelayFactor = 2;
+    vision_turnStepSize=5;
+    vision_filterWidth = 1;
+    vision_hysteresesDelayFactor = 10;
     
-
-    maxU = 66;
-    minU = 66;
-    maxV = 66;
-    minV = 66;
 
     hysteresesDelay=0;
     noroofcnt = 0;
@@ -106,96 +96,130 @@ extern void autoheading_stop(void) {
 
 }
 
-static void stereo_parse(uint8_t c);
-static void stereo_parse(uint8_t c) {
-    
+static bool handleColorPackage(void);
+static bool handleColorPackage(void) {
+    //check the full header of this package:    
+    uint8_t c = StereoLink(Getch());
+    if (c != 'o') {return false;}
+    c = StereoLink(Getch());
+    if (c != 'l') {return false;}
 
-    uint32_t wtf = objectcnt;
+    //ok, certain of color package. Retrieve the package:
 
-         DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &c,&hysteresesDelay, &vision_filterWidth, &wtf);
+    uint8_t data[8];
+    data[3] = StereoLink(Getch());
+    data[4] = StereoLink(Getch());
+    data[5] = StereoLink(Getch());
+    data[6] = StereoLink(Getch());
+    data[7] = StereoLink(Getch());
 
+    //some more error checking:
+    if (data[5] != 255) {return false;}
+    if (data[3] != data[6]) {return false;}
+    if (data[4] != data[7]) {return false;}
 
-    // if (vision_turnbutton) {
-    //     c = 100;
+    /********all ok, handle the data********/
 
-    //     // vision_turnbutton = false; // make it a one shot turn
-    //     // incrementHeading(vision_turnStepSize);
-    // } else {c = 0;}
+    uint8_t cnt_R = data[3];
+    uint8_t cnt_L = data[4];
 
-    debugcnt =(debugcnt+1) % 1 ;
-    if (debugcnt == 0) {
-        /* debug message */
-        if (c > 127) {
-            str[1] = c-128; // roof/color
-        }
-        else {
-            str[0] = c; // objects
-   
-        }
-        // DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 2, str);
-    }
-    if (hysteresesDelay==0) {
-        
-        if (c > 127) { // roof detector byte
-        //     if (c-128 < vision_colorthreshold) {  
-        //         noroofcnt++;
-        //         if (noroofcnt >= vision_filterWidth) {
-        //             noroofcnt = 0;
-        //             hysteresesDelay = vision_hysteresesDelayFactor * ((vision_turnStepSize / vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ);
-        //             incrementHeading(vision_turnStepSize);           
-        //             LED_ON(1);   
-        //         }                             
-        //     } else {
-        //         //reset movg avg
-        //         noroofcnt = 0;            
-        //     }
-        } else { // stereo detector byte
-            if (c >= vision_objectthreshold) {  
-                objectcnt++;
-                if (objectcnt > vision_filterWidth) {
-                    objectcnt=0;                    
-                    hysteresesDelay = vision_hysteresesDelayFactor * ((vision_turnStepSize / vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ);
-                   incrementHeading(vision_turnStepSize);                    
-                    LED_ON(1); 
-                } 
+    //telemytrize that shit
+    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &vision_colorthreshold,&vision_objectthreshold, &cnt_L,&cnt_R, &lastReceivedStereoCnt, &hysteresesDelay);
 
+    if (hysteresesDelay==0) { // wait until previous turn was completed
+        if (cnt_L < vision_colorthreshold || cnt_R < vision_colorthreshold) { //if not enough color was detected either in the left or right half of the image
+            if (cnt_L < cnt_R)  { //turn to the half in which most color was measured
+                incrementHeading(-vision_turnStepSize); 
             } else {
-                objectcnt=0;
+                incrementHeading(vision_turnStepSize); 
             }
-        }        
-    } else {
-        LED_OFF(1); //off if nothing is happening
-        noroofcnt = 0;
-        objectcnt = 0;
+            hysteresesDelay = (float)vision_hysteresesDelayFactor * (((float)vision_turnStepSize / (float)vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ);                  
+        } else {
+            //LED_OFF(1); //off if nothing is happening
+            noroofcnt = 0; // currently unused            
+        }
     }
-    
+    return true;
 }
 
+
+static bool handleStereoPackage(void);
+static bool handleStereoPackage(void) {
+    //check the full header of this package:    
+    uint8_t c = StereoLink(Getch());
+    if (c != 'i') {return false;}
+    c = StereoLink(Getch());
+    if (c != 's') {return false;}
+
+    //ok, certain of color package. Retrieve the package:
+
+    uint8_t data[8];
+    data[3] = StereoLink(Getch());
+    data[4] = StereoLink(Getch());
+    data[5] = StereoLink(Getch());
+    
+    //some more error checking:
+    if (data[4] != 255) {return false;}
+    if (data[3] != data[5]) {return false;}
+    
+    /********all ok, handle the data********/
+
+    c =  data[3];
+    lastReceivedStereoCnt = c; // save it globally, for the telemetry message
+   
+    if (hysteresesDelay==0) { // wait until previous turn was completed
+            if (c > vision_objectthreshold) {  //if an object was detected
+                objectcnt++;
+                if (objectcnt > vision_filterWidth) { // if an object was detected long enough
+                    objectcnt=0;                    
+                    hysteresesDelay = (float)vision_hysteresesDelayFactor * (((float)vision_turnStepSize / (float)vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ); 
+                    incrementHeading(vision_turnStepSize);
+                } 
+            } else {
+                objectcnt=0;
+                //LED_OFF(1); //off if nothing is happening        
+            }            
+    }
+    return true;    
+}
+
+
 extern void autoheading_periodic(void) {
-    
-    //stereo_parse(StereoLink(Getch()));               
-    if (UART1ChAvailable())
-    {
-      
-    //receive one char
-    stereo_parse(StereoLink(Getch()));
+        
+    // if (UART1ChAvailable()) 
+    // {         
+        bool res = false;
+        while (!res && UART1ChAvailable()) {
+            uint8_t c = StereoLink(Getch());
+            
+            if (c == 'c')  {
+                res = handleColorPackage();
+            } else if  (c == 'd') {
+                res = handleStereoPackage();
+            } else {
+                //weird data; kill it with fire     
+                while (StereoLink(ChAvailable()))
+                    StereoLink(Getch());  
+            }
+        }   
+    // }
 
-    //clear the uart buffer
-    while (StereoLink(ChAvailable()))
-        StereoLink(Getch());
     
-    }
-
-    if (hysteresesDelay>0) {
+    if (hysteresesDelay>0) { //keep track whether the drone is turning
         hysteresesDelay--;        
+        setAutoHeadingPitchAngle(-vision_pitchangle); // if the drone is turning, pitch backward to slow down
+        LED_TOGGLE(1);
+    } else {
+        setAutoHeadingPitchAngle(vision_pitchangle); // if not turning, try to keep constant forward speed
+        LED_OFF(1);
     }
-    setHeading_P(vision_turnspeed);
-    setAutoHeadingPitchAngle(vision_pitchangle);
 
- //   if (vision_turnbutton) {
-        // vision_turnbutton = false; // make it a one shot turn
-        // incrementHeading(vision_turnStepSize);
-   // } 
+    setHeading_P(vision_turnspeed); // set turn speed, should be moved out of periodic loop...
+
+   if (vision_turnbutton) {
+        vision_turnbutton = false; // make it a one shot turn
+        incrementHeading(vision_turnStepSize);
+   } 
 }
 
 
