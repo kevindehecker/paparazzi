@@ -53,6 +53,8 @@ uint32_t vision_filterWidth;
 uint32_t noroofcnt;
 volatile uint32_t objectcnt;
 uint8_t lastReceivedStereoCnt;
+uint8_t lastReceivedColorCnt_L;
+uint8_t lastReceivedColorCnt_R;
 
 
 
@@ -75,7 +77,7 @@ extern void autoheading_setMaxU(uint8_t value) {
 extern void autoheading_start(void){
     vision_turnspeed = 1;
     vision_colorthreshold = 5;
-    vision_objectthreshold = 20;
+    vision_objectthreshold = 255;
     vision_turnbutton = false;
     vision_pitchangle=-4.1;
     
@@ -123,8 +125,10 @@ static bool handleColorPackage(void) {
     uint8_t cnt_R = data[3];
     uint8_t cnt_L = data[4];
 
-    //telemytrize that shit
-    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &vision_colorthreshold,&vision_objectthreshold, &cnt_L,&cnt_R, &lastReceivedStereoCnt, &hysteresesDelay);
+
+    lastReceivedColorCnt_L = cnt_L;
+    lastReceivedColorCnt_R = cnt_R;
+ 
 
     if (hysteresesDelay==0) { // wait until previous turn was completed
         if (cnt_L < vision_colorthreshold || cnt_R < vision_colorthreshold) { //if not enough color was detected either in the left or right half of the image
@@ -184,6 +188,9 @@ static bool handleStereoPackage(void) {
 }
 
 
+uint8_t fuckingsuperbitrfreducer;
+
+
 extern void autoheading_periodic(void) {
         
     // if (UART1ChAvailable()) 
@@ -204,7 +211,15 @@ extern void autoheading_periodic(void) {
         }   
     // }
 
+
+
+fuckingsuperbitrfreducer = (fuckingsuperbitrfreducer +1) % 5;
     
+    if (fuckingsuperbitrfreducer == 0) {
+        //telemytrize that shit
+        DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &vision_colorthreshold,&vision_objectthreshold, &lastReceivedColorCnt_L,&lastReceivedColorCnt_R, &lastReceivedStereoCnt, &hysteresesDelay);
+    }
+
     if (hysteresesDelay>0) { //keep track whether the drone is turning
         hysteresesDelay--;        
         setAutoHeadingPitchAngle(-vision_pitchangle); // if the drone is turning, pitch backward to slow down
