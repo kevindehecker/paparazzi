@@ -33,6 +33,7 @@
 #include "subsystems/ahrs/ahrs_int_cmpl_quat.h"
 #include "subsystems/ahrs/ahrs_aligner.h"
 #include "subsystems/ahrs/ahrs_int_utils.h"
+#include "firmwares/rotorcraft/autopilot.h"
 
 #include "state.h"
 
@@ -225,8 +226,6 @@ void ahrs_align(void) {
   INT_RATES_LSHIFT(ahrs_impl.high_rez_bias, ahrs_impl.high_rez_bias, 28);
 
   ahrs.status = AHRS_RUNNING;
-
-  imu_SetBodyToImuCurrent(TRUE);
 }
 
 
@@ -261,6 +260,9 @@ void ahrs_propagate(float dt) {
   // increase accel and mag propagation counters
   ahrs_impl.accel_cnt++;
   ahrs_impl.mag_cnt++;
+
+  if(autopilot_mode == AP_MODE_KILL)
+    RunOnceEvery(500, {imu_SetBodyToImuCurrent(TRUE);});
 }
 
 
