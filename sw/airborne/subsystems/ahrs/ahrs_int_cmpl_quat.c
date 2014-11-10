@@ -225,6 +225,8 @@ void ahrs_align(void) {
   INT_RATES_LSHIFT(ahrs_impl.high_rez_bias, ahrs_impl.high_rez_bias, 28);
 
   ahrs.status = AHRS_RUNNING;
+
+  imu_SetBodyToImuCurrent(TRUE);
 }
 
 
