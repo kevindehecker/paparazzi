@@ -129,6 +129,7 @@ void ahrs_aligner_run(void) {
 #ifdef AHRS_ALIGNER_LED
       LED_ON(AHRS_ALIGNER_LED);
 #endif
+      imu_SetBodyToImuCurrent(TRUE);
     }
   }
 
