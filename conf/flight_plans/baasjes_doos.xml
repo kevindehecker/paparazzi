@@ -1,0 +1,38 @@
+<!-- DOCTYPE flight_plan SYSTEM "flight_plan.dtd" -->
+
+<flight_plan NAME="baasjes doosjes" LON0="1.27289" MAX_DIST_FROM_HOME="1000" GROUND_ALT="0" SECURITY_HEIGHT="0" QFU="270" ALT="2" LAT0="43.46223">
+  <header>
+#include "firmwares/rotorcraft/guidance/guidance_v.h"
+#include "subsystems/ahrs/ahrs_int_cmpl_quat.h"
+  </header>
+  <waypoints>
+    <waypoint name="HOME" x="0.0" y="120.0" alt="250."/>
+  </waypoints>
+
+  <blocks>
+    <block name="wait">
+      <call fun="NavKillThrottle()"/>
+      <set var="imu_to_body_force" value="TRUE"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="stage_time>30"/>
+    </block>
+    <block name="set_reference_enzo">
+      <set var="imu_to_body_force" value="FALSE"/>
+      <call fun="NavSetAltitudeReferenceHere()"/>
+      <set var="guidance_v_z_sp" value="stateGetPositionNed_i()->z-2*256"/>
+    </block>
+    <block name="gooooo">
+      <set var="imu_to_body_force" value="FALSE"/>
+      <call fun="NavResurrect()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="stage_time>30"/>
+    </block>
+    <block name="land">
+      <set var="guidance_v_z_sp" value="guidance_v_z_sp+3*256"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="stage_time>2"/>
+    </block>
+    <block name="landed">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle"/>
+    </block>
+  </blocks>
+</flight_plan>
+
