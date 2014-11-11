@@ -29,6 +29,8 @@
 
 struct RadioControl radio_control;
 
+pprz_t kill_switch_status_flight_plan;
+
 void radio_control_init(void)
 {
   uint8_t i;
@@ -41,12 +43,16 @@ void radio_control_init(void)
   radio_control.frame_rate = 0;
   radio_control.frame_cpt = 0;
   radio_control_impl_init();
+
+  kill_switch_status_flight_plan = 9600;
 }
 
 void radio_control_periodic_task(void)
 {
   static uint8_t _1Hz;
   _1Hz++;
+
+  kill_switch_status_flight_plan = radio_control.values[RADIO_KILL_SWITCH];
 
   if (_1Hz >= 60) {
     _1Hz = 0;

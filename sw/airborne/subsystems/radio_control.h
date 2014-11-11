@@ -57,6 +57,8 @@ struct RadioControl {
 
 extern struct RadioControl radio_control;
 
+extern pprz_t kill_switch_status_flight_plan;
+
 
 extern void radio_control_init(void);
 

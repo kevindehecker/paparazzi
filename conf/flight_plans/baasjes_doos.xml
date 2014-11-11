@@ -4,16 +4,25 @@
   <header>
 #include "firmwares/rotorcraft/guidance/guidance_v.h"
 #include "subsystems/ahrs/ahrs_int_cmpl_quat.h"
+#include "subsystems/radio_control.h"
   </header>
   <waypoints>
     <waypoint name="HOME" x="0.0" y="120.0" alt="250."/>
   </waypoints>
 
+  <exceptions>
+    <exception cond="0>kill_switch_status_flight_plan" deroute="wait5sec"/>
+  </exceptions>
   <blocks>
     <block name="wait">
       <call fun="NavKillThrottle()"/>
       <set var="imu_to_body_force" value="TRUE"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="stage_time>30"/>
+    </block>
+    <block name="wait5sec">
+      <call fun="NavKillThrottle()"/>
+      <set var="imu_to_body_force" value="TRUE"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="stage_time>5"/>
     </block>
     <block name="set_reference_enzo">
       <set var="imu_to_body_force" value="FALSE"/>
@@ -26,8 +35,12 @@
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="stage_time>30"/>
     </block>
     <block name="land">
-      <set var="guidance_v_z_sp" value="guidance_v_z_sp+3*256"/>
+      <set var="guidance_v_z_sp" value="guidance_v_z_sp+256"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="stage_time>2"/>
+      <set var="guidance_v_z_sp" value="guidance_v_z_sp+256"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="stage_time>1"/>
+      <set var="guidance_v_z_sp" value="guidance_v_z_sp+256"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="stage_time>1"/>
     </block>
     <block name="landed">
       <call fun="NavKillThrottle()"/>
