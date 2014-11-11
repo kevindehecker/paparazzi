@@ -94,6 +94,8 @@ struct AhrsIntCmplQuat {
 
 extern struct AhrsIntCmplQuat ahrs_impl;
 
+extern bool_t imu_to_body_force;
+
 
 /** Update yaw based on a heading measurement.
  * e.g. from GPS course

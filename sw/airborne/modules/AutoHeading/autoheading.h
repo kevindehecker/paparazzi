@@ -35,9 +35,11 @@ extern uint8_t vision_colorthreshold;
 extern float vision_turnspeed;
 extern bool vision_turnbutton;
 extern float vision_pitchangle;
+extern float vision_rollangle;
 extern float vision_turnStepSize;
 extern uint32_t vision_hysteresesDelayFactor;
 extern uint32_t vision_filterWidth;
+
 
 
 extern uint8_t maxU;

@@ -246,7 +246,8 @@ void guidance_h_mode_changed(uint8_t new_mode) {
     case GUIDANCE_H_MODE_AUTOHEADING:
       rpy_autoheading.psi = stateGetNedToBodyEulers_i()->psi;
       autoHeading_sp = stateGetNedToBodyEulers_i()->psi;
-
+      rpy_autoheading.phi = 0;
+      rpy_autoheading.theta = 0;
 
      break;
     case GUIDANCE_H_MODE_HOVER:
@@ -337,6 +338,10 @@ void setAutoHeadingPitchAngle(float pitchAngle) {
   rpy_autoheading.theta = ANGLE_BFP_OF_REAL(RadOfDeg(pitchAngle));
 }
 
+void setAutoHeadingRollAngle(float rollAngle) {     
+  rpy_autoheading.phi = ANGLE_BFP_OF_REAL(RadOfDeg(rollAngle));
+}
+
 void guidance_h_run(bool_t  in_flight) {
   switch ( guidance_h_mode ) {
 
@@ -390,9 +395,6 @@ void guidance_h_run(bool_t  in_flight) {
         rpy_autoheading.psi -=autoHeading_P;
       }
       INT32_ANGLE_NORMALIZE(rpy_autoheading.psi);
-            
-      rpy_autoheading.phi = 0;
-      
 
       stabilization_attitude_set_rpy_setpoint_i(&rpy_autoheading);
       /* set final attitude setpoint */

@@ -44,6 +44,7 @@ uint8_t vision_colorthreshold;
 bool vision_turnbutton;
 float vision_turnspeed;
 float vision_pitchangle;
+float vision_rollangle;
 
 float vision_turnStepSize;
 volatile uint32_t hysteresesDelay;
@@ -55,6 +56,7 @@ volatile uint32_t objectcnt;
 uint8_t lastReceivedStereoCnt;
 uint8_t lastReceivedColorCnt_L;
 uint8_t lastReceivedColorCnt_R;
+
 
 
 
@@ -75,15 +77,16 @@ extern void autoheading_setMaxU(uint8_t value) {
 }
 
 extern void autoheading_start(void){
-    vision_turnspeed = 1;
-    vision_colorthreshold = 5;
+    vision_turnspeed = 0.23;
+    vision_colorthreshold = 1;
     vision_objectthreshold = 255;
     vision_turnbutton = false;
-    vision_pitchangle=-4.1;
+    vision_pitchangle=-5.2;
     
-    vision_turnStepSize=5;
+    vision_turnStepSize=90;
     vision_filterWidth = 1;
-    vision_hysteresesDelayFactor = 10;
+    vision_hysteresesDelayFactor = 3;
+    vision_rollangle = 10.0;
     
 
     hysteresesDelay=0;
@@ -132,17 +135,19 @@ static bool handleColorPackage(void) {
 
     if (hysteresesDelay==0) { // wait until previous turn was completed
         if (cnt_L < vision_colorthreshold || cnt_R < vision_colorthreshold) { //if not enough color was detected either in the left or right half of the image
-            if (cnt_L < cnt_R)  { //turn to the half in which most color was measured
-                incrementHeading(-vision_turnStepSize); 
-            } else {
-                incrementHeading(vision_turnStepSize); 
-            }
+            //if (cnt_L < cnt_R)  { //turn to the half in which most color was measured
+            incrementHeading(vision_turnStepSize);
+            // } else {
+            //     incrementHeading(vision_turnStepSize); 
+            // }
             hysteresesDelay = (float)vision_hysteresesDelayFactor * (((float)vision_turnStepSize / (float)vision_turnspeed ) / (float)AUTOHEADING_PERIODIC_FREQ);                  
         } else {
             //LED_OFF(1); //off if nothing is happening
             noroofcnt = 0; // currently unused            
         }
     }
+   
+
     return true;
 }
 
@@ -220,12 +225,21 @@ fuckingsuperbitrfreducer = (fuckingsuperbitrfreducer +1) % 5;
         DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &vision_colorthreshold,&vision_objectthreshold, &lastReceivedColorCnt_L,&lastReceivedColorCnt_R, &lastReceivedStereoCnt, &hysteresesDelay);
     }
 
+
+
+
     if (hysteresesDelay>0) { //keep track whether the drone is turning
         hysteresesDelay--;        
-        setAutoHeadingPitchAngle(-vision_pitchangle); // if the drone is turning, pitch backward to slow down
+        setAutoHeadingPitchAngle(0); // if the drone is turning, pitch backward to slow down
+        
+        setAutoHeadingRollAngle(vision_rollangle);
+  
+
         LED_TOGGLE(1);
     } else {
+
         setAutoHeadingPitchAngle(vision_pitchangle); // if not turning, try to keep constant forward speed
+        setAutoHeadingRollAngle(0.0);
         LED_OFF(1);
     }
 
