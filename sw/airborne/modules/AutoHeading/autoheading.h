@@ -40,6 +40,8 @@ extern float vision_turnStepSize;
 extern uint32_t vision_hysteresesDelayFactor;
 extern uint32_t vision_filterWidth;
 
+extern bool_t go_to_blue;
+
 
 
 extern uint8_t maxU;

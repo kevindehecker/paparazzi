@@ -46,6 +46,8 @@ float vision_turnspeed;
 float vision_pitchangle;
 float vision_rollangle;
 
+bool_t go_to_blue;
+
 float vision_turnStepSize;
 volatile uint32_t hysteresesDelay;
 uint32_t vision_hysteresesDelayFactor;
@@ -87,6 +89,7 @@ extern void autoheading_start(void){
     vision_filterWidth = 1;
     vision_hysteresesDelayFactor = 3;
     vision_rollangle = 10.0;
+    go_to_blue = FALSE;
     
 
     hysteresesDelay=0;
@@ -133,7 +136,7 @@ static bool handleColorPackage(void) {
     lastReceivedColorCnt_R = cnt_R;
  
 
-    if (hysteresesDelay==0) { // wait until previous turn was completed
+    if ((hysteresesDelay==0) && (go_to_blue == TRUE)) { // wait until previous turn was completed
         if (cnt_L < vision_colorthreshold || cnt_R < vision_colorthreshold) { //if not enough color was detected either in the left or right half of the image
             //if (cnt_L < cnt_R)  { //turn to the half in which most color was measured
             incrementHeading(vision_turnStepSize);
@@ -176,7 +179,7 @@ static bool handleStereoPackage(void) {
     c =  data[3];
     lastReceivedStereoCnt = c; // save it globally, for the telemetry message
    
-    if (hysteresesDelay==0) { // wait until previous turn was completed
+    if ((hysteresesDelay==0) && (go_to_blue == TRUE)) { // wait until previous turn was completed
             if (c > vision_objectthreshold) {  //if an object was detected
                 objectcnt++;
                 if (objectcnt > vision_filterWidth) { // if an object was detected long enough

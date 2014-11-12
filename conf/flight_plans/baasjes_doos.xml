@@ -5,6 +5,7 @@
 #include "firmwares/rotorcraft/guidance/guidance_v.h"
 #include "subsystems/ahrs/ahrs_int_cmpl_quat.h"
 #include "subsystems/radio_control.h"
+#include "modules/AutoHeading/autoheading.h"
   </header>
   <waypoints>
     <waypoint name="HOME" x="0.0" y="120.0" alt="250."/>
@@ -26,12 +27,15 @@
     </block>
     <block name="set_reference_enzo">
       <set var="imu_to_body_force" value="FALSE"/>
+      <set var="go_to_blue" value="FALSE"/>
       <call fun="NavSetAltitudeReferenceHere()"/>
       <set var="guidance_v_z_sp" value="stateGetPositionNed_i()->z-2*256"/>
+      <set var="imu_to_body_force" value="FALSE"/>
     </block>
     <block name="gooooo">
-      <set var="imu_to_body_force" value="FALSE"/>
       <call fun="NavResurrect()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="stage_time>2"/>
+      <set var="go_to_blue" value="TRUE"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="stage_time>30"/>
     </block>
     <block name="land">
