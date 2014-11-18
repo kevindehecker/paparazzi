@@ -1949,6 +1949,7 @@
     <field name="cnt_R" type="uint8"/>
     <field name="cnt_stereo" type="uint8"/>
     <field name="hysteres" type="uint32"/> 
+    </message>
   <!--217 is free -->  
  
 
