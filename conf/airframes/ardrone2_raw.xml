@@ -7,6 +7,7 @@
       <define name="AUTOPILOT_DISABLE_AHRS_KILL"/>
       <subsystem name="telemetry" type="transparent_udp"/>
       <subsystem name="radio_control" type="datalink"/>
+      <configure name="USE_MAGNETOMETER" value="1"/>
     </target>
 
     <target name="nps" board="pc">
@@ -20,14 +21,14 @@
     <subsystem name="motor_mixing"/>
     <subsystem name="actuators" type="ardrone2"/>
     <subsystem name="imu" type="ardrone2"/>
-    <subsystem name="gps" type="ublox"/>
-    <subsystem name="stabilization" type="int_quat"/>
+    <subsystem name="gps" type="datalink"/>
+    <subsystem name="stabilization" type="float_euler"/>
     <subsystem name="ahrs" type="int_cmpl_quat"/>
     <subsystem name="ins" type="extended"/>
   </firmware>
 
   <modules main_freq="512">
-    <load name="gps_ubx_ucenter.xml"/>
+    <!--load name="gps_ubx_ucenter.xml"/-->
     <load name="send_imu_mag_current.xml"/>
     <load name="file_logger.xml"/>
     <load name="IC.xml"/>
@@ -105,6 +106,7 @@
     <!--define name="H_X" value="0.3892503"/>
     <define name="H_Y" value="0.0017972"/>
     <define name="H_Z" value="0.9211303"/ -->
+    <define name="USE_GPS_HEADING" value="0"/>
   </section>
 
   <section name="INS" prefix="INS_">

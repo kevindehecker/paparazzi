@@ -41,6 +41,8 @@ static FILE* file_logger;
 
 /** Start the file logger and open a new file */
 void file_logger_start(void) {
+  
+  printf("Starting Logger...\n");
   uint32_t counter = 0;
   char filename[512];
 
@@ -52,6 +54,7 @@ void file_logger_start(void) {
     counter++;
     sprintf(filename, "%s%05d.csv", FILE_LOGGER_PATH, counter);
   }
+  printf("Valid filename found: \n");
 
   file_logger = fopen(filename, "w");
 
@@ -60,7 +63,9 @@ void file_logger_start(void) {
       file_logger,
       "counter,gyro_unscaled_p,gyro_unscaled_q,gyro_unscaled_r,accel_unscaled_x,accel_unscaled_y,accel_unscaled_z,mag_unscaled_x,mag_unscaled_y,mag_unscaled_z,COMMAND_THRUST,COMMAND_ROLL,COMMAND_PITCH,COMMAND_YAW,qi,qx,qy,qz\n"
     );
+
   }
+  printf("First line printed...\n");
 }
 
 /** Stop the logger an nicely close the file */

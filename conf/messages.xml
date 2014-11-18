@@ -1923,18 +1923,46 @@
     <field name="wn"          type="float"/>
   </message>
 
-  <message name="STEREO" id="215">       
+  <message name="OF_VELOCITIES" id="215">
+    <field name="Vx_filt"     type="float"/>
+    <field name="Vy_filt"     type="float"/>
+    <field name="Vz_filt"     type="float"/>
+    <field name="V_body_x"    type="float"/>
+    <field name="V_body_y"    type="float"/>
+    <field name="V_body_z"    type="float"/>
+    <field name="Vx_filt_corr_rate"     type="float"/>
+    <field name="Vy_filt_corr_rate"     type="float"/>
+    <field name="Vx_filt_corr_angle"     type="float"/>
+    <field name="Vy_filt_corr_angle"     type="float"/>
+    <field name="Vx_compl_m"     type="float"/>
+    <field name="Vy_compl_m"     type="float"/>
+    <field name="Vx_compl_f"     type="float"/>
+    <field name="Vy_compl_f"     type="float"/>
+    <field name="Vx_kalman" 	 type="float"/>
+    <field name="Vy_kalman" 	 type="float"/>    
+  </message>
+
+   <message name="STEREO" id="216">       
     <field name="color_tresh" type="uint8"/>
     <field name="stereo_tresh" type="uint8"/>
     <field name="cnt_L" type="uint8"/>
     <field name="cnt_R" type="uint8"/>
     <field name="cnt_stereo" type="uint8"/>
-    <field name="hysteres" type="uint32"/>
+    <field name="hysteres" type="uint32"/> 
+  <!--217 is free -->  
+ 
 
+  <message name="OF_CTRL" id="218">
+    <field name="cmd_phi" 	type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
+    <field name="cmd_theta" 	type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
+    <field name="cmd_psi" 	type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
+    <field name="cmd_phi0" 	type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
+    <field name="cmd_theta0" 	type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
+    <field name="cmd_psi0" 	type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>    
+    <field name="pGainHover" type="uint32"/>
+    <field name="iGainHover" type="uint32"/>
+    <field name="dGainHover" type="uint32"/>
   </message>
- <!--216 is free -->
- <!--217 is free -->
- <!--218 is free -->
   <message name="WEATHER" id="219">
     <field name="p_amb" type="float" unit="Pa" alt_unit="mBar" alt_unit_coef="0.01"/>
     <field name="t_amb" type="float" unit="deg C"/>
@@ -1952,9 +1980,65 @@
     <field name="diff"         type="float"/>
   </message>
 
- <!--222 is free -->
- <!--223 is free -->
- <!--224 is free -->
+  <message name="AIR_DATA" id="222">
+    <field name="pressure" type="float" unit="Pa"/>
+    <field name="diff_p" type="float" unit="Pa"/>
+    <field name="temp" type="float" unit="deg celcius"/>
+    <field name="qnh" type="float" unit="hPa"/>
+    <field name="amsl_baro" type="float" unit="m"/>
+    <field name="airspeed" type="float" unit="m/s"/>
+    <field name="tas_factor" type="float"/>
+  </message>
+
+  <message name="AMSL" id="223">
+    <field name="AMSL_BARO" type="float" unit="ft" alt_unit="m"/>
+    <field name="AMSL_GPS" type="float" unit="ft" alt_unit="m"/>
+  </message>
+
+  <message name="OF_DEBUG" id="224">
+    <field name="Tx"   type="float" unit="px"/>
+    <field name="Ty"   type="float" unit="px"/>
+    <field name="Tz"   type="float" unit="px"/>
+    <field name="Vx"   type="float" unit="m/s"/>
+    <field name="Vy"   type="float" unit="m/s"/>
+    <field name="Vz"   type="float" unit="m/s"/>
+    <field name="Vx_ctrl"   type="float" unit="m/s"/>
+    <field name="Vy_ctrl"   type="float" unit="m/s"/>
+    <field name="Vz_ctrl"   type="float" unit="m/s"/>    
+    <field name="p_corr"    type="float" unit="rad"/>    
+    <field name="q_corr"    type="float" unit="rad"/>    
+    <field name="percentDetected"   type="int32"/>
+    <field name="threshold"   	    type="int32"/>
+    <field name="erreur"   	    type="uint32"/>
+    <field name="FPS"               type="float"/>
+    <field name="h"  		    type="float"/>
+    <field name="msg_id"  	    type="uint8"/>
+    <field name="framesskip"  	    type="int32"/>
+    <field name="window"  	    type="int32"/>
+    <field name="optic_flow_ctrl"   type="uint8"/>
+    <field name="Ahx"  		    type="float"/>
+    <field name="Ahy"  		    type="float"/>
+    <!-- kalman part -->
+    <field name="Vx_kalman" 	type="float"/>
+    <field name="Vy_kalman" 	type="float"/>
+    <field name="Biasx" 	type="float"/>
+    <field name="Biasy" 	type="float"/>
+    <field name="Vkalmanx_pred" type="float"/>
+    <field name="Vkalmany_pred" type="float"/>
+    <field name="Vxm_kalman" 	type="float"/>
+    <field name="Vym_kalman" 	type="float"/>
+    <field name="Axm_kalman" 	type="float"/>
+    <field name="Aym_kalman" 	type="float"/>
+    <field name="dt" 		type="float"/>
+    <field name="P00" 		type="float"/>
+    <field name="P11" 		type="float"/>
+    <field name="P22" 		type="float"/>
+    <field name="P33" 		type="float"/>
+    <field name="Q00" 		type="float"/>
+    <field name="Q11" 		type="float"/>
+    <field name="R00" 		type="float"/>
+    <field name="R11" 		type="float"/>    
+  </message>
 
   <message name="VIDEO_SYNC" id="225">
     <field name="id" type="uint8"/>

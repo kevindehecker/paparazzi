@@ -1,0 +1,11 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<settings>
+  <dl_settings>
+    <dl_settings NAME="OPTIC FLOW HOVER2">
+      <dl_setting var="pGainHover" MIN="0" STEP="20" MAX="2000" module="../../../sw/ext/ardrone2_vision/modules/OpticFlowARM/opticflow_module"/>
+      <dl_setting var="iGainHover" MIN="0" STEP="1" MAX="50" module="../../../sw/ext/ardrone2_vision/modules/OpticFlowARM/opticflow_module"/>
+      <dl_setting var="dGainHover" MIN="0" STEP="20" MAX="2000" module="../../../sw/ext/ardrone2_vision/modules/OpticFlowARM/opticflow_module"/>
+    </dl_settings>
+  </dl_settings>
+</settings>

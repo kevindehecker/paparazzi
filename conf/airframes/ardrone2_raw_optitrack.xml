@@ -6,7 +6,11 @@
     <target name="ap" board="ardrone2_raw">
       <define name="AUTOPILOT_DISABLE_AHRS_KILL"/>
       <define name="FAILSAFE_DESCENT_SPEED" value="0.5"/>
-      <configure name="USE_MAGNETOMETER" value="0"/>
+      <define name="USE_SONAR" value="1"/>
+      <define name="INS_SONAR_MAX_RANGE" value="5000"/>
+      <define name="INS_SONAR_VARIANCE_THRESHOLD"/>
+      <define name="NO_RC_THRUST_LIMIT"/>
+      <configure name="USE_MAGNETOMETER" value="1"/>
 
       <subsystem name="telemetry" type="transparent_udp"/>
       <subsystem name="radio_control" type="datalink"/>
@@ -29,11 +33,25 @@
 
   <modules main_freq="512">
     <load name="send_imu_mag_current.xml"/>
-    <load name="follow.xml">
-      <define name="FOLLOW_AC_ID" value="101"/>
-      <define name="FOLLOW_WAYPOINT_ID" value="WP_p1"/>
-      <define name="FOLLOW_OFFSET_Z" value="2.0"/>
-    </load>
+    <!--load name="../../sw/ext/ardrone2_vision/modules/Mjpeg/ViewVideo.xml"/-->
+    <!--load name="../../sw/ext/ardrone2_vision/modules/OpticFlowARM/OpticFlowARM.xml"/-->
+    <!--load name="../../sw/ext/ardrone2_vision/modules/OpticFlow3D-DSP/OpticFlow3D-DSP.xml">
+      <define name="ARDRONE_VIDEO_PORT" value="2002" />
+      <define name="USE_ARDRONE_VIDEO" />  
+      <define name="USE_FMS" value="0"/>
+      <define name="OPTIC_FLOW_DSP" value="1"/>
+      <define name="USE_OPTITRACK_Z" value="0"/>
+      <define name="OPTITRACK_POS" value="1"/>
+    </load-->
+    <!--load name="../../sw/ext/ardrone2_vision/modules/OpticFlowDSP/OpticFlowDSP.xml">
+      <define name="ARDRONE_VIDEO_PORT" value="2002" />
+      <define name="USE_ARDRONE_VIDEO" />  
+      <define name="USE_FMS" value="1"/>
+      <define name="OPTIC_FLOW_DSP" value="1"/>
+      <define name="USE_OPTITRACK_Z" value="0"/>
+      <define name="OPTITRACK_POS" value="1"/>
+    </load-->
+
   </modules>
 
   <commands>
@@ -109,7 +127,7 @@
     <define name="H_Z" value="0.9211303"/ -->
 
     <!-- Use GPS heading instead of magneto -->
-    <define name="USE_GPS_HEADING" value="1"/>
+    <define name="USE_GPS_HEADING" value="0"/>
   </section>
 
   <section name="INS" prefix="INS_">

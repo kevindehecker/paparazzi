@@ -1,0 +1,92 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+
+<flight_plan alt="1" ground_alt="0" lat0="51.990634" lon0="4.376771" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="1">
+  <header>
+#include "autopilot.h"
+</header>
+  <waypoints>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="CLIMB" x="0.0" y="0.0"/>
+    <waypoint name="STDBY" x="-1.4" y="0.9"/>
+    <waypoint name="TD" x="0.0" y="0.0"/>
+    <waypoint name="p1" x="2.4" y="-0.5"/>
+    <waypoint name="p2" x="1.1" y="2.1"/>
+    <waypoint lat="51.990635" lon="4.376836" name="FA1"/>
+    <waypoint lat="51.990606" lon="4.376760" name="FA2"/>
+    <waypoint lat="51.990652" lon="4.376712" name="FA3"/>
+    <waypoint lat="51.990681" lon="4.376791" name="FA4"/>
+    <waypoint lat="51.9906546" lon="4.3767775" name="notext"/>
+    <waypoint lat="51.9906431" lon="4.3767593" name="coarsetext"/>
+    <waypoint lat="51.9906403" lon="4.3767901" name="finetext"/>    
+    <waypoint lat="51.9906399" lon="4.3767521" name="stickers"/>    
+    <waypoint lat="51.9906522" lon="4.3767788" name="clean"/>    
+  </waypoints>
+  <sectors>
+    <sector color="red" name="Flight_Area">
+      <corner name="FA4"/>
+      <corner name="FA3"/>
+      <corner name="FA2"/>
+      <corner name="FA1"/>
+    </sector>
+  </sectors>
+  <blocks>
+    <block name="Wait GPS">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetWaypointHere(WP_HOME)"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="NavSetAltitudeReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="Start Engine">
+      <call fun="NavResurrect()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
+      <exception cond="stateGetPositionEnu_f()->z > 0.5" deroute="Standby"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <stay climb="0.5" vmode="climb" wp="CLIMB"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <stay wp="STDBY"/>
+    </block>
+    <block name="go to height 1">
+      <stay   alt="0.5" until="stage_time > 5" wp="stickers"/>
+    </block>  
+    <block name="Stickers, 1.5 m">
+      <stay   alt="1.5" wp="stickers"/>
+    </block>   
+    <block name="circle height 2">
+      <circle alt="1.5" wp="stickers" radius="0.5" until="stage_time > 20"/>
+    </block>    
+    <block name="circle height 3">
+      <circle alt="2.0" wp="stickers" radius="0.5" until="stage_time > 20"/>
+    </block>
+    <block name="Stickers2, 1.5 m">
+      <stay   alt="2.0" wp="stickers"/>
+    </block> 
+    <block key="l" name="land here" strip_button="Land Here" strip_icon="land-right.png">
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+    </block>
+    <block name="land">
+      <go wp="TD"/>
+    </block>
+    <block name="flare">
+      <exception cond="NavDetectGround()" deroute="landed"/>
+      <exception cond="!nav_is_in_flight()" deroute="landed"/>
+      <call fun="NavStartDetectGround()"/>
+      <stay climb="-0.8" vmode="climb" wp="TD"/>
+    </block>
+    <block name="landed">
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+  </blocks>
+</flight_plan>

@@ -179,7 +179,7 @@ static void send_energy(void) {
 static void send_fp(void) {
   int32_t carrot_up = -guidance_v_z_sp;
   DOWNLINK_SEND_ROTORCRAFT_FP(DefaultChannel, DefaultDevice,
-      &guidance_v_z_sp,
+      &(stateGetPositionEnu_i()->x),
       &(stateGetPositionEnu_i()->y),
       &(stateGetPositionEnu_i()->z),
       &(stateGetSpeedEnu_i()->x),
@@ -396,6 +396,9 @@ void autopilot_set_mode(uint8_t new_autopilot_mode) {
       case AP_MODE_NAV:
         guidance_h_mode_changed(GUIDANCE_H_MODE_NAV);
         break;
+      case AP_MODE_OPTIC_FLOW:
+    	  guidance_h_mode_changed(GUIDANCE_H_MODE_OPTIC_FLOW);
+    	  break;
       default:
         break;
     }
@@ -431,7 +434,8 @@ void autopilot_set_mode(uint8_t new_autopilot_mode) {
       case AP_MODE_RATE_Z_HOLD:
       case AP_MODE_ATTITUDE_Z_HOLD:
       case AP_MODE_HOVER_Z_HOLD:
-      case AP_MODE_AUTOHEADING:
+      case AP_MODE_OPTIC_FLOW:
+	  case AP_MODE_AUTOHEADING:
         guidance_v_mode_changed(GUIDANCE_V_MODE_HOVER);
         break;
       case AP_MODE_HOME:

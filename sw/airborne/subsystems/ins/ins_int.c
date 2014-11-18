@@ -264,7 +264,12 @@ static void baro_cb(uint8_t __attribute__((unused)) sender_id, const float *pres
       ins_update_from_vff();
     }
     else {
-      ins_impl.baro_z = -pprz_isa_height_of_pressure(*pressure, ins_impl.qfe);
+      
+    
+    ins_impl.baro_z = -pprz_isa_height_of_pressure(*pressure, ins_impl.qfe);
+
+      
+      
 #if USE_VFF_EXTENDED
       vff_update_baro(ins_impl.baro_z);
 #else
@@ -330,12 +335,13 @@ void ins_update_gps(void) {
 #endif /* USE_GPS */
 
 
+
 #if USE_SONAR
 static void sonar_cb(uint8_t __attribute__((unused)) sender_id, const float *distance) {
   static float last_offset = 0.;
-
+      ins_impl.sonar_z = 1000*(*distance*0.67);
   /* update filter assuming a flat ground */
-  if (*distance < INS_SONAR_MAX_RANGE && *distance > INS_SONAR_MIN_RANGE
+  if (*distance*0.67 < INS_SONAR_MAX_RANGE && *distance*0.67 > INS_SONAR_MIN_RANGE
 #ifdef INS_SONAR_THROTTLE_THRESHOLD
       && stabilization_cmd[COMMAND_THRUST] < INS_SONAR_THROTTLE_THRESHOLD
 #endif
@@ -344,7 +350,7 @@ static void sonar_cb(uint8_t __attribute__((unused)) sender_id, const float *dis
 #endif
       && ins_impl.update_on_agl
       && ins_impl.baro_initialized) {
-    vff_update_z_conf(-(*distance), VFF_R_SONAR_0 + VFF_R_SONAR_OF_M * fabsf(*distance));
+    vff_update_z_conf(-(*distance*0.67), VFF_R_SONAR_0 + VFF_R_SONAR_OF_M * fabsf(*distance*0.67));
     last_offset = vff.offset;
   }
   else {
@@ -398,7 +404,7 @@ static void ins_update_from_hff(void) {
   ins_impl.ltp_accel.x = ACCEL_BFP_OF_REAL(b2_hff_state.xdotdot);
   ins_impl.ltp_accel.y = ACCEL_BFP_OF_REAL(b2_hff_state.ydotdot);
   ins_impl.ltp_speed.x = SPEED_BFP_OF_REAL(b2_hff_state.xdot);
-  ins_impl.ltp_speed.y = SPEED_BFP_OF_REAL(b2_hff_state.ydot);
+  ins_impl.ltp_speed.y = SPEED_BFP_OF_REAL(b2_hff_state.ydot);O
   ins_impl.ltp_pos.x   = POS_BFP_OF_REAL(b2_hff_state.x);
   ins_impl.ltp_pos.y   = POS_BFP_OF_REAL(b2_hff_state.y);
 }

@@ -1,14 +1,15 @@
 <!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
 
-<flight_plan alt="150" ground_alt="147" lat0="51.990634" lon0="4.376789" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="2">
+
+<flight_plan alt="148" ground_alt="147" lat0="51.990634" lon0="4.376771" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="0.1">
   <header>
 #include "autopilot.h"
   </header>
   <waypoints>
     <waypoint name="HOME" x="0.0" y="0.0"/>
-    <waypoint name="CLIMB" x="0.0" y="5.0"/>
-    <waypoint name="STDBY" x="-2.0" y="-5.0"/>
-    <waypoint name="TD" x="5.6" y="-10.9"/>
+    <waypoint name="CLIMB" x="0.0" y="0.0"/>
+    <waypoint name="STDBY" x="0.0" y="0.0"/>
+    <waypoint name="TD" x="0.0" y="0.0"/>
     <waypoint lat="51.990639" lon="4.376807" name="p1"/>
     <waypoint lat="51.990624" lon="4.376767" name="p2"/>
     <waypoint lat="51.990648" lon="4.376745" name="p3"/>
@@ -48,7 +49,7 @@
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
-      <exception cond="stateGetPositionEnu_f()->z > 2.0" deroute="Standby"/>
+      <exception cond="stateGetPositionEnu_f()->z > 1.0" deroute="Standby"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <stay vmode="climb" climb="0.5" wp="CLIMB"/>
     </block>

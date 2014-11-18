@@ -115,6 +115,9 @@ static void read_rc_setpoint_speed_i(struct Int32Vect2 *speed_sp, bool_t in_flig
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
 
+
+
+
 static void send_gh(void) {
   struct NedCoor_i* pos = stateGetPositionNed_i();
   DOWNLINK_SEND_GUIDANCE_H_INT(DefaultChannel, DefaultDevice,
@@ -191,7 +194,7 @@ void guidance_h_init(void) {
   guidance_h_vgain = GUIDANCE_H_VGAIN;
   transition_percentage = 0;
   transition_theta_offset = 0;
-
+  
   gh_ref_init();
 
 #if PERIODIC_TELEMETRY
@@ -234,6 +237,7 @@ void guidance_h_mode_changed(uint8_t new_mode) {
       stabilization_attitude_reset_care_free_heading();
     case GUIDANCE_H_MODE_FORWARD:
     case GUIDANCE_H_MODE_ATTITUDE:
+    case GUIDANCE_H_MODE_OPTIC_FLOW:
 #if NO_ATTITUDE_RESET_ON_MODE_CHANGE
       /* reset attitude stabilization if previous mode was not using it */
       if (guidance_h_mode == GUIDANCE_H_MODE_KILL ||
@@ -359,6 +363,7 @@ void guidance_h_run(bool_t  in_flight) {
       }
     case GUIDANCE_H_MODE_CARE_FREE:
     case GUIDANCE_H_MODE_ATTITUDE:
+    case GUIDANCE_H_MODE_OPTIC_FLOW:
       stabilization_attitude_run(in_flight);
       break;
 
@@ -426,12 +431,15 @@ void guidance_h_run(bool_t  in_flight) {
         /* set psi command */
         guidance_h_heading_sp = nav_heading;
         INT32_ANGLE_NORMALIZE(guidance_h_heading_sp);
-        /* compute x,y earth commands */
-        guidance_h_traj_run(in_flight);
-        /* set final attitude setpoint */
-        stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
+	
+	  /* compute x,y earth commands */
+	  guidance_h_traj_run(in_flight);
+	  
+	  /* set final attitude setpoint */
+	  stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
                                                guidance_h_heading_sp);
       }
+
       stabilization_attitude_run(in_flight);
       break;
 

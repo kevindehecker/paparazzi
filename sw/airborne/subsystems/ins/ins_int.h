@@ -61,7 +61,10 @@ struct InsInt {
 
 #if USE_SONAR
   bool_t update_on_agl; ///< use sonar to update agl if available
+  int sonar_z;
 #endif
+
+
 };
 
 /** global INS state */
