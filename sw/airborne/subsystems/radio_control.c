@@ -52,7 +52,9 @@ void radio_control_periodic_task(void)
   static uint8_t _1Hz;
   _1Hz++;
 
+#ifdef RADIO_KILL_SWITCH
   kill_switch_status_flight_plan = radio_control.values[RADIO_KILL_SWITCH];
+#endif
 
   if (_1Hz >= 60) {
     _1Hz = 0;
