@@ -233,14 +233,11 @@ fuckingsuperbitrfreducer = (fuckingsuperbitrfreducer +1) % 5;
 
     if (hysteresesDelay>0) { //keep track whether the drone is turning
         hysteresesDelay--;        
-        setAutoHeadingPitchAngle(0); // if the drone is turning, pitch backward to slow down
-        
+        setAutoHeadingPitchAngle(0); // if the drone is turning, pitch backward to slow down        
         setAutoHeadingRollAngle(vision_rollangle);
   
-
         LED_TOGGLE(1);
     } else {
-
         setAutoHeadingPitchAngle(vision_pitchangle); // if not turning, try to keep constant forward speed
         setAutoHeadingRollAngle(0.0);
         LED_OFF(1);

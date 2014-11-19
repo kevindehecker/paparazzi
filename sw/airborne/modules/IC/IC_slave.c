@@ -45,7 +45,7 @@
 
 //#include "state.h" //needed????
 #include "firmwares/rotorcraft/guidance/guidance_h.h" // to set heading
-
+#include "generated/modules.h" // to get periodic frequency
 
 
  /*  private function declarations  */
@@ -58,10 +58,16 @@ int       list_s;                /*  listening socket          */
 struct    sockaddr_in servaddr;  /*  socket address structure  */
 struct 	ICDataPackage tcp_data;
 
-int32_t vision_threshold;
-bool vision_turnbutton;
-float vision_turnspeed;
-float vision_pitchangle;
+int32_t IC_threshold;
+bool IC_turnbutton;
+float IC_turnspeed;
+float IC_pitchangle;
+float IC_rollangle;
+float IC_turnStepSize;
+
+uint32_t hysteresesDelay;
+uint32_t IC_hysteresesDelayFactor;
+
 
 int closeSocket(void) {
 	return close(list_s);
@@ -116,17 +122,23 @@ bool Read_socket(char * c, size_t maxlen) {
 
 
 extern void IC_slave_TurnButton(float whatever) {
-    vision_turnbutton = true;
+    IC_turnbutton = true;
 }
 
 extern void IC_start(void){
 		//init the socket	
 	
-    vision_turnspeed = 0.1;
-    vision_threshold = 6;
-    vision_turnbutton = false;
-    vision_pitchangle=-2;
-
+    IC_turnspeed = 0.1;
+    IC_threshold = 6;
+    IC_turnbutton = false;
+    IC_pitchangle=-2;
+  
+    IC_turnStepSize=90;
+    IC_hysteresesDelayFactor = 3;
+    IC_rollangle = 10.0;    
+    
+    hysteresesDelay=0;
+    
     initSocket();	
 	printf("IC module started\n");
 }
@@ -142,15 +154,34 @@ extern void IC_periodic(void) {
 	
 	char * c = (char *) &tcp_data; 
 	Read_socket(c,sizeof(tcp_data));
-	printf("IC gt: %d, nn: %d, thesh: %d\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_nn, vision_threshold);	
+	//printf("IC gt: %d, nn: %d, thresh: %d\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_nn, IC_threshold);	
 
-    setHeading_P(vision_turnspeed);
-    setAutoHeadingPitchAngle(vision_pitchangle);
 
-    if (vision_turnbutton) {
-        vision_turnbutton = false; // make it a one shot turn
-        incrementHeading(45.0);
+    if (hysteresesDelay==0)  { // wait until previous turn was completed
+        if (tcp_data.avgdisp_gt > IC_threshold) { //if object detected
+            
+            incrementHeading(IC_turnStepSize);
+            
+            hysteresesDelay = (float)IC_hysteresesDelayFactor * (((float)IC_turnStepSize / (float)IC_turnspeed ) / (float)IC_PERIODIC_FREQ);                  
+        } 
     }
+
+
+    if (hysteresesDelay>0) { //keep track whether the drone is turning
+        hysteresesDelay--;        
+        setAutoHeadingPitchAngle(0); // if the drone is turning, pitch backward to slow down        
+        setAutoHeadingRollAngle(IC_rollangle);
+    } else {
+        setAutoHeadingPitchAngle(IC_pitchangle); // if not turning, try to keep constant forward speed
+        setAutoHeadingRollAngle(0.0);        
+    }
+
+    setHeading_P(IC_turnspeed); // set turn speed, should be moved out of periodic loop...
+
+   if (IC_turnbutton) {
+        IC_turnbutton = false; // make it a one shot turn
+        incrementHeading(IC_turnStepSize);
+   } 
 }
 
 
