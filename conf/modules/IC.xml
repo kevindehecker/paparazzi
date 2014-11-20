@@ -6,7 +6,7 @@
      IC vision module, Kevin's graduation project.     
    </description>
    </doc>
-  <settings>
+<!--   <settings>
     <dl_settings name="control">
         <dl_settings name="hoer">
           <dl_setting var="IC_threshold"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Tresh" param="IC_THRESHOLD"/>
@@ -14,11 +14,11 @@
           <dl_setting var="IC_turnbutton" min="0" step="1"    max="1"   module="IC/IC_slave" shortname="Turn" values="FALSE|TRUE" handler="TurnButton"/>
         </dl_settings>
      </dl_settings>
-   </settings>
+   </settings> -->
 <header>
     <file name="IC_slave.h"/>
   </header>
-  <periodic fun="IC_periodic()" start="IC_start()" stop="IC_stop()" autorun="TRUE" freq="10"/>
+  <periodic fun="IC_periodic()" start="IC_start()" stop="IC_stop()" autorun="FALSE" freq="10"/>
   <makefile>
     <file name="IC_slave.c"/>
   </makefile>

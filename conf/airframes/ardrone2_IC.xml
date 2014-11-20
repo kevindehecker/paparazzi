@@ -4,8 +4,10 @@
 
   <firmware name="rotorcraft">
     <target name="ap" board="ardrone2_raw">
-      <define name="AUTOPILOT_DISABLE_AHRS_KILL"/>
+      <!-- <define name="AUTOPILOT_DISABLE_AHRS_KILL"/> -->
       <define name="FAILSAFE_DESCENT_SPEED" value="0.5"/>
+      <define name="USE_SONAR" value="1"/>
+      <define name="INS_SONAR_VARIANCE_THRESHOLD"/>
       <configure name="USE_MAGNETOMETER" value="0"/>
 
       <subsystem name="telemetry" type="transparent_udp"/>
@@ -29,12 +31,8 @@
 
   <modules main_freq="512">
     <load name="send_imu_mag_current.xml"/>
-    <load name="follow.xml">
-      <define name="FOLLOW_AC_ID" value="101"/>
-      <define name="FOLLOW_WAYPOINT_ID" value="WP_p1"/>
-      <define name="FOLLOW_OFFSET_Z" value="2.0"/>
-    </load>
-    <load name="IC.xml"/>
+    <load name="../../sw/ext/ardrone2_vision/modules/OpticFlowHist/OpticFlowHist.xml"/>
+	  <load name="IC.xml"/>
   </modules>
 
   <commands>
@@ -80,12 +78,18 @@
     <define name="ACCEL_Z_NEUTRAL" value="2048"/>
 
     <!-- Magneto calibration -->
-    <define name="MAG_X_NEUTRAL" value="0"/>
+    <!--define name="MAG_X_NEUTRAL" value="0"/>
     <define name="MAG_Y_NEUTRAL" value="0"/>
     <define name="MAG_Z_NEUTRAL" value="-180"/>
     <define name="MAG_X_SENS" value="16." integer="16"/>
     <define name="MAG_Y_SENS" value="16." integer="16"/>
-    <define name="MAG_Z_SENS" value="16." integer="16"/>
+    <define name="MAG_Z_SENS" value="16." integer="16"/-->
+    <define name="MAG_X_NEUTRAL" value="65"/>
+    <define name="MAG_Y_NEUTRAL" value="15"/>
+    <define name="MAG_Z_NEUTRAL" value="-34"/>
+    <define name="MAG_X_SENS" value="17.9856019048" integer="16"/>
+    <define name="MAG_Y_SENS" value="16.1644749768" integer="16"/>
+    <define name="MAG_Z_SENS" value="19.181956941" integer="16"/>
 
     <!-- Magneto current calibration -->
     <define name="MAG_X_CURRENT_COEF" value="0.0"/>
@@ -101,13 +105,13 @@
   <!-- http://wiki.paparazziuav.org/wiki/Subsystem/ahrs#Local_Magnetic_Field -->
   <section name="AHRS" prefix="AHRS_">
     <!-- Toulouse -->
-    <define name="H_X" value="0.513081"/>
+    <!--define name="H_X" value="0.513081"/>
     <define name="H_Y" value="-0.00242783"/>
-    <define name="H_Z" value="0.858336"/>
+    <define name="H_Z" value="0.858336"/-->
     <!-- Delft -->
-    <!--define name="H_X" value="0.3892503"/>
+    <define name="H_X" value="0.3892503"/>
     <define name="H_Y" value="0.0017972"/>
-    <define name="H_Z" value="0.9211303"/ -->
+    <define name="H_Z" value="0.9211303"/>
 
     <!-- Use GPS heading instead of magneto -->
     <define name="USE_GPS_HEADING" value="1"/>
@@ -115,6 +119,8 @@
 
   <section name="INS" prefix="INS_">
     <!-- Use GPS altitude measurments and set the R gain -->
+    <define name="SONAR_MAX_RANGE" value="4"/>
+    <define name="SONAR_UPDATE_ON_AGL" value="FALSE"/>    
     <define name="USE_GPS_ALT" value="1"/>
     <define name="VFF_R_GPS" value="0.01"/>
   </section>
@@ -226,8 +232,8 @@
   <section name="AUTOPILOT">
     <define name="MODE_STARTUP" value="AP_MODE_AUTOHEADING"/>
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO1" value="AP_MODE_AUTOHEADING"/>
-    <define name="MODE_AUTO2" value="AP_MODE_AUTOHEADING"/>
+ 	  <define name="MODE_AUTO1" value="AP_MODE_OPTIC_FLOW"/>
+    <define name="MODE_AUTO2" value="AP_MODE_OPTIC_FLOW"/>
   </section>
 
   <section name="BAT">
