@@ -100,8 +100,8 @@ extern bool_t nav_set_heading_current(void);
 #define CARROT 0
 #endif
 
-#define NavKillThrottle() ({ if ((autopilot_mode == AP_MODE_NAV) || (autopilot_mode == AP_MODE_AUTOHEADING)) { autopilot_set_motors_on(FALSE); } FALSE; })
-#define NavResurrect() ({ if ((autopilot_mode == AP_MODE_NAV) || (autopilot_mode == AP_MODE_AUTOHEADING)) { autopilot_set_motors_on(TRUE); } FALSE; })
+#define NavKillThrottle() ({ if (autopilot_mode == AP_MODE_NAV) { autopilot_set_motors_on(FALSE); } FALSE; })
+#define NavResurrect() ({ if (autopilot_mode == AP_MODE_NAV) { autopilot_set_motors_on(TRUE); } FALSE; })
 
 
 #define NavSetGroundReferenceHere() ({ nav_reset_reference(); FALSE; })

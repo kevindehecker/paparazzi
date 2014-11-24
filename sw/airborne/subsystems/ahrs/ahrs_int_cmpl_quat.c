@@ -112,8 +112,6 @@ static inline void set_body_state_from_quat(void);
 static inline void UNUSED ahrs_update_mag_full(float dt);
 static inline void ahrs_update_mag_2d(float dt);
 
-bool_t imu_to_body_force = TRUE;
-
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
 
@@ -263,7 +261,7 @@ void ahrs_propagate(float dt) {
   ahrs_impl.accel_cnt++;
   ahrs_impl.mag_cnt++;
 
-  if(imu_to_body_force)
+  if(autopilot_mode == AP_MODE_KILL)
     RunOnceEvery(500, {imu_SetBodyToImuCurrent(TRUE);});
 }
 
