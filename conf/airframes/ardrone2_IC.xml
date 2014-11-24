@@ -31,7 +31,7 @@
 
   <modules main_freq="512">
     <load name="send_imu_mag_current.xml"/>
-    <load name="../../sw/ext/ardrone2_vision/modules/OpticFlowHist/OpticFlowHist.xml"/>
+    <!--- load name="../../sw/ext/ardrone2_vision/modules/OpticFlowHist/OpticFlowHist.xml"/> --->
     <!--- <load name="IC.xml"/> -->
     <!-- load name="../../sw/ext/ardrone2_vision/modules/Mjpeg/ViewVideo.xml"/ -->
   </modules>
@@ -231,10 +231,10 @@
   </section>
 
   <section name="AUTOPILOT">
-    <define name="MODE_STARTUP" value="AP_MODE_AUTOHEADING"/>
+    <define name="MODE_STARTUP" value="AP_MODE_NAV"/>
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
- 	  <define name="MODE_AUTO1" value="AP_MODE_OPTIC_FLOW"/>
-    <define name="MODE_AUTO2" value="AP_MODE_OPTIC_FLOW"/>
+ 	  <define name="MODE_AUTO1" value="AP_MODE_NAV"/>
+    <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
   </section>
 
   <section name="BAT">
