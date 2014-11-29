@@ -42,10 +42,13 @@
 #include <arpa/inet.h>
 #include <time.h> 
 
-
-//#include "state.h" //needed????
 #include "firmwares/rotorcraft/guidance/guidance_h.h" // to set heading
 #include "generated/modules.h" // to get periodic frequency
+
+
+ #include "math/pprz_geodetic_int.h"
+#include "math/pprz_geodetic_float.h"
+ #include "navigation.h"
 
 
  /*  private function declarations  */
@@ -157,7 +160,7 @@ extern void IC_stop(void) {
 extern void IC_periodic(void) {
 	//read the data from the video tcp socket
 	
-	char * c = (char *) &tcp_data; 
+	// char * c = (char *) &tcp_data; 
 	//Read_socket(c,sizeof(tcp_data));
 	//printf("IC gt: %d, nn: %d, thresh: %d\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_nn, IC_threshold);	
 
@@ -197,3 +200,50 @@ extern void IC_periodic(void) {
 void increase_nav_heading(int32_t *heading, int32_t increment) {
   *heading = *heading + increment;
 }
+
+
+bool increase_nav_waypoint(int wp_id, int32_t distance, int32_t heading) {
+
+    struct EnuCoor_i *wp = &waypoints[wp_id];
+    printf("ori: wp.x %d, wp.y %d, distance %d, heading %d\n",(*wp).x,(*wp).y,distance,heading );
+
+
+    float alpha = (float)heading * 0.0175;
+
+    float x= cosf(alpha) * (float)distance;
+    float y= sinf(alpha) * (float)distance;
+    (*wp).x = (*wp).x+ x;
+    (*wp).y = (*wp).y+ y;
+
+
+
+
+    printf("res: wp.x %d, wp.y %d, distance %d, heading %d\n",(*wp).x,(*wp).y,distance,heading );
+
+    return false;
+  
+}
+
+
+
+
+
+
+// |         *
+// |        /
+// |       /
+// |      /
+// |     /
+// |    /
+// |   /
+// |  /
+// | /
+// |/
+// ------------
+
+
+
+// sos sin(alpha) = o/s  = y/distance, y = sin(alpha)*distance
+// cas cos(alpha) = a/s  = x/distance
+
+

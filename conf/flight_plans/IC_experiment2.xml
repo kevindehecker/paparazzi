@@ -23,6 +23,9 @@
     <waypoint lat="51.990643" lon="4.376721" name="GOAL1"/>
     <waypoint lat="51.990635" lon="4.376728" name="GOAL2"/>
     <waypoint lat="51.990643" lon="4.376743" name="GOAL3"/>
+
+    <waypoint lat="51.990616" lon="4.376845" name="TESTWP"/>
+
   </waypoints>
   <sectors>
     <sector color="red" name="Flight_Area">
@@ -34,6 +37,10 @@
   </sectors>
   <blocks>
     <block name="Wait GPS">
+      
+      <set value="stateGetNedToBodyEulers_i()->psi" var="nav_heading"/>
+      <call fun="increase_nav_waypoint(WP_TESTWP,100,90)"/>
+
       <call fun="NavKillThrottle()"/>
       <while cond="!GpsFixValid()"/>
     </block>
