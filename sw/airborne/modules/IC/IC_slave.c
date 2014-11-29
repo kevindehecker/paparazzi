@@ -202,11 +202,13 @@ void increase_nav_heading(int32_t *heading, int32_t increment) {
 }
 
 
+/*
+* Moves a waypoint forward with *distance* in direction of *heading*
+*
+*/
 bool increase_nav_waypoint(int wp_id, int32_t distance, int32_t heading) {
 
     struct EnuCoor_i *wp = &waypoints[wp_id];
-    printf("ori: wp.x %d, wp.y %d, distance %d, heading %d\n",(*wp).x,(*wp).y,distance,heading );
-
 
     float alpha = (float)heading * 0.0175;
 
@@ -215,35 +217,7 @@ bool increase_nav_waypoint(int wp_id, int32_t distance, int32_t heading) {
     (*wp).x = (*wp).x+ x;
     (*wp).y = (*wp).y+ y;
 
-
-
-
-    printf("res: wp.x %d, wp.y %d, distance %d, heading %d\n",(*wp).x,(*wp).y,distance,heading );
-
     return false;
   
 }
-
-
-
-
-
-
-// |         *
-// |        /
-// |       /
-// |      /
-// |     /
-// |    /
-// |   /
-// |  /
-// | /
-// |/
-// ------------
-
-
-
-// sos sin(alpha) = o/s  = y/distance, y = sin(alpha)*distance
-// cas cos(alpha) = a/s  = x/distance
-
 
