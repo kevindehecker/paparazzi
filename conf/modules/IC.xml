@@ -36,7 +36,7 @@
 <header>
     <file name="IC_slave.h"/>
   </header>
-  <periodic fun="IC_periodic()" start="IC_start()" stop="IC_stop()" autorun="FALSE" freq="10"/>
+  <periodic fun="IC_periodic()" start="IC_start()" stop="IC_stop()" autorun="TRUE" freq="10"/>
   <makefile>
     <file name="IC_slave.c"/>
   </makefile>

@@ -46,6 +46,7 @@ extern float IC_turnStepSize;
 extern bool obstacle_detected;
 extern uint32_t IC_hysteresesDelayFactor;
 
+extern void increase_nav_heading(int32_t *heading, int32_t increment);
 
 #define PORT	6969
 

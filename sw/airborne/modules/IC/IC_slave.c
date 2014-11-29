@@ -142,7 +142,7 @@ extern void IC_start(void){
     
     hysteresesDelay=0;
     
-    initSocket();	
+ //   initSocket();	
 	printf("IC module started\n");
 
 
@@ -150,7 +150,7 @@ extern void IC_start(void){
 
 
 extern void IC_stop(void) {	
-	closeSocket();
+//	closeSocket();
 	printf("IC module stopped\n");	
 }
 
@@ -158,7 +158,7 @@ extern void IC_periodic(void) {
 	//read the data from the video tcp socket
 	
 	char * c = (char *) &tcp_data; 
-	Read_socket(c,sizeof(tcp_data));
+	//Read_socket(c,sizeof(tcp_data));
 	//printf("IC gt: %d, nn: %d, thresh: %d\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_nn, IC_threshold);	
 
 
@@ -192,3 +192,8 @@ extern void IC_periodic(void) {
 
 
 //AP_MODE_ATTITUDE_Z_HOLD (A_ZH) , heading aanpassen
+
+
+void increase_nav_heading(int32_t *heading, int32_t increment) {
+  *heading = *heading + increment;
+}
