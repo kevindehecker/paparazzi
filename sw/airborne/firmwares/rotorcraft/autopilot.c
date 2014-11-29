@@ -396,6 +396,9 @@ void autopilot_set_mode(uint8_t new_autopilot_mode) {
       case AP_MODE_NAV:
         guidance_h_mode_changed(GUIDANCE_H_MODE_NAV);
         break;
+      case AP_MODE_OPTIC_FLOW:
+        guidance_h_mode_changed(GUIDANCE_H_MODE_OPTIC_FLOW);
+        break;
       default:
         break;
     }

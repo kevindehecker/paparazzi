@@ -12,8 +12,8 @@
     <waypoint name="p1" x="-2.2" y="0.1"/>
     <waypoint name="p2" x="-2.8" y="0.7"/>
     <waypoint lat="51.990616" lon="4.376845" name="FA1"/>
-    <waypoint lat="51.990590" lon="4.376757" name="FA2"/>
-    <waypoint lat="51.990643" lon="4.376708" name="FA3"/>
+    <waypoint lat="51.990587" lon="4.376759" name="FA2"/>
+    <waypoint lat="51.990646" lon="4.376704" name="FA3"/>
     <waypoint lat="51.990672" lon="4.376806" name="FA4"/>
     <waypoint lat="51.990640" lon="4.376741" name="midroom"/>
   </waypoints>

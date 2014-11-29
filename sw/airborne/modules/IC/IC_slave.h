@@ -43,6 +43,8 @@ extern bool IC_turnbutton;
 extern float IC_pitchangle;
 extern float IC_rollangle;
 extern float IC_turnStepSize;
+extern bool obstacle_detected;
+extern uint32_t IC_hysteresesDelayFactor;
 
 
 #define PORT	6969
@@ -51,7 +53,7 @@ extern void IC_start(void);
 extern void IC_stop(void);
 extern void IC_periodic(void);
 
-extern void IC_slave_TurnButton(float whatever);
+extern void IC_slave_TurnButton(bool value);
 
 #endif /* IC_SLAVE_H_ */
  

@@ -68,6 +68,9 @@ float IC_turnStepSize;
 uint32_t hysteresesDelay;
 uint32_t IC_hysteresesDelayFactor;
 
+bool obstacle_detected;
+
+
 
 int closeSocket(void) {
 	return close(list_s);
@@ -121,13 +124,13 @@ bool Read_socket(char * c, size_t maxlen) {
 }
 
 
-extern void IC_slave_TurnButton(float whatever) {
-    IC_turnbutton = true;
+extern void IC_slave_TurnButton(bool value) {
+    IC_turnbutton = value;
 }
 
 extern void IC_start(void){
-		//init the socket	
-	
+		
+	obstacle_detected = false;
     IC_turnspeed = 0.1;
     IC_threshold = 6;
     IC_turnbutton = false;
@@ -141,6 +144,8 @@ extern void IC_start(void){
     
     initSocket();	
 	printf("IC module started\n");
+
+
 }
 
 
@@ -157,31 +162,32 @@ extern void IC_periodic(void) {
 	//printf("IC gt: %d, nn: %d, thresh: %d\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_nn, IC_threshold);	
 
 
-    if (hysteresesDelay==0)  { // wait until previous turn was completed
-        if (tcp_data.avgdisp_gt > IC_threshold) { //if object detected
+   //  if (hysteresesDelay==0)  { // wait until previous turn was completed
+   //      if (tcp_data.avgdisp_gt > IC_threshold) { //if object detected
             
-            incrementHeading(IC_turnStepSize);
+   //          incrementHeading(IC_turnStepSize);
             
-            hysteresesDelay = (float)IC_hysteresesDelayFactor * (((float)IC_turnStepSize / (float)IC_turnspeed ) / (float)IC_PERIODIC_FREQ);                  
-        } 
-    }
+   //          hysteresesDelay = (float)IC_hysteresesDelayFactor * (((float)IC_turnStepSize / (float)IC_turnspeed ) / (float)IC_PERIODIC_FREQ);                  
+   //      } 
+   //  }
 
 
-    if (hysteresesDelay>0) { //keep track whether the drone is turning
-        hysteresesDelay--;        
-        setAutoHeadingPitchAngle(0); // if the drone is turning, pitch backward to slow down        
-        setAutoHeadingRollAngle(IC_rollangle);
-    } else {
-        setAutoHeadingPitchAngle(IC_pitchangle); // if not turning, try to keep constant forward speed
-        setAutoHeadingRollAngle(0.0);        
-    }
+   //  if (hysteresesDelay>0) { //keep track whether the drone is turning
+   //      hysteresesDelay--;        
+   //      setAutoHeadingPitchAngle(0); // if the drone is turning, pitch backward to slow down        
+   //      setAutoHeadingRollAngle(IC_rollangle);
+   //  } else {
+   //      setAutoHeadingPitchAngle(IC_pitchangle); // if not turning, try to keep constant forward speed
+   //      setAutoHeadingRollAngle(0.0);        
+   //  }
 
-    setHeading_P(IC_turnspeed); // set turn speed, should be moved out of periodic loop...
+   //  setHeading_P(IC_turnspeed); // set turn speed, should be moved out of periodic loop...
 
-   if (IC_turnbutton) {
-        IC_turnbutton = false; // make it a one shot turn
-        incrementHeading(IC_turnStepSize);
-   } 
+   // if (IC_turnbutton) {
+   //      IC_turnbutton = false; // make it a one shot turn
+   //      incrementHeading(IC_turnStepSize);
+   // }
+   obstacle_detected = IC_turnbutton; 
 }
 
 

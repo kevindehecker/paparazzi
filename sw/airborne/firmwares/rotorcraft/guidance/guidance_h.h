@@ -104,7 +104,7 @@ extern void guidance_h_run(bool_t in_flight);
 extern void incrementHeading(float heading_increment);
 extern void setHeading_P(float degreesSpeed);
 extern void setAutoHeadingPitchAngle(float pitchAngle);
-
+extern void setAutoHeadingRollAngle(float rollAngle);
 
 #define guidance_h_SetKi(_val) {            \
     guidance_h_igain = _val;                \
