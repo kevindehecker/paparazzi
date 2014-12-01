@@ -8,19 +8,14 @@
 #include "guidance/guidance_h_ref.h"
 </header>
   <waypoints>
-    <waypoint name="HOME" x="-2.6" y="0.7"/>
-    <waypoint name="CLIMB" x="-2.6" y="0.7"/>
-    <waypoint name="STDBY" x="-2.5" y="0.7"/>
-    <waypoint name="TD" x="5.6" y="-10.9"/>
-    <waypoint name="W0" x="5.6" y="-10.9"/>
-    <waypoint name="W1" x="5.6" y="-10.9"/>
-    <waypoint name="last_wp" x="-2.5" y="0.7"/>
-    <waypoint name="route_START" x="5.6" y="-10.9"/>
+    <waypoint name="HOME" x="-2.6" y="0.7"/>    
+    <waypoint name="STDBY" x="-2.5" y="0.7"/>            
     <waypoint lat="51.990616" lon="4.376845" name="FA1"/>
     <waypoint lat="51.990587" lon="4.376759" name="FA2"/>
     <waypoint lat="51.990646" lon="4.376704" name="FA3"/>
     <waypoint lat="51.990672" lon="4.376806" name="FA4"/>
     <waypoint lat="51.990643" lon="4.376721" name="GOAL"/>
+    <waypoint lat="51.990643" lon="4.376721" name="PREVGOAL"/>
   </waypoints>
   <sectors>
     <sector color="red" name="Flight_Area">
@@ -50,67 +45,61 @@
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
       <exception cond="stateGetPositionEnu_f()->z > 1" deroute="Standby"/>
-      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
-      <stay climb="0.5" vmode="climb" wp="CLIMB"/>
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <stay climb="0.3" vmode="climb" wp="STDBY"/>
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
       <exception cond="electrical.bat_low" deroute="land here"/>
-      <call fun="NavSetWaypointHere(WP_STDBY)"/>
-      <call fun="NavCopyWaypoint(WP_last_wp,WP_W0)"/>
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>      
       <stay wp="STDBY"/>
     </block>
     <block key="g" name="heading_to_GOAL">
-      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
+      <!-- <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/> -->
       <exception cond="electrical.bat_low" deroute="land here"/>
-      <call fun="nav_set_heading_towards_waypoint(WP_GOAL)"/>
-      <call fun="NavSetWaypointHere(WP_route_START)"/>
-      <stay until="stage_time > 1" wp="route_START"/>
+      <call fun="nav_set_heading_towards_waypoint(WP_GOAL)"/>      
+      <call fun="NavSetWaypointHere(WP_PREVGOAL)"/>
+      <stay until="stage_time > 1" wp="PREVGOAL"/>
     </block>
     <block name="route_to_GOAL">
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
       <exception cond="electrical.bat_low" deroute="land here"/>
-      <exception cond="obstacle_detected==1" deroute="stay_W0"/>
+      <exception cond="obstacle_detected==1" deroute="PreventCollision"/>
       <call fun="nav_set_heading_towards_waypoint(WP_GOAL)"/>
-      <go from="route_START" hmode="route" wp="GOAL"/>
-      <call fun="NavCopyWaypoint(WP_last_wp,WP_GOAL)"/>
-      <stay until="stage_time > 1" wp="GOAL"/>
-    </block>
-    <block name="set_new_GOAL">
-      <call fun="NavSetWaypointHere(WP_GOAL)"/>
-      <set value="stateGetNedToBodyEulers_i()->psi" var="nav_heading"/>
-      <call fun="increase_nav_waypoint(WP_GOAL,100,nav_heading)"/>  
-      <deroute block="route_to_GOAL"/>
-    </block>
 
-    <block name="stay_W0" pre_call="increase_nav_heading(&nav_heading, 45)">
-      <exception cond="obstacle_detected==0" deroute="set_new_GOAL"/>
+      
+
+      <while cond="obstacle_detected==0">
+        <go from="PREVGOAL" hmode="route" wp="GOAL"/>
+        <stay until="stage_time > 1" wp="GOAL"/>     
+        <call fun="NavSetWaypointHere(WP_PREVGOAL)"/>          
+        <call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)"/>  
+      </while>      
+      <!-- <deroute block="heading_to_GOAL"/> -->
+    </block>
+    
+
+    <block name="PreventCollision" pre_call="increase_nav_heading(&nav_heading, 45);NavSetWaypointHere(WP_GOAL);increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)">
+      <exception cond="obstacle_detected==0" deroute="heading_to_GOAL"/>
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
       <exception cond="electrical.bat_low" deroute="land here"/>
-      <call fun="NavSetWaypointHere(WP_W0)"/>
-      <call fun="NavCopyWaypoint(WP_last_wp,WP_W0)"/>
-      <stay wp="W0"/>
+      <call fun="NavSetWaypointHere(WP_PREVGOAL)"/>      
+      <stay wp="PREVGOAL"/>
     </block>
-    <!-- <block name="resume_route"> -->
-      <!-- <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/> -->
-      <!-- <exception cond="electrical.bat_low" deroute="land here"/> -->
-      <!-- <exception cond="obstacle_detected==1" deroute="stay_W0"/> -->
-      <!-- <go from="W0" hmode="route" wp="GOAL"/> -->
-      <!-- <call fun="NavCopyWaypoint(WP_last_wp,WP_W1)"/> -->
-      <!-- <deroute block="heading_to_GOAL"/> -->
-    <!-- </block> -->
+
+
     <block key="l" name="land here" strip_button="Land Here" strip_icon="land-right.png">
-      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
     </block>
     <block name="land">
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
-      <go wp="TD"/>
+      <go wp="STDBY"/>
     </block>
     <block name="flare">
       <exception cond="NavDetectGround()" deroute="landed"/>
       <exception cond="!nav_is_in_flight()" deroute="landed"/>
       <call fun="NavStartDetectGround()"/>
-      <stay climb="-1.0" until="stage_time > 3" vmode="climb" wp="TD"/>
+      <stay climb="-1.0" until="stage_time > 3" vmode="climb" wp="STDBY"/>
     </block>
     <block name="landed">
       <call fun="NavKillThrottle()"/>

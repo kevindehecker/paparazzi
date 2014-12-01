@@ -50,6 +50,8 @@
 #include "math/pprz_geodetic_float.h"
  #include "navigation.h"
 
+ #include "subsystems/datalink/downlink.h"
+
 
  /*  private function declarations  */
 int initSocket(void) ;
@@ -60,6 +62,8 @@ int closeSocket(void);
 int       list_s;                /*  listening socket          */
 struct    sockaddr_in servaddr;  /*  socket address structure  */
 struct 	ICDataPackage tcp_data;
+
+float alpha;
 
 int32_t IC_threshold;
 bool IC_turnbutton;
@@ -114,16 +118,16 @@ int initSocket() {
 }
 
 bool Read_socket(char * c, size_t maxlen) {
-    int n = 0;
+    int n = 0;    
     while (n<maxlen) {    
         usleep(1000); //TODO: improve this
         int tmpn = read(list_s, c+n, maxlen-n);        
         if (tmpn>0) {
         	n+=tmpn;      	
-        } 
+        } else {return true;} // return problem == true
         
     }
-    return true;
+    return false;
 }
 
 
@@ -135,7 +139,7 @@ extern void IC_start(void){
 		
 	obstacle_detected = false;
     IC_turnspeed = 0.1;
-    IC_threshold = 6;
+    IC_threshold = 130;
     IC_turnbutton = false;
     IC_pitchangle=-2;
   
@@ -144,8 +148,9 @@ extern void IC_start(void){
     IC_rollangle = 10.0;    
     
     hysteresesDelay=0;
+    IC_turnbutton=true;
     
- //   initSocket();	
+    initSocket();	
 	printf("IC module started\n");
 
 
@@ -160,9 +165,18 @@ extern void IC_stop(void) {
 extern void IC_periodic(void) {
 	//read the data from the video tcp socket
 	
-	// char * c = (char *) &tcp_data; 
-	//Read_socket(c,sizeof(tcp_data));
-	//printf("IC gt: %d, nn: %d, thresh: %d\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_nn, IC_threshold);	
+	char * c = (char *) &tcp_data; 
+	if (Read_socket(c,sizeof(tcp_data))) {return;};
+	printf("IC gt: %d, nn: %d, thresh: %d\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_nn, IC_threshold);	
+
+
+    if (tcp_data.avgdisp_gt > IC_threshold) {
+        obstacle_detected = true;
+    } else {
+        obstacle_detected = false;
+    }
+
+    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_nn), &IC_threshold, &alpha);
 
 
    //  if (hysteresesDelay==0)  { // wait until previous turn was completed
@@ -190,7 +204,8 @@ extern void IC_periodic(void) {
    //      IC_turnbutton = false; // make it a one shot turn
    //      incrementHeading(IC_turnStepSize);
    // }
-   obstacle_detected = IC_turnbutton; 
+
+   //obstacle_detected = IC_turnbutton;  // test switch in  IC settings tab
 }
 
 
@@ -206,16 +221,20 @@ void increase_nav_heading(int32_t *heading, int32_t increment) {
 * Moves a waypoint forward with *distance* in direction of *heading*
 *
 */
-bool increase_nav_waypoint(int wp_id, int32_t distance, int32_t heading) {
+ bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, int32_t distance, int32_t heading) {
 
-    struct EnuCoor_i *wp = &waypoints[wp_id];
+    alpha = -ANGLE_FLOAT_OF_BFP(heading) +1.5708;
+    // DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &alpha);
 
-    float alpha = (float)heading * 0.0175;
+    struct EnuCoor_i *wpc = &waypoints[wp_id_current];
+    struct EnuCoor_i *wpg = &waypoints[wp_id_goal];
+
+    //float alpha = (float)heading * 0.0175;
 
     float x= cosf(alpha) * (float)distance;
     float y= sinf(alpha) * (float)distance;
-    (*wp).x = (*wp).x+ x;
-    (*wp).y = (*wp).y+ y;
+    (*wpg).x = (*wpc).x+ x;
+    (*wpg).y = (*wpc).y+ y;
 
     return false;
   

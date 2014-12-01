@@ -48,7 +48,7 @@ extern bool obstacle_detected;
 extern uint32_t IC_hysteresesDelayFactor;
 
 extern void increase_nav_heading(int32_t *heading, int32_t increment);
-extern bool increase_nav_waypoint(int wp_id, int32_t distance, int32_t heading);
+extern bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, int32_t distance, int32_t heading);
 
 #define PORT	6969
 

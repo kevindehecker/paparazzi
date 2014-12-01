@@ -1942,14 +1942,12 @@
     <field name="Vy_kalman" 	 type="float"/>    
   </message>
 
-   <message name="STEREO" id="216">       
-    <field name="color_tresh" type="uint8"/>
-    <field name="stereo_tresh" type="uint8"/>
-    <field name="cnt_L" type="uint8"/>
-    <field name="cnt_R" type="uint8"/>
-    <field name="cnt_stereo" type="uint8"/>
-    <field name="hysteres" type="uint32"/> 
-    </message>
+  <message name="STEREO" id="216">           
+    <field name="avgdisp_gt" type="int32"/>
+    <field name="avgdisp_nn" type="int32"/>
+    <field name="IC_threshold" type="int32"/>
+    <field name="nav_heading" type="float"/>    
+  </message>
   <!--217 is free -->  
  
 

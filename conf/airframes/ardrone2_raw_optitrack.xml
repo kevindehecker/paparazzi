@@ -221,8 +221,8 @@
     <!-- reference model -->
     <define name="REF_OMEGA" value="RadOfDeg(67.)"/>
     <define name="REF_ZETA" value="0.85"/>
-    <define name="REF_MAX_ACCEL" value="5.66"/>
-    <define name="REF_MAX_SPEED" value="3"/>
+    <define name="REF_MAX_ACCEL" value="1.66"/>
+    <define name="REF_MAX_SPEED" value="0.2"/>
 
     <!-- gains -->
     <define name="PGAIN" value="116"/>
@@ -244,6 +244,8 @@
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD"/>
     <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
+
+    <define name="ARRIVED_AT_WAYPOINT" value="0.15"/>
   </section>
 
   <section name="BAT">
