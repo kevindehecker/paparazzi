@@ -33,12 +33,14 @@
  
 struct ICDataPackage {
   int avgdisp_gt;
+  int avgdisp_gt_stdev;
   int avgdisp_nn;
   char endl;             // endl fix :)
 };
 extern struct ICDataPackage video_impl;
 
 extern int32_t IC_threshold;
+extern int32_t IC_threshold_std;
 extern float IC_turnspeed;
 extern bool IC_turnbutton;
 extern float IC_pitchangle;
@@ -47,7 +49,7 @@ extern float IC_turnStepSize;
 extern bool obstacle_detected;
 extern uint32_t IC_hysteresesDelayFactor;
 
-extern void increase_nav_heading(int32_t *heading, int32_t increment);
+extern bool increase_nav_heading(int32_t *heading, int32_t increment);
 extern bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, int32_t distance, int32_t heading);
 
 #define PORT	6969

@@ -66,6 +66,7 @@ struct 	ICDataPackage tcp_data;
 float alpha;
 
 int32_t IC_threshold;
+int32_t IC_threshold_std;
 bool IC_turnbutton;
 float IC_turnspeed;
 float IC_pitchangle;
@@ -139,7 +140,8 @@ extern void IC_start(void){
 		
 	obstacle_detected = false;
     IC_turnspeed = 0.1;
-    IC_threshold = 130;
+    IC_threshold = 90;
+    IC_threshold_std = 70;
     IC_turnbutton = false;
     IC_pitchangle=-2;
   
@@ -167,16 +169,22 @@ extern void IC_periodic(void) {
 	
 	char * c = (char *) &tcp_data; 
 	if (Read_socket(c,sizeof(tcp_data))) {return;};
-	printf("IC gt: %d, nn: %d, thresh: %d\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_nn, IC_threshold);	
+	printf("IC gt: %d, std: %d, nn: %d, thresh: %d\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,tcp_data.avgdisp_nn, IC_threshold);	
 
-
-    if (tcp_data.avgdisp_gt > IC_threshold) {
-        obstacle_detected = true;
-    } else {
+    if (tcp_data.avgdisp_gt_stdev < IC_threshold_std) {
+        if (tcp_data.avgdisp_gt > IC_threshold) {
+            obstacle_detected = true;
+        } else {
+            obstacle_detected = false;
+        }
+    }
+    else { // if variance is too high, probably only far away objects....
         obstacle_detected = false;
+
     }
 
-    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_nn), &IC_threshold, &alpha);
+
+    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_nn), &IC_threshold,&IC_threshold_std, &alpha);
 
 
    //  if (hysteresesDelay==0)  { // wait until previous turn was completed
@@ -212,8 +220,9 @@ extern void IC_periodic(void) {
 //AP_MODE_ATTITUDE_Z_HOLD (A_ZH) , heading aanpassen
 
 
-void increase_nav_heading(int32_t *heading, int32_t increment) {
+bool increase_nav_heading(int32_t *heading, int32_t increment) {
   *heading = *heading + increment;
+  return false;
 }
 
 

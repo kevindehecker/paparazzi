@@ -56,7 +56,7 @@
     </block>
     <block key="g" name="heading_to_GOAL">
       <!-- <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/> -->
-      <exception cond="electrical.bat_low" deroute="land here"/>
+      <exception cond="electrical.bat_low" deroute="land here"/>      
       <call fun="nav_set_heading_towards_waypoint(WP_GOAL)"/>      
       <call fun="NavSetWaypointHere(WP_PREVGOAL)"/>
       <stay until="stage_time > 1" wp="PREVGOAL"/>
@@ -64,28 +64,46 @@
     <block name="route_to_GOAL">
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
       <exception cond="electrical.bat_low" deroute="land here"/>
-      <exception cond="obstacle_detected==1" deroute="PreventCollision"/>
+      <exception cond="obstacle_detected==1" deroute="GoBackaBit"/>
       <call fun="nav_set_heading_towards_waypoint(WP_GOAL)"/>
 
       
-
       <while cond="obstacle_detected==0">
         <go from="PREVGOAL" hmode="route" wp="GOAL"/>
         <stay until="stage_time > 1" wp="GOAL"/>     
         <call fun="NavSetWaypointHere(WP_PREVGOAL)"/>          
         <call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)"/>  
       </while>      
-      <!-- <deroute block="heading_to_GOAL"/> -->
     </block>
-    
 
-    <block name="PreventCollision" pre_call="increase_nav_heading(&nav_heading, 45);NavSetWaypointHere(WP_GOAL);increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)">
-      <exception cond="obstacle_detected==0" deroute="heading_to_GOAL"/>
+
+    <block name="GoBackaBit">
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
       <exception cond="electrical.bat_low" deroute="land here"/>
-      <call fun="NavSetWaypointHere(WP_PREVGOAL)"/>      
+      <call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,-20,nav_heading)"/>  
+      <stay until="stage_time > 1" wp="GOAL"/> 
+      <call fun="NavSetWaypointHere(WP_PREVGOAL)"/>  
+    </block>
+
+    <block name="TurnAway" pre_call="increase_nav_heading(&nav_heading, 90);NavSetWaypointHere(WP_GOAL);increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)">
+      <exception cond="obstacle_detected==0" deroute="TurnaBitMore"/>
+      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
+      <exception cond="electrical.bat_low" deroute="land here"/>          
       <stay wp="PREVGOAL"/>
     </block>
+
+    <block name="TurnaBitMore">
+      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
+      <exception cond="electrical.bat_low" deroute="land here"/>
+      <exception cond="obstacle_detected==1" deroute="TurnAway"/>
+      <call fun="increase_nav_heading(&nav_heading, 90)"/>
+      <call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)"/>      
+      <stay until="stage_time > 1" wp="PREVGOAL" />
+      <deroute block="heading_to_GOAL"/>
+
+    </block>
+
+
 
 
     <block key="l" name="land here" strip_button="Land Here" strip_icon="land-right.png">

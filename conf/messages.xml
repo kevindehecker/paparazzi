@@ -1944,8 +1944,10 @@
 
   <message name="STEREO" id="216">           
     <field name="avgdisp_gt" type="int32"/>
+    <field name="avgdisp_gt_stdev" type="int32"/>
     <field name="avgdisp_nn" type="int32"/>
-    <field name="IC_threshold" type="int32"/>
+    <field name="IC_threshold_avg" type="int32"/>
+    <field name="IC_threshold_std" type="int32"/>
     <field name="nav_heading" type="float"/>    
   </message>
   <!--217 is free -->  
