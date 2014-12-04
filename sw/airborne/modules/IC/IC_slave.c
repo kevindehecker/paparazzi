@@ -50,11 +50,15 @@
 #include "math/pprz_geodetic_float.h"
  #include "navigation.h"
 
+
+#include "autopilot.h"
+#include "guidance/guidance_h_ref.h"
+
  #include "subsystems/datalink/downlink.h"
 
 
  /*  private function declarations  */
-int initSocket(void) ;
+bool initSocket(void) ;
 bool Read_socket(char * c, size_t maxlen) ;
 int closeSocket(void);
 
@@ -62,6 +66,8 @@ int closeSocket(void);
 int       list_s;                /*  listening socket          */
 struct    sockaddr_in servaddr;  /*  socket address structure  */
 struct 	ICDataPackage tcp_data;
+
+int noDataCounter;
 
 float alpha;
 
@@ -78,18 +84,31 @@ uint32_t IC_hysteresesDelayFactor;
 
 bool obstacle_detected;
 
+int32_t scanMin_gtavg;
+int32_t scanMax_gtavg;
+int32_t scanMin_gtstd;
+int32_t scanMax_gtstd;
+int32_t scanMin_nnavg;
+int32_t scanMax_nnavg;
+
+int32_t scanMin_gtavg_heading;
+int32_t scanMax_gtavg_heading;
+int32_t scanMin_gtstd_heading;
+int32_t scanMax_gtstd_heading;
+int32_t scanMin_nnavg_heading;
+int32_t scanMax_nnavg_heading;
 
 
 int closeSocket(void) {
 	return close(list_s);
 }
 
-int initSocket() {
+bool initSocket() {
 
     /*  Create the listening socket  */
     if ( (list_s = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
 	   fprintf(stderr, "TCP server: Error creating listening socket.\n");
-	   return 1;
+	   return true;
     }
     // printf("list_s: %d\n",list_s );
 
@@ -105,17 +124,17 @@ int initSocket() {
 	if(inet_pton(AF_INET, ipa, &servaddr.sin_addr)<=0)
     {
         printf("\n inet_pton error occured\n");
-        return 1;
+        return true;
     } 
 
     if( !connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
     {
        printf("\n Error connect failed: %s:%d \n",ipa,PORT);
-       return 1;
+       return true;
     } 
      printf("Connected to IC program: %s:%d \n",ipa,PORT);
 
-	return 0;
+	return false;
 }
 
 bool Read_socket(char * c, size_t maxlen) {
@@ -151,8 +170,12 @@ extern void IC_start(void){
     
     hysteresesDelay=0;
     IC_turnbutton=true;
+    noDataCounter=0;
     
-    initSocket();	
+    if (initSocket()) {
+        printf("Could not connect to IC\n"); // hmm, this does not work
+        exit(1);
+    }	
 	printf("IC module started\n");
 
 
@@ -168,19 +191,53 @@ extern void IC_periodic(void) {
 	//read the data from the video tcp socket
 	
 	char * c = (char *) &tcp_data; 
-	if (Read_socket(c,sizeof(tcp_data))) {return;};
+	if (Read_socket(c,sizeof(tcp_data))) {
+        noDataCounter++;
+        if (noDataCounter>100) {
+            printf("No IC data received for too long.") ;           
+        }
+        return;
+    } else {
+        noDataCounter=0;
+    }
 	printf("IC gt: %d, std: %d, nn: %d, thresh: %d\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,tcp_data.avgdisp_nn, IC_threshold);	
 
     if (tcp_data.avgdisp_gt_stdev < IC_threshold_std) {
-        if (tcp_data.avgdisp_gt > IC_threshold) {
+       // if (tcp_data.avgdisp_gt > IC_threshold) {
             obstacle_detected = true;
-        } else {
-            obstacle_detected = false;
-        }
+        // } else {
+        //     obstacle_detected = false;
+        // }
     }
     else { // if variance is too high, probably only far away objects....
         obstacle_detected = false;
+    }
 
+    //scanner:    
+    if (scanMin_gtavg > tcp_data.avgdisp_gt) {
+        scanMin_gtavg = tcp_data.avgdisp_gt;
+        scanMin_gtavg_heading = stateGetNedToBodyEulers_i()->psi;
+    }
+    if (scanMin_gtstd > tcp_data.avgdisp_gt_stdev ) {
+        scanMin_gtstd = tcp_data.avgdisp_gt_stdev;
+        scanMin_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
+    }    
+    if (scanMin_nnavg > tcp_data.avgdisp_nn ) {
+        scanMin_nnavg = tcp_data.avgdisp_nn;
+        scanMin_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
+    }
+
+    if (scanMax_gtavg < tcp_data.avgdisp_gt ) {
+        scanMax_gtavg = tcp_data.avgdisp_gt;
+        scanMax_gtavg_heading = stateGetNedToBodyEulers_i()->psi;
+    }
+    if (scanMax_gtstd < tcp_data.avgdisp_gt_stdev ) {
+        scanMax_gtstd = tcp_data.avgdisp_gt_stdev;
+        scanMax_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
+    }    
+    if (scanMax_nnavg < tcp_data.avgdisp_nn ) {
+        scanMax_nnavg = tcp_data.avgdisp_nn;
+        scanMax_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
     }
 
 
@@ -221,7 +278,8 @@ extern void IC_periodic(void) {
 
 
 bool increase_nav_heading(int32_t *heading, int32_t increment) {
-  *heading = *heading + increment;
+//  stateGetNedToBodyEulers_i()->psi = stateGetNedToBodyEulers_i()->psi + increment;
+     *heading = *heading + increment;
   return false;
 }
 
@@ -260,3 +318,30 @@ bool goBackaBit(int wp_id_current,int wp_id_prevgoal) {
     return false;
 }
 
+bool startNewScan() {
+    scanMin_gtavg = tcp_data.avgdisp_gt;
+    scanMax_gtavg = tcp_data.avgdisp_gt;
+    scanMin_nnavg = tcp_data.avgdisp_nn;
+    scanMax_nnavg = tcp_data.avgdisp_nn;
+    scanMin_gtstd = tcp_data.avgdisp_gt_stdev;
+    scanMax_gtstd = tcp_data.avgdisp_gt_stdev;
+
+    scanMax_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
+    scanMax_gtavg_heading = stateGetNedToBodyEulers_i()->psi;
+    scanMin_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
+    scanMax_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
+    scanMin_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
+    scanMax_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
+
+
+    scanMin_gtavg_heading = stateGetNedToBodyEulers_i()->psi;
+    scanMax_gtavg_heading = stateGetNedToBodyEulers_i()->psi;
+    scanMin_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
+    scanMax_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
+    scanMin_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
+    scanMax_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
+
+
+    
+    return false;
+}

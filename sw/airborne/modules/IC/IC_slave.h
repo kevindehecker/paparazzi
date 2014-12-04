@@ -49,9 +49,19 @@ extern float IC_turnStepSize;
 extern bool obstacle_detected;
 extern uint32_t IC_hysteresesDelayFactor;
 
-extern bool increase_nav_heading(int32_t *heading, int32_t increment);
+extern bool increase_nav_heading(int32_t *heading,int32_t increment);
 extern bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, int32_t distance, int32_t heading);
 extern bool goBackaBit(int wp_id_current,int wp_id_prevgoal);
+
+extern bool startNewScan(void);
+extern int32_t scanMin_gtavg;
+extern int32_t scanMax_gtavg;
+extern int32_t scanMin_gtstd;
+extern int32_t scanMax_gtstd;
+extern int32_t scanMin_nnavg;
+extern int32_t scanMax_nnavg;
+
+extern int noDataCounter;
 
 #define PORT	6969
 
