@@ -468,7 +468,7 @@ static void baro_update_logic(void)
     spike_detected = 3;
 
     spikes++;
-    printf("Spike! # %d\n",spikes);
+    // printf("Spike! # %d\n",spikes);
   }
 
   if (spike_detected > 0)

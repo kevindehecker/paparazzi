@@ -20,9 +20,9 @@
     <waypoint lat="51.990587" lon="4.376759" name="FA2"/>
     <waypoint lat="51.990646" lon="4.376704" name="FA3"/>
     <waypoint lat="51.990672" lon="4.376806" name="FA4"/>
-    <waypoint lat="51.990643" lon="4.376721" name="GOAL1"/>
-    <waypoint lat="51.990635" lon="4.376728" name="GOAL2"/>
-    <waypoint lat="51.990643" lon="4.376743" name="GOAL3"/>
+    <waypoint lat="51.990643" lon="4.376724" name="GOAL1"/>
+    <waypoint lat="51.990635" lon="4.376730" name="GOAL2"/>
+    <waypoint lat="51.990646" lon="4.376753" name="GOAL3"/>
   </waypoints>
   <sectors>
     <sector color="red" name="Flight_Area">

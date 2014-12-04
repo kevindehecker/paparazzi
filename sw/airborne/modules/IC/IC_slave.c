@@ -88,10 +88,10 @@ int initSocket() {
 
     /*  Create the listening socket  */
     if ( (list_s = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
-	fprintf(stderr, "tcp server: Error creating listening socket.\n");
-	return -1;
+	   fprintf(stderr, "TCP server: Error creating listening socket.\n");
+	   return 1;
     }
-    printf("list_s: %d\n",list_s );
+    // printf("list_s: %d\n",list_s );
 
     /*  Set all bytes in socket address structure to
         zero, and fill in the relevant data members   */
@@ -108,14 +108,14 @@ int initSocket() {
         return 1;
     } 
 
-    if( connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
+    if( !connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
     {
        printf("\n Error connect failed: %s:%d \n",ipa,PORT);
        return 1;
     } 
-     printf("\n Connected: %s:%d \n",ipa,PORT);
+     printf("Connected to IC program: %s:%d \n",ipa,PORT);
 
-	return 1;
+	return 0;
 }
 
 bool Read_socket(char * c, size_t maxlen) {
@@ -247,5 +247,16 @@ bool increase_nav_heading(int32_t *heading, int32_t increment) {
 
     return false;
   
+}
+
+bool goBackaBit(int wp_id_current,int wp_id_prevgoal) {
+
+    struct EnuCoor_i wpc = waypoints[wp_id_current];
+    //struct EnuCoor_i *wpg = &waypoints[wp_id_goal];
+    struct EnuCoor_i wpp = waypoints[wp_id_prevgoal];
+
+    wpc.x = wpp.x+ (wpc.x - wpp.x)/2;
+    wpc.y = wpp.y+ (wpc.y - wpp.y)/2;
+    return false;
 }
 
