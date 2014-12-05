@@ -9,28 +9,11 @@
   <settings>
     <dl_settings name="control">
         <dl_settings name="IC">
-          <dl_setting var="IC_threshold"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Tresh avg" param="IC_THRESHOLD"/>
-          <dl_setting var="IC_threshold_std"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Tresh std" param="IC_THRESHOLD_STD"/>
-          <dl_setting var="IC_turnspeed"  min="0" step="0.01" max="1"   module="IC/IC_slave" shortname="Turn speed" param="IC_TURNSPEED"/>  
-          <dl_setting var="IC_turnbutton" min="0" step="1"    max="1"   module="IC/IC_slave" shortname="Turn" values="FALSE|TRUE" handler="TurnButton"/>
-
-          <dl_setting var="IC_pitchangle"  min="-15" step="0.5" max="5"   module="IC/IC_slave" shortname="Pitch angle"/>
-          <dl_setting var="IC_rollangle"  min="-50" step="1" max="50"   module="IC/IC_slave" shortname="Roll angle"/>
-          <dl_setting var="IC_turnStepSize"  min="0" step="1" max="360"   module="IC/IC_slave" shortname="Turn angle step size"/>
-          <dl_setting var="IC_hysteresesDelayFactor"  min="0" step="1" max="100"   module="IC/IC_slave" shortname="Hystereses delay factor"/>
-
-<!--    <dl_setting var="vision_objectthreshold"  min="0"    step="1"    max="255" module="AutoHeading/autoheading" shortname="Disp tresh"/>
-           <dl_setting var="vision_turnspeed"  min="0.02" step="0.01" max="5"   module="AutoHeading/autoheading" shortname="Turn speed"/>
-           <dl_setting var="vision_pitchangle"  min="-15" step="0.5" max="5"   module="AutoHeading/autoheading" shortname="Pitch angle"/>
--          <dl_setting var="vision_rollangle"  min="-50" step="1" max="50"   module="AutoHeading/autoheading" shortname="Roll angle"/>
-           <dl_setting var="vision_turnStepSize"  min="0" step="1" max="360"   module="AutoHeading/autoheading" shortname="Turn angle step size"/>
-           <dl_setting var="vision_hysteresesDelayFactor"  min="0" step="1" max="100"   module="AutoHeading/autoheading" shortname="Hystereses delay factor"/>
-           <dl_setting var="vision_filterWidth"  min="0" step="1" max="500"   module="AutoHeading/autoheading" shortname="Filter width"/>
-
- -->
-
-
-
+          <dl_setting var="IC_threshold_gt"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Tresh avg" param="IC_THRESHOLD"/>
+          <dl_setting var="IC_threshold_gtstd"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Tresh std" param="IC_THRESHOLD_STD"/>
+          <dl_setting var="IC_threshold_nn"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Tresh avg" param="IC_THRESHOLD"/>                    
+          <dl_setting var="IC_flymode" min="0" step="1"    max="1"   module="IC/IC_slave" shortname="FlyMode" values="Stereo|Textons" handler="FlyModeButton"/>
+          <dl_setting var="IC_learnmode" min="0" step="1"    max="3"   module="IC/IC_slave" shortname="LearnMode" values="none|textons|stereo|both" handler="LearnModeButton"/>
         </dl_settings>
      </dl_settings>
    </settings> 

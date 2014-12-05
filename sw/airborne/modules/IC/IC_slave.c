@@ -67,37 +67,20 @@ int       list_s;                /*  listening socket          */
 struct    sockaddr_in servaddr;  /*  socket address structure  */
 struct 	ICDataPackage tcp_data;
 
-int noDataCounter;
+
 
 float alpha;
 
-int32_t IC_threshold;
-int32_t IC_threshold_std;
+int32_t IC_threshold_nn;
+int32_t IC_threshold_gt;
+int32_t IC_threshold_gtstd;
 bool IC_turnbutton;
-float IC_turnspeed;
-float IC_pitchangle;
-float IC_rollangle;
-float IC_turnStepSize;
 
-uint32_t hysteresesDelay;
-uint32_t IC_hysteresesDelayFactor;
+int8_t IC_flymode;
+int8_t IC_learnmode;
 
-bool obstacle_detected;
-
-int32_t scanMin_gtavg;
-int32_t scanMax_gtavg;
-int32_t scanMin_gtstd;
-int32_t scanMax_gtstd;
-int32_t scanMin_nnavg;
-int32_t scanMax_nnavg;
-
-int32_t scanMin_gtavg_heading;
-int32_t scanMax_gtavg_heading;
-int32_t scanMin_gtstd_heading;
-int32_t scanMax_gtstd_heading;
-int32_t scanMin_nnavg_heading;
-int32_t scanMax_nnavg_heading;
-
+bool obstacle_detected; // signal to flightplan
+int noDataCounter;      //signal to flightplan if IC is running OK
 
 int closeSocket(void) {
 	return close(list_s);
@@ -110,7 +93,7 @@ bool initSocket() {
 	   fprintf(stderr, "TCP server: Error creating listening socket.\n");
 	   return true;
     }
-    // printf("list_s: %d\n",list_s );
+     printf("list_s: %d\n",list_s );
 
     /*  Set all bytes in socket address structure to
         zero, and fill in the relevant data members   */
@@ -123,16 +106,16 @@ bool initSocket() {
     servaddr.sin_port        = htons(PORT);
 	if(inet_pton(AF_INET, ipa, &servaddr.sin_addr)<=0)
     {
-        printf("\n inet_pton error occured\n");
+        printf("inet_pton error occured\n");
         return true;
     } 
 
-    if( !connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
+    if(!connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) )
     {
-       printf("\n Error connect failed: %s:%d \n",ipa,PORT);
+       printf("Error connect failed: %s:%d \n",ipa,PORT);
        return true;
     } 
-     printf("Connected to IC program: %s:%d \n",ipa,PORT);
+     printf("Started IC program tcp listener: %s:%d \n",ipa,PORT);
 
 	return false;
 }
@@ -151,24 +134,22 @@ bool Read_socket(char * c, size_t maxlen) {
 }
 
 
-extern void IC_slave_TurnButton(bool value) {
-    IC_turnbutton = value;
+extern void IC_slave_FlyModeButton(int8_t value) {
+    IC_flymode = value;
+}
+extern void IC_slave_LearnModeButton(int8_t value) {
+    IC_learnmode = value;
+    //TODO: communicate this to IC
 }
 
-extern void IC_start(void){
-		
+extern void IC_start(void){		
 	obstacle_detected = false;
-    IC_turnspeed = 0.1;
-    IC_threshold = 90;
-    IC_threshold_std = 70;
-    IC_turnbutton = false;
-    IC_pitchangle=-2;
-  
-    IC_turnStepSize=90;
-    IC_hysteresesDelayFactor = 3;
-    IC_rollangle = 10.0;    
     
-    hysteresesDelay=0;
+    IC_threshold_gt = 90;
+    IC_threshold_nn = 90;
+    IC_threshold_gtstd = 70;
+    IC_turnbutton = false;
+            
     IC_turnbutton=true;
     noDataCounter=0;
     
@@ -177,8 +158,6 @@ extern void IC_start(void){
         exit(1);
     }	
 	printf("IC module started\n");
-
-
 }
 
 
@@ -200,9 +179,15 @@ extern void IC_periodic(void) {
     } else {
         noDataCounter=0;
     }
-	printf("IC gt: %d, std: %d, nn: %d, thresh: %d\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,tcp_data.avgdisp_nn, IC_threshold);	
+	if (IC_flymode==stereo) {
+        printf("IC gt: %d, std: %d, thresh_gt: %d \n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,IC_threshold_gt);        
+    } else {
+        printf("IC nn: %d, thresh_nn: %d\n",tcp_data.avgdisp_nn,IC_threshold_nn);        
+    }
+    
 
-    if (tcp_data.avgdisp_gt_stdev < IC_threshold_std) {
+if (IC_flymode==stereo){
+    if (tcp_data.avgdisp_gt_stdev < IC_threshold_gtstd) {
        // if (tcp_data.avgdisp_gt > IC_threshold) {
             obstacle_detected = true;
         // } else {
@@ -213,72 +198,18 @@ extern void IC_periodic(void) {
         obstacle_detected = false;
     }
 
-    //scanner:    
-    if (scanMin_gtavg > tcp_data.avgdisp_gt) {
-        scanMin_gtavg = tcp_data.avgdisp_gt;
-        scanMin_gtavg_heading = stateGetNedToBodyEulers_i()->psi;
-    }
-    if (scanMin_gtstd > tcp_data.avgdisp_gt_stdev ) {
-        scanMin_gtstd = tcp_data.avgdisp_gt_stdev;
-        scanMin_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
-    }    
-    if (scanMin_nnavg > tcp_data.avgdisp_nn ) {
-        scanMin_nnavg = tcp_data.avgdisp_nn;
-        scanMin_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
-    }
+} else {
+    obstacle_detected = (tcp_data.avgdisp_nn > IC_threshold_nn); 
+}
 
-    if (scanMax_gtavg < tcp_data.avgdisp_gt ) {
-        scanMax_gtavg = tcp_data.avgdisp_gt;
-        scanMax_gtavg_heading = stateGetNedToBodyEulers_i()->psi;
-    }
-    if (scanMax_gtstd < tcp_data.avgdisp_gt_stdev ) {
-        scanMax_gtstd = tcp_data.avgdisp_gt_stdev;
-        scanMax_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
-    }    
-    if (scanMax_nnavg < tcp_data.avgdisp_nn ) {
-        scanMax_nnavg = tcp_data.avgdisp_nn;
-        scanMax_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
-    }
+    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_nn), &IC_threshold_gt,&IC_threshold_gtstd,&IC_threshold_nn, &alpha);
 
-
-    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_nn), &IC_threshold,&IC_threshold_std, &alpha);
-
-
-   //  if (hysteresesDelay==0)  { // wait until previous turn was completed
-   //      if (tcp_data.avgdisp_gt > IC_threshold) { //if object detected
-            
-   //          incrementHeading(IC_turnStepSize);
-            
-   //          hysteresesDelay = (float)IC_hysteresesDelayFactor * (((float)IC_turnStepSize / (float)IC_turnspeed ) / (float)IC_PERIODIC_FREQ);                  
-   //      } 
-   //  }
-
-
-   //  if (hysteresesDelay>0) { //keep track whether the drone is turning
-   //      hysteresesDelay--;        
-   //      setAutoHeadingPitchAngle(0); // if the drone is turning, pitch backward to slow down        
-   //      setAutoHeadingRollAngle(IC_rollangle);
-   //  } else {
-   //      setAutoHeadingPitchAngle(IC_pitchangle); // if not turning, try to keep constant forward speed
-   //      setAutoHeadingRollAngle(0.0);        
-   //  }
-
-   //  setHeading_P(IC_turnspeed); // set turn speed, should be moved out of periodic loop...
-
-   // if (IC_turnbutton) {
-   //      IC_turnbutton = false; // make it a one shot turn
-   //      incrementHeading(IC_turnStepSize);
-   // }
 
    //obstacle_detected = IC_turnbutton;  // test switch in  IC settings tab
 }
 
 
-//AP_MODE_ATTITUDE_Z_HOLD (A_ZH) , heading aanpassen
-
-
 bool increase_nav_heading(int32_t *heading, int32_t increment) {
-//  stateGetNedToBodyEulers_i()->psi = stateGetNedToBodyEulers_i()->psi + increment;
      *heading = *heading + increment;
   return false;
 }
@@ -318,30 +249,3 @@ bool goBackaBit(int wp_id_current,int wp_id_prevgoal) {
     return false;
 }
 
-bool startNewScan() {
-    scanMin_gtavg = tcp_data.avgdisp_gt;
-    scanMax_gtavg = tcp_data.avgdisp_gt;
-    scanMin_nnavg = tcp_data.avgdisp_nn;
-    scanMax_nnavg = tcp_data.avgdisp_nn;
-    scanMin_gtstd = tcp_data.avgdisp_gt_stdev;
-    scanMax_gtstd = tcp_data.avgdisp_gt_stdev;
-
-    scanMax_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
-    scanMax_gtavg_heading = stateGetNedToBodyEulers_i()->psi;
-    scanMin_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
-    scanMax_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
-    scanMin_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
-    scanMax_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
-
-
-    scanMin_gtavg_heading = stateGetNedToBodyEulers_i()->psi;
-    scanMax_gtavg_heading = stateGetNedToBodyEulers_i()->psi;
-    scanMin_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
-    scanMax_gtstd_heading = stateGetNedToBodyEulers_i()->psi;
-    scanMin_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
-    scanMax_nnavg_heading = stateGetNedToBodyEulers_i()->psi;
-
-
-    
-    return false;
-}

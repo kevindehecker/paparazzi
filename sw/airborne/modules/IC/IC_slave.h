@@ -39,27 +39,23 @@ struct ICDataPackage {
 };
 extern struct ICDataPackage video_impl;
 
-extern int32_t IC_threshold;
-extern int32_t IC_threshold_std;
-extern float IC_turnspeed;
+enum flymode{ stereo, textons};
+
+enum learnmode{none,stereo_only,textons_only,stereo_textons};
+
+extern int32_t IC_threshold_gt;
+extern int32_t IC_threshold_gtstd;
+extern int32_t IC_threshold_nn;
 extern bool IC_turnbutton;
-extern float IC_pitchangle;
-extern float IC_rollangle;
-extern float IC_turnStepSize;
+extern int8_t IC_flymode;
+extern int8_t IC_learnmode;
+
+
 extern bool obstacle_detected;
-extern uint32_t IC_hysteresesDelayFactor;
 
 extern bool increase_nav_heading(int32_t *heading,int32_t increment);
 extern bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, int32_t distance, int32_t heading);
 extern bool goBackaBit(int wp_id_current,int wp_id_prevgoal);
-
-extern bool startNewScan(void);
-extern int32_t scanMin_gtavg;
-extern int32_t scanMax_gtavg;
-extern int32_t scanMin_gtstd;
-extern int32_t scanMax_gtstd;
-extern int32_t scanMin_nnavg;
-extern int32_t scanMax_nnavg;
 
 extern int noDataCounter;
 
@@ -69,7 +65,8 @@ extern void IC_start(void);
 extern void IC_stop(void);
 extern void IC_periodic(void);
 
-extern void IC_slave_TurnButton(bool value);
+extern void IC_slave_FlyModeButton(int8_t value);
+extern void IC_slave_LearnModeButton(int8_t value);
 
 #endif /* IC_SLAVE_H_ */
  
