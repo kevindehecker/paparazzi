@@ -61,9 +61,11 @@
 bool initSocket(void) ;
 bool Read_socket(char * c, size_t maxlen) ;
 int closeSocket(void);
+bool Write_socket(char * c, size_t n);
 
 /*  Global variables  */
 int       list_s;                /*  listening socket          */
+int       conn_s;                /*  connection socket         */
 struct    sockaddr_in servaddr;  /*  socket address structure  */
 struct 	ICDataPackage tcp_data;
 
@@ -78,6 +80,7 @@ bool IC_turnbutton;
 
 int8_t IC_flymode;
 int8_t IC_learnmode;
+int8_t IC_actionDummy;
 
 bool obstacle_detected; // signal to flightplan
 int noDataCounter;      //signal to flightplan if IC is running OK
@@ -110,11 +113,14 @@ bool initSocket() {
         return true;
     } 
 
-    if(!connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) )
-    {
-       printf("Error connect failed: %s:%d \n",ipa,PORT);
-       return true;
-    } 
+
+
+    int test = connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) ;
+    //if(!connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) )
+    //{
+       printf("Error connect failed: %s:%d, %d \n",ipa,PORT, test);
+      // return true;
+    //} 
      printf("Started IC program tcp listener: %s:%d \n",ipa,PORT);
 
 	return false;
@@ -132,15 +138,51 @@ bool Read_socket(char * c, size_t maxlen) {
     }
     return false;
 }
+bool Write_socket(char * c, size_t n) {
 
+    while ( n > 0 ) {
+        int nwritten = 0;
+        if ( (nwritten = write(list_s, c, n)) <= 0 ) {
+            if ( errno == EINTR )
+                nwritten = 0;
+            else
+                return true;
+        }
+        n -= nwritten;
+        c += nwritten;
+    }
+    return false;
+}
 
 extern void IC_slave_FlyModeButton(int8_t value) {
     IC_flymode = value;
 }
 extern void IC_slave_LearnModeButton(int8_t value) {
-    IC_learnmode = value;
-    //TODO: communicate this to IC
+    IC_learnmode = value;    
+    char str[2];
+    str[0]=value+48;
+    str[1]=0;
+    Write_socket(str,2);
+    printf("Send to IC %s\n", str);
 }
+
+extern void IC_slave_ActionButton(int8_t value) {
+    char str[2];
+    if (value==0) { 
+        str[0]='c';
+    } else if(value==1) { 
+        str[0]='i';
+    } else if(value==2) { 
+        str[0]='s';
+    } else if(value==3) { 
+        str[0]='l';
+    } 
+    str[1]=0;
+    Write_socket(str,2);
+    printf("Send to IC %s\n", str);
+}
+
+
 
 extern void IC_start(void){		
 	obstacle_detected = false;

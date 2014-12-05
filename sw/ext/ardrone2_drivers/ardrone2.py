@@ -433,10 +433,37 @@ elif args.command == 'upload_file_and_run':
     execute_command("mkdir -p /data/video/" + args.folder)
     print('Uploading \'' + f[1] + "\' from " + f[0] + " to " + args.folder)
     uploadfile(ftp, args.folder + "/" + f[1], file(args.file, "rb"))
+
+
+
+    print("Uploading \'IC\' from /home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/drone/build to drone/build/IC" )
+    execute_command("killall IC")
+    execute_command("killall -9 IC")
     sleep(0.5)
+    uploadfile(ftp, "drone/build/IC", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/drone/build/IC", "rb"))
+
+    print("Uploading IC related data")
+    uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/graph_buffer.xml", "rb"))    
+    uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/groundtruth_buffer.xml", "rb"))
+    uploadfile(ftp, "drone/distribtuion_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribtuion_buffer.xml", "rb"))    
+    uploadfile(ftp, "drone/textons.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons.dat", "rb"))
+    
+    sleep(0.5)
+
+    execute_command("chmod 777 /data/video/drone/build/IC")
+
+    execute_command("mount /dev/sda1 /data/video/stick/")
+    execute_command("export PATH=/opt/arm_light/gst/bin:$PATH")
+    execute_command("cd /data/video/drone/build/")    
+    execute_command("./IC > /dev/null 2>&1 &")
+
+
+    print("#pragma message: Upload and Start of IC to ARDrone2 Succes!")
+    sleep(1)
     execute_command("chmod 777 /data/video/" + args.folder + "/" + f[1])
     execute_command("/data/video/" + args.folder + "/" + f[1] + " > /dev/null 2>&1 &")
-    print("#pragma message: Upload and Start of ap.elf to ARDrone2 Succes!")
+    print("#pragma message: Upload and Start of ap.elf to ARDrone2 Succes!") 
+
 
 elif args.command == 'upload_file':
     # Split filename and path

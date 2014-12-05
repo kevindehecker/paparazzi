@@ -49,6 +49,7 @@ extern int32_t IC_threshold_nn;
 extern bool IC_turnbutton;
 extern int8_t IC_flymode;
 extern int8_t IC_learnmode;
+extern int8_t IC_actionDummy;
 
 
 extern bool obstacle_detected;
@@ -67,6 +68,7 @@ extern void IC_periodic(void);
 
 extern void IC_slave_FlyModeButton(int8_t value);
 extern void IC_slave_LearnModeButton(int8_t value);
+extern void IC_slave_ActionButton(int8_t value);
 
 #endif /* IC_SLAVE_H_ */
  
