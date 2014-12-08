@@ -168,6 +168,7 @@ extern void IC_slave_LearnModeButton(int8_t value) {
 
 extern void IC_slave_ActionButton(int8_t value) {
     char str[2];
+    IC_actionDummy = value;
     if (value==0) { 
         str[0]='c';
     } else if(value==1) { 
