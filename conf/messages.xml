@@ -1879,7 +1879,15 @@
     <field name="g2_r" type="float"/>
   </message>
 
-  <!--217 is free -->
+    <message name="STEREO" id="217">           
+    <field name="avgdisp_gt" type="int32"/>
+    <field name="avgdisp_gt_stdev" type="int32"/>
+    <field name="avgdisp_nn" type="int32"/>
+    <field name="IC_threshold_gt" type="int32"/>
+    <field name="IC_threshold_gtstd" type="int32"/>
+    <field name="IC_threshold_nn" type="int32"/>
+    <field name="nav_heading" type="float"/>    
+  </message>
 
   <message name="BEBOP_ACTUATORS" id="218">
     <field name="cmd_thrust" type="int32"/>

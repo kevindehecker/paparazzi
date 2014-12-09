@@ -1,0 +1,28 @@
+ <!DOCTYPE module SYSTEM "module.dtd">
+
+ <module name="IC">
+  <doc>
+   <description>
+     IC vision module, Kevin's graduation project.     
+   </description>
+   </doc>
+  <settings>
+    <dl_settings name="control">
+        <dl_settings name="IC">
+          <dl_setting var="IC_threshold_gt"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Treshold gt" param="IC_THRESHOLD_GT"/>
+          <dl_setting var="IC_threshold_gtstd"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Treshold gtstd" param="IC_THRESHOLD_STD"/>
+          <dl_setting var="IC_threshold_nn"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Treshold nn" param="IC_THRESHOLD_NN"/>                    
+          <dl_setting var="IC_flymode" min="0" step="1"    max="1"   module="IC/IC_slave" shortname="FlyMode" values="Stereo|Textons" handler="FlyModeButton"/>
+          <dl_setting var="IC_learnmode" min="0" step="1"    max="3"   module="IC/IC_slave" shortname="LearnMode" values="none|textons|stereo|both" handler="LearnModeButton"/>
+          <dl_setting var="IC_actionDummy" min="0" step="1"    max="3"   module="IC/IC_slave" shortname="Action" values="Clear|Learn|Save|Reload" handler="ActionButton"/>
+        </dl_settings>
+     </dl_settings>
+   </settings> 
+<header>
+    <file name="IC_slave.h"/>
+  </header>
+  <periodic fun="IC_periodic()" start="IC_start()" stop="IC_stop()" autorun="TRUE" freq="10"/>
+  <makefile>
+    <file name="IC_slave.c"/>
+  </makefile>
+ </module>

@@ -1,20 +1,26 @@
 <!DOCTYPE airframe SYSTEM "airframe.dtd">
 
-<airframe name="ardrone2_raw">
+<airframe name="ardrone2_IC">
 
   <firmware name="rotorcraft">
     <target name="ap" board="ardrone2_raw">
+      <!-- <define name="AUTOPILOT_DISABLE_AHRS_KILL"/> -->
       <define name="FAILSAFE_DESCENT_SPEED" value="0.5"/>
+      <define name="USE_SONAR" value="0"/>
+      <define name="USE_BARO" value="0"/>
+      <define name="INS_SONAR_VARIANCE_THRESHOLD"/>
       <configure name="USE_MAGNETOMETER" value="0"/>
+
+      <subsystem name="telemetry" type="transparent_udp"/>
+      <subsystem name="radio_control" type="datalink"/>
     </target>
 
     <target name="nps" board="pc">
       <subsystem name="fdm" type="jsbsim"/>
+      <subsystem name="radio_control" type="ppm"/>
     </target>
 
-	<!-- Subsystem section -->
-    <subsystem name="telemetry" type="transparent_udp"/>
-    <subsystem name="radio_control" type="datalink"/>
+  <!-- Subsystem section -->
     <subsystem name="motor_mixing"/>
     <subsystem name="actuators" type="ardrone2"/>
     <subsystem name="imu" type="ardrone2"/>
@@ -26,7 +32,9 @@
 
   <modules main_freq="512">
     <load name="send_imu_mag_current.xml"/>
+    <!--- load name="../../sw/ext/ardrone2_vision/modules/OpticFlowHist/OpticFlowHist.xml"/> --->
     <load name="IC.xml"/> 
+    <!-- load name="../../sw/ext/ardrone2_vision/modules/Mjpeg/ViewVideo.xml"/ -->
   </modules>
 
   <commands>
@@ -72,12 +80,18 @@
     <define name="ACCEL_Z_NEUTRAL" value="2048"/>
 
     <!-- Magneto calibration -->
-    <define name="MAG_X_NEUTRAL" value="0"/>
+    <!--define name="MAG_X_NEUTRAL" value="0"/>
     <define name="MAG_Y_NEUTRAL" value="0"/>
     <define name="MAG_Z_NEUTRAL" value="-180"/>
     <define name="MAG_X_SENS" value="16." integer="16"/>
     <define name="MAG_Y_SENS" value="16." integer="16"/>
-    <define name="MAG_Z_SENS" value="16." integer="16"/>
+    <define name="MAG_Z_SENS" value="16." integer="16"/-->
+    <define name="MAG_X_NEUTRAL" value="65"/>
+    <define name="MAG_Y_NEUTRAL" value="15"/>
+    <define name="MAG_Z_NEUTRAL" value="-34"/>
+    <define name="MAG_X_SENS" value="17.9856019048" integer="16"/>
+    <define name="MAG_Y_SENS" value="16.1644749768" integer="16"/>
+    <define name="MAG_Z_SENS" value="19.181956941" integer="16"/>
 
     <!-- Magneto current calibration -->
     <define name="MAG_X_CURRENT_COEF" value="0.0"/>
@@ -93,13 +107,13 @@
   <!-- http://wiki.paparazziuav.org/wiki/Subsystem/ahrs#Local_Magnetic_Field -->
   <section name="AHRS" prefix="AHRS_">
     <!-- Toulouse -->
-    <define name="H_X" value="0.513081"/>
+    <!--define name="H_X" value="0.513081"/>
     <define name="H_Y" value="-0.00242783"/>
-    <define name="H_Z" value="0.858336"/>
+    <define name="H_Z" value="0.858336"/-->
     <!-- Delft -->
-    <!--define name="H_X" value="0.3892503"/>
+    <define name="H_X" value="0.3892503"/>
     <define name="H_Y" value="0.0017972"/>
-    <define name="H_Z" value="0.9211303"/ -->
+    <define name="H_Z" value="0.9211303"/>
 
     <!-- Use GPS heading instead of magneto -->
     <define name="USE_GPS_HEADING" value="1"/>
@@ -107,6 +121,8 @@
 
   <section name="INS" prefix="INS_">
     <!-- Use GPS altitude measurments and set the R gain -->
+    <define name="SONAR_MAX_RANGE" value="4"/>
+    <define name="SONAR_UPDATE_ON_AGL" value="FALSE"/>    
     <define name="USE_GPS_ALT" value="1"/>
     <define name="VFF_R_GPS" value="0.01"/>
   </section>
@@ -197,8 +213,8 @@
     <!-- reference model -->
     <define name="REF_OMEGA" value="RadOfDeg(67.)"/>
     <define name="REF_ZETA" value="0.85"/>
-    <define name="REF_MAX_ACCEL" value="5.66"/>
-    <define name="REF_MAX_SPEED" value="3"/>
+    <define name="REF_MAX_ACCEL" value="3.66"/>
+    <define name="REF_MAX_SPEED" value="0.5"/>
 
     <!-- gains -->
     <define name="PGAIN" value="116"/>
@@ -211,14 +227,18 @@
   <section name="SIMULATOR" prefix="NPS_">
     <define name="ACTUATOR_NAMES" value="{&quot;nw_motor&quot;, &quot;ne_motor&quot;, &quot;se_motor&quot;, &quot;sw_motor&quot;}"/>
     <define name="JSBSIM_MODEL" value="&quot;simple_ardrone2&quot;"/>
+    <define name="JSBSIM_INIT" value="&quot;reset00&quot;"/>
     <define name="SENSORS_PARAMS" value="&quot;nps_sensors_params_ardrone2.h&quot;"/>
   </section>
 
   <section name="AUTOPILOT">
     <define name="MODE_STARTUP" value="AP_MODE_NAV"/>
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD"/>
+ 	  <define name="MODE_AUTO1" value="AP_MODE_NAV"/>
     <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
+<!-- 
+    <define name="ARRIVED_AT_WAYPOINT" value="0.15"/>
+    <define name="AUTOPILOT_IN_FLIGHT_MIN_THRUST" value="1500"/> -->
   </section>
 
   <section name="BAT">
