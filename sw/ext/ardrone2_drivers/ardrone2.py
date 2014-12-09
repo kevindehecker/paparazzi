@@ -442,11 +442,14 @@ elif args.command == 'upload_file_and_run':
     sleep(0.5)
     uploadfile(ftp, "drone/build/IC", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/drone/build/IC", "rb"))
 
-    # print("Uploading IC related data")
-    # uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/graph_buffer.xml", "rb"))    
-    # uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/groundtruth_buffer.xml", "rb"))
-    # uploadfile(ftp, "drone/distribtuion_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribtuion_buffer.xml", "rb"))    
-    # uploadfile(ftp, "drone/textons.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons.dat", "rb"))
+    print("Uploading IC related data")
+    uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/graph_buffer.xml", "rb"))    
+    uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/groundtruth_buffer.xml", "rb"))
+    uploadfile(ftp, "drone/distribtuion_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribtuion_buffer.xml", "rb")) 
+    uploadfile(ftp, "drone/distribtuion_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribtuion_buffer.xml", "rb")) 
+    uploadfile(ftp, "drone/distribtuion_buf_pointer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribtuion_buf_pointer.xml", "rb"))    
+    uploadfile(ftp, "drone/distribution_buf_size.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_size.xml", "rb"))    
+    uploadfile(ftp, "drone/textons.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons.dat", "rb"))
     
     sleep(0.5)
 

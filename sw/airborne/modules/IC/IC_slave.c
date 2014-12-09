@@ -195,6 +195,8 @@ extern void IC_start(void){
             
     IC_turnbutton=true;
     noDataCounter=0;
+
+    IC_learnmode = stereo_textons; // current default in IC
     
     if (initSocket()) {
         printf("Could not connect to IC\n"); // hmm, this does not work
