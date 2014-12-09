@@ -77,7 +77,7 @@ struct EnuCoor_i nav_circle_center;
 int32_t nav_circle_radius, nav_circle_qdr, nav_circle_radians;
 
 int32_t nav_leg_progress;
-int32_t nav_leg_length;
+uint32_t nav_leg_length;
 
 int32_t nav_roll, nav_pitch;
 int32_t nav_heading;
@@ -106,10 +106,10 @@ static inline void nav_set_altitude( void );
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
 
-static void send_nav_status(void) {
+static void send_nav_status(struct transport_tx *trans, struct link_device *dev) {
   float dist_home = sqrtf(dist2_to_home);
   float dist_wp = sqrtf(dist2_to_wp);
-  DOWNLINK_SEND_ROTORCRAFT_NAV_STATUS(DefaultChannel, DefaultDevice,
+  pprz_msg_send_ROTORCRAFT_NAV_STATUS(trans, dev, AC_ID,
       &block_time, &stage_time,
       &dist_home, &dist_wp,
       &nav_block, &nav_stage,
@@ -119,20 +119,20 @@ static void send_nav_status(void) {
     float sy = POS_FLOAT_OF_BFP(nav_segment_start.y);
     float ex = POS_FLOAT_OF_BFP(nav_segment_end.x);
     float ey = POS_FLOAT_OF_BFP(nav_segment_end.y);
-    DOWNLINK_SEND_SEGMENT(DefaultChannel, DefaultDevice, &sx, &sy, &ex, &ey);
+    pprz_msg_send_SEGMENT(trans, dev, AC_ID, &sx, &sy, &ex, &ey);
   }
   else if (horizontal_mode == HORIZONTAL_MODE_CIRCLE) {
     float cx = POS_FLOAT_OF_BFP(nav_circle_center.x);
     float cy = POS_FLOAT_OF_BFP(nav_circle_center.y);
     float r = POS_FLOAT_OF_BFP(nav_circle_radius);
-    DOWNLINK_SEND_CIRCLE(DefaultChannel, DefaultDevice, &cx, &cy, &r);
+    pprz_msg_send_CIRCLE(trans, dev, AC_ID, &cx, &cy, &r);
   }
 }
 
-static void send_wp_moved(void) {
+static void send_wp_moved(struct transport_tx *trans, struct link_device *dev) {
   static uint8_t i;
   i++; if (i >= nb_waypoint) i = 0;
-  DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice,
+  pprz_msg_send_WP_MOVED_ENU(trans, dev, AC_ID,
       &i,
       &(waypoints[i].x),
       &(waypoints[i].y),
@@ -269,8 +269,8 @@ void nav_route(struct EnuCoor_i * wp_start, struct EnuCoor_i * wp_end) {
   VECT2_COPY(wp_diff_prec, wp_diff);
   INT32_VECT2_RSHIFT(wp_diff,wp_diff,INT32_POS_FRAC);
   INT32_VECT2_RSHIFT(pos_diff,pos_diff,INT32_POS_FRAC);
-  int32_t leg_length2 = Max((wp_diff.x * wp_diff.x + wp_diff.y * wp_diff.y),1);
-  INT32_SQRT(nav_leg_length,leg_length2);
+  uint32_t leg_length2 = Max((wp_diff.x * wp_diff.x + wp_diff.y * wp_diff.y),1);
+  nav_leg_length = int32_sqrt(leg_length2);
   nav_leg_progress = (pos_diff.x * wp_diff.x + pos_diff.y * wp_diff.y) / nav_leg_length;
   int32_t progress = Max((CARROT_DIST >> INT32_POS_FRAC), 0);
   nav_leg_progress += progress;
@@ -393,7 +393,7 @@ void nav_init_stage( void ) {
 
 #include <stdio.h>
 void nav_periodic_task(void) {
-  RunOnceEvery(16, { stage_time++;  block_time++; });
+  RunOnceEvery(NAV_FREQ, { stage_time++;  block_time++; });
 
   dist2_to_wp = 0;
 

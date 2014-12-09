@@ -32,10 +32,8 @@
 #include "modules/digital_cam/dc.h"
 
 // Telemetry
-#include "mcu_periph/uart.h"
-#include "messages.h"
-#include "subsystems/datalink/downlink.h"
-#include "generated/periodic_telemetry.h"
+#include "subsystems/datalink/telemetry.h"
+
 #include BOARD_CONFIG
 
 // Communication
@@ -96,7 +94,7 @@ void digital_cam_uart_event(void)
 }
 
 #if PERIODIC_TELEMETRY
-static void send_thumbnails(void)
+static void send_thumbnails(struct transport_tx *trans, struct link_device *dev)
 {
   static int cnt = 0;
   if (digital_cam_uart_thumbnails > 0) {
@@ -107,7 +105,7 @@ static void send_thumbnails(void)
         return;
       }
     }
-    DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, THUMB_MSG_SIZE, thumbs[thumb_pointer]);
+    pprz_msg_send_PAYLOAD(trans, dev, AC_ID, THUMB_MSG_SIZE, thumbs[thumb_pointer]);
 
     // Update the write/read pointer: if we receive a new thumb part, that will be sent, otherwise the oldest infor is repeated
     thumb_pointer++;

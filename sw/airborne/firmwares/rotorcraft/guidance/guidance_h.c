@@ -103,8 +103,6 @@ int32_t autoHeading_P;
 int32_t autoHeading_sp;
 float   autoHeadingPitchAngle;
 
-
-
 static void guidance_h_update_reference(void);
 static void guidance_h_traj_run(bool_t in_flight);
 static void guidance_h_hover_enter(void);
@@ -115,22 +113,19 @@ static void read_rc_setpoint_speed_i(struct Int32Vect2 *speed_sp, bool_t in_flig
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
 
-
-
-
-static void send_gh(void) {
+static void send_gh(struct transport_tx *trans, struct link_device *dev) {
   struct NedCoor_i* pos = stateGetPositionNed_i();
-  DOWNLINK_SEND_GUIDANCE_H_INT(DefaultChannel, DefaultDevice,
+  pprz_msg_send_GUIDANCE_H_INT(trans, dev, AC_ID,
       &guidance_h_pos_sp.x, &guidance_h_pos_sp.y,
       &guidance_h_pos_ref.x, &guidance_h_pos_ref.y,
       &(pos->x), &(pos->y));
 }
 
-static void send_hover_loop(void) {
+static void send_hover_loop(struct transport_tx *trans, struct link_device *dev) {
   struct NedCoor_i* pos = stateGetPositionNed_i();
   struct NedCoor_i* speed = stateGetSpeedNed_i();
   struct NedCoor_i* accel = stateGetAccelNed_i();
-  DOWNLINK_SEND_HOVER_LOOP(DefaultChannel, DefaultDevice,
+  pprz_msg_send_HOVER_LOOP(trans, dev, AC_ID,
                            &guidance_h_pos_sp.x,
                            &guidance_h_pos_sp.y,
                            &(pos->x), &(pos->y),
@@ -147,8 +142,8 @@ static void send_hover_loop(void) {
                            &guidance_h_heading_sp);
 }
 
-static void send_href(void) {
-  DOWNLINK_SEND_GUIDANCE_H_REF_INT(DefaultChannel, DefaultDevice,
+static void send_href(struct transport_tx *trans, struct link_device *dev) {
+  pprz_msg_send_GUIDANCE_H_REF_INT(trans, dev, AC_ID,
       &guidance_h_pos_sp.x, &guidance_h_pos_ref.x,
       &guidance_h_speed_sp.x, &guidance_h_speed_ref.x,
       &guidance_h_accel_ref.x,
@@ -157,8 +152,8 @@ static void send_href(void) {
       &guidance_h_accel_ref.y);
 }
 
-static void send_tune_hover(void) {
-  DOWNLINK_SEND_ROTORCRAFT_TUNE_HOVER(DefaultChannel, DefaultDevice,
+static void send_tune_hover(struct transport_tx *trans, struct link_device *dev) {
+  pprz_msg_send_ROTORCRAFT_TUNE_HOVER(trans, dev, AC_ID,
       &radio_control.values[RADIO_ROLL],
       &radio_control.values[RADIO_PITCH],
       &radio_control.values[RADIO_YAW],
@@ -178,7 +173,6 @@ void guidance_h_init(void) {
   guidance_h_mode = GUIDANCE_H_MODE_KILL;
   guidance_h_use_ref = GUIDANCE_H_USE_REF;
   guidance_h_approx_force_by_thrust = GUIDANCE_H_APPROX_FORCE_BY_THRUST;
-
   INT_EULERS_ZERO(rpy_autoheading);
   autoHeading_P = ANGLE_BFP_OF_REAL(RadOfDeg(0.1));
   autoHeading_sp = 0;
@@ -194,6 +188,7 @@ void guidance_h_init(void) {
   guidance_h_vgain = GUIDANCE_H_VGAIN;
   transition_percentage = 0;
   transition_theta_offset = 0;
+
   
   gh_ref_init();
 
@@ -433,15 +428,12 @@ void guidance_h_run(bool_t  in_flight) {
         /* set psi command */
         guidance_h_heading_sp = nav_heading;
         INT32_ANGLE_NORMALIZE(guidance_h_heading_sp);
-	
-	  /* compute x,y earth commands */
-	  guidance_h_traj_run(in_flight);
-	  
-	  /* set final attitude setpoint */
-	  stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
+        /* compute x,y earth commands */
+        guidance_h_traj_run(in_flight);
+        /* set final attitude setpoint */
+        stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
                                                guidance_h_heading_sp);
       }
-
       stabilization_attitude_run(in_flight);
       break;
 
@@ -455,7 +447,7 @@ static void guidance_h_update_reference(void) {
   /* compute reference even if usage temporarily disabled via guidance_h_use_ref */
 #if GUIDANCE_H_USE_REF
 #if GUIDANCE_H_USE_SPEED_REF
-  if(guidance_h_mode == GUIDANCE_H_MODE_HOVER ) 
+  if(guidance_h_mode == GUIDANCE_H_MODE_HOVER)
     gh_update_ref_from_speed_sp(guidance_h_speed_sp);
   else
 #endif

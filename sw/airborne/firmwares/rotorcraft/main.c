@@ -34,6 +34,7 @@
 #include "mcu.h"
 #include "mcu_periph/sys_time.h"
 #include "mcu_periph/i2c.h"
+#include "mcu_periph/uart.h"
 #if USE_UDP
 #include "mcu_periph/udp.h"
 #endif
@@ -41,8 +42,8 @@
 
 #include "subsystems/datalink/telemetry.h"
 #include "subsystems/datalink/datalink.h"
+#include "subsystems/datalink/downlink.h"
 #include "subsystems/settings.h"
-#include "subsystems/datalink/xbee.h"
 
 #include "subsystems/commands.h"
 #include "subsystems/actuators.h"
@@ -81,6 +82,10 @@ PRINT_CONFIG_MSG_VALUE("USE_BARO_BOARD is TRUE, reading onboard baro: ", BARO_BO
 
 #include "generated/modules.h"
 #include "subsystems/abi.h"
+
+#if USE_USB_SERIAL
+#include "mcu_periph/usb_serial.h"
+#endif
 
 
 /* if PRINT_CONFIG is defined, print some config options */
@@ -171,9 +176,7 @@ STATIC_INLINE void main_init( void ) {
 
   mcu_int_enable();
 
-#if DATALINK == XBEE
-  xbee_init();
-#endif
+  downlink_init();
 
   // register the timers for the periodic functions
   main_periodic_tid = sys_time_register_timer((1./PERIODIC_FREQUENCY), NULL);
@@ -224,7 +227,7 @@ STATIC_INLINE void main_periodic( void ) {
 }
 
 STATIC_INLINE void telemetry_periodic(void) {
-  periodic_telemetry_send_Main();
+  periodic_telemetry_send_Main(&(DefaultChannel).trans_tx, &(DefaultDevice).device);
 }
 
 /** mode to enter when RC is lost while using a mode with RC input (not AP_MODE_NAV) */
@@ -276,8 +279,16 @@ STATIC_INLINE void main_event( void ) {
 
   i2c_event();
 
+#ifndef SITL
+  uart_event();
+#endif
+
 #if USE_UDP
   udp_event();
+#endif
+
+#if USE_USB_SERIAL
+  VCOM_event();
 #endif
 
   DatalinkEvent();

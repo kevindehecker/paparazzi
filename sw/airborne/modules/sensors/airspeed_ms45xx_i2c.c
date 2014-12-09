@@ -137,9 +137,9 @@ static struct i2c_transaction ms45xx_trans;
 static Butterworth2LowPass ms45xx_filter;
 
 
-static void ms45xx_downlink(void)
+static void ms45xx_downlink(struct transport_tx *trans, struct link_device *dev)
 {
-  DOWNLINK_SEND_AIRSPEED_MS45XX(DefaultChannel, DefaultDevice,
+  pprz_msg_send_AIRSPEED_MS45XX(trans, dev, AC_ID,
                                 &ms45xx.diff_pressure,
                                 &ms45xx.temperature, &ms45xx.airspeed);
 }
@@ -213,7 +213,7 @@ void ms45xx_i2c_event(void)
       stateSetAirspeed_f(&ms45xx.airspeed);
 #endif
       if (ms45xx.sync_send) {
-        ms45xx_downlink();
+        ms45xx_downlink(&(DefaultChannel).trans_tx, &(DefaultDevice).device);
       }
     }
 

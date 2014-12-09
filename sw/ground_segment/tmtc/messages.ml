@@ -48,6 +48,7 @@ let one_page = fun sender class_name (notebook:GPack.notebook) (help_label:GObj.
   let _l = GMisc.label ~text:id ~packing:h#add () in
   let eb = GBin.event_box ~packing:h#pack () in
   let time = GMisc.label ~width:40 ~packing:eb#add () in
+  let fields = List.filter (fun f -> Xml.tag f = "field") (Xml.children m) in
   eb#coerce#misc#modify_bg [`SELECTED, `NAME "green"];
   let fields =
     List.fold_left
@@ -78,7 +79,7 @@ let one_page = fun sender class_name (notebook:GPack.notebook) (help_label:GObj.
                 sprintf "%s (%d)" literal_values.(i) i
               with _ ->
                 match format_ with
-                | Some f -> alt_value (Pprz.formatted_string_of_value f x)
+                | Some f -> alt_value (Pprz.string_of_value_format f x)
                 | _ -> alt_value (Pprz.string_of_value x)
           and display_value = fun () ->
             if notebook#page_num v#coerce = notebook#current_page then
@@ -113,7 +114,7 @@ let one_page = fun sender class_name (notebook:GPack.notebook) (help_label:GObj.
               rest
       )
       []
-      (Xml.children m)
+      fields
   in
   let (update_values, display_values) = List.split fields in
   let n = List.length fields in
@@ -211,6 +212,7 @@ let _ =
   (** Open the window container with its notebook*)
   let icon = GdkPixbuf.from_file Env.icon_mes_file in
   let window = GWindow.window ~type_hint:`DIALOG ~icon ~title:"Messages" () in
+  window#set_default_size ~width:200 ~height:50;
   let quit = fun () -> GMain.Main.quit (); exit 0 in
   ignore (window#connect#destroy ~callback:quit);
   let vbox = GPack.vbox ~packing:window#add () in
