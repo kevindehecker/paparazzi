@@ -388,6 +388,44 @@ elif args.command == 'upload_file_and_run':
     parrot_utils.execute_command(tn, "mkdir -p /data/video/" + args.folder)
     print('Uploading \'' + f[1] + "\' from " + f[0] + " to " + args.folder)
     parrot_utils.uploadfile(ftp, args.folder + "/" + f[1], file(args.file, "rb"))
+
+
+
+
+
+    print("Uploading \'IC\' from /home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/drone/build to drone/build/IC" )
+    parrot_utils.execute_command(tn,"killall IC")
+    parrot_utils.execute_command(tn,"killall -9 IC")
+    sleep(0.5)
+    parrot_utils.uploadfile(ftp, "drone/build/IC", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/drone/build/IC", "rb"))
+
+    print("Uploading IC related data")
+    parrot_utils.uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/graph_buffer.xml", "rb"))    
+    parrot_utils.uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/groundtruth_buffer.xml", "rb"))
+    parrot_utils.uploadfile(ftp, "drone/distribtuion_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribtuion_buffer.xml", "rb")) 
+    parrot_utils.uploadfile(ftp, "drone/distribtuion_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribtuion_buffer.xml", "rb")) 
+    parrot_utils.uploadfile(ftp, "drone/distribtuion_buf_pointer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribtuion_buf_pointer.xml", "rb"))    
+    parrot_utils.uploadfile(ftp, "drone/distribution_buf_size.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_size.xml", "rb"))    
+    parrot_utils.uploadfile(ftp, "drone/textons.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons.dat", "rb"))
+    
+    sleep(0.5)
+
+    parrot_utils.execute_command(tn,"chmod 777 /data/video/drone/build/IC")
+
+    parrot_utils.execute_command(tn,"mount /dev/sda1 /data/video/stick/")
+    parrot_utils.execute_command(tn,"export PATH=/opt/arm_light/gst/bin:$PATH")
+    parrot_utils.execute_command(tn,"cd /data/video/drone/build/")    
+    parrot_utils.execute_command(tn,"./IC > /dev/null 2>&1 &")
+
+
+    print("#pragma message: Upload and Start of IC to ARDrone2 Succes!")
+    sleep(1)
+    parrot_utils.execute_command(tn,"chmod 777 /data/video/" + args.folder + "/" + f[1])
+    parrot_utils.execute_command(tn,"/data/video/" + args.folder + "/" + f[1] + " > /dev/null 2>&1 &")
+    print("#pragma message: Upload and Start of ap.elf to ARDrone2 Succes!") 
+
+
+
     sleep(0.5)
     parrot_utils.execute_command(tn, "chmod 777 /data/video/" + args.folder + "/" + f[1])
     parrot_utils.execute_command(tn, "/data/video/" + args.folder + "/" + f[1] + " > /dev/null 2>&1 &")
