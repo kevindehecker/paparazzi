@@ -189,9 +189,8 @@ extern void IC_start(void){
 	obstacle_detected = false;
     
     IC_threshold_gt = 90;
-    IC_threshold_nn = 90;
+    IC_threshold_nn = 42;
     IC_threshold_gtstd = 70;
-    IC_turnbutton = false;
             
     IC_turnbutton=true;
     noDataCounter=0;
