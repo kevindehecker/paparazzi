@@ -206,7 +206,7 @@ extern void IC_start(void){
 
 
 extern void IC_stop(void) {	
-//	closeSocket();
+	closeSocket();
 	printf("IC module stopped\n");	
 }
 
@@ -217,7 +217,10 @@ extern void IC_periodic(void) {
 	if (Read_socket(c,sizeof(tcp_data))) {
         noDataCounter++;
         if (noDataCounter>100) {
-            printf("No IC data received for too long.") ;           
+            printf("No IC data received for too long.") ;
+            closeSocket();
+            initSocket();
+            noDataCounter=0;           
         }
         return;
     } else {
