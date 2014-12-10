@@ -12,7 +12,7 @@
 			<field name="mode" value="Fit(mode,-108,108,0,2)"/>
 			<field name="throttle" value="Fit(throttle,-117,117,0,127)" />
 			<field name="roll" value="-roll" />
-			<field name="yaw" value="-yaw" />
+			<field name="yaw" value="Fit(-yaw,-105,105,-127,127)" />
 			<field name="pitch" value="-pitch" />
 		</message>
 	</messages>
