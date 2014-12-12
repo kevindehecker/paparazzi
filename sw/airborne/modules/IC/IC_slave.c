@@ -82,7 +82,7 @@ int8_t IC_flymode;
 int8_t IC_learnmode;
 int8_t IC_actionDummy;
 
-bool obstacle_detected; // signal to flightplan
+bool obstacle_detected; // signal to flightplan if obstacle is detected
 int noDataCounter;      //signal to flightplan if IC is running OK
 
 int closeSocket(void) {
@@ -188,7 +188,7 @@ extern void IC_slave_ActionButton(int8_t value) {
 extern void IC_start(void){		
 	obstacle_detected = false;
     
-    IC_threshold_gt = 90;
+    IC_threshold_gt = 1;
     IC_threshold_nn = 42;
     IC_threshold_gtstd = 70;
             
@@ -234,8 +234,8 @@ extern void IC_periodic(void) {
     
 
 if (IC_flymode==stereo){
-    if (tcp_data.avgdisp_gt_stdev < IC_threshold_gtstd) {
-       // if (tcp_data.avgdisp_gt > IC_threshold) {
+    //if (tcp_data.avgdisp_gt_stdev < IC_threshold_gtstd) {
+    if (tcp_data.avgdisp_gt > IC_threshold) {
             obstacle_detected = true;
         // } else {
         //     obstacle_detected = false;
@@ -255,7 +255,11 @@ if (IC_flymode==stereo){
    //obstacle_detected = IC_turnbutton;  // test switch in  IC settings tab
 }
 
-
+/************************** FLIGHT PLAN FUNCTIONS *********************************/
+/*
+* Rotates (yaw) the heading of drone with increment
+*
+*/
 bool increase_nav_heading(int32_t *heading, int32_t increment) {
      *heading = *heading + increment;
   return false;
@@ -263,18 +267,15 @@ bool increase_nav_heading(int32_t *heading, int32_t increment) {
 
 
 /*
-* Moves a waypoint forward with *distance* in direction of *heading*
+* Moves goal waypoint *wp_id_goal* forward with *distance* in direction of *heading* from *wp_id_current*
 *
 */
  bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, int32_t distance, int32_t heading) {
 
     alpha = -ANGLE_FLOAT_OF_BFP(heading) +1.5708;
-    // DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &alpha);
 
     struct EnuCoor_i *wpc = &waypoints[wp_id_current];
     struct EnuCoor_i *wpg = &waypoints[wp_id_goal];
-
-    //float alpha = (float)heading * 0.0175;
 
     float x= cosf(alpha) * (float)distance;
     float y= sinf(alpha) * (float)distance;
