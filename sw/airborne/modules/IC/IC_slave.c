@@ -188,9 +188,9 @@ extern void IC_slave_ActionButton(int8_t value) {
 extern void IC_start(void){		
 	obstacle_detected = false;
     
-    IC_threshold_gt = 1;
-    IC_threshold_nn = 42;
-    IC_threshold_gtstd = 70;
+    IC_threshold_gt = 100;
+    IC_threshold_nn = 30;
+    IC_threshold_gtstd = 55;
             
     IC_turnbutton=true;
     noDataCounter=0;
@@ -235,7 +235,7 @@ extern void IC_periodic(void) {
 
 if (IC_flymode==stereo){
     //if (tcp_data.avgdisp_gt_stdev < IC_threshold_gtstd) {
-    if (tcp_data.avgdisp_gt > IC_threshold) {
+    if (tcp_data.avgdisp_gt > IC_threshold_gt) {
             obstacle_detected = true;
         // } else {
         //     obstacle_detected = false;
