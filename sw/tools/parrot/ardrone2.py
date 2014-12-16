@@ -397,9 +397,9 @@ elif args.command == 'upload_file_and_run':
     print("Uploading IC related data")
     parrot_utils.uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/graph_buffer.xml", "rb"))    
     parrot_utils.uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/groundtruth_buffer.xml", "rb"))
-    parrot_utils.uploadfile(ftp, "drone/distribtuion_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribtuion_buffer.xml", "rb")) 
-    parrot_utils.uploadfile(ftp, "drone/distribtuion_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribtuion_buffer.xml", "rb")) 
-    parrot_utils.uploadfile(ftp, "drone/distribtuion_buf_pointer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribtuion_buf_pointer.xml", "rb"))    
+    parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buffer.xml", "rb")) 
+    parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buffer.xml", "rb")) 
+    parrot_utils.uploadfile(ftp, "drone/distribution_buf_pointer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_pointer.xml", "rb"))    
     parrot_utils.uploadfile(ftp, "drone/distribution_buf_size.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_size.xml", "rb"))    
     parrot_utils.uploadfile(ftp, "drone/textons.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons.dat", "rb"))
     
