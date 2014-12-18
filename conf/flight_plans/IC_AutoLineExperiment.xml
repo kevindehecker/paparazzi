@@ -1,0 +1,124 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+
+<flight_plan alt="1.2" ground_alt="0" lat0="51.990634" lon0="4.376771" max_dist_from_home="15" name="Vision_drone" security_height="0.1">
+  <header>
+#include "autopilot.h"
+#include "subsystems/electrical.h"
+#include "modules/IC/IC_slave.h"
+#include "guidance/guidance_h_ref.h"
+</header>
+  <waypoints>
+    <waypoint name="HOME" x="-2.6" y="0.7"/>    
+    <waypoint name="STDBY" x="-2.5" y="0.7"/>            
+    <waypoint lat="51.9906235" lon="4.3768652" name="FA1"/>     
+    <waypoint lat="51.9905905" lon="4.3767770" name="FA2"/>   
+    <waypoint lat="51.9906456" lon="4.3767026" name="FA3"/>   
+    <waypoint lat="51.9906852" lon="4.3767952" name="FA4"/>   
+    <waypoint lat="51.990643" lon="4.376721" name="GOAL"/>
+    <waypoint lat="51.990643" lon="4.376721" name="PREVGOAL"/>
+    <waypoint lat="51.9906190" lon="4.3767322" name="R2"/>  
+    <waypoint lat="51.9906399" lon="4.3767861" name="R3"/>
+    <waypoint lat="51.9906682" lon="4.3767512" name="R4"/>    
+    <waypoint lat="51.9906323" lon="4.3767335" name="LStart"/>    
+    <waypoint lat="51.9906454" lon="4.3767596" name="LStop"/>          
+  </waypoints>
+  <sectors>
+    <sector color="red" name="Flight_Area">
+      <corner name="FA4"/>
+      <corner name="FA3"/>
+      <corner name="FA2"/>
+      <corner name="FA1"/>
+    </sector>
+    <sector color="orange" name="Room">
+      <corner name="FA3"/>
+      <corner name="R2"/>
+      <corner name="R3"/>
+      <corner name="R4"/>
+    </sector>
+  </sectors>
+  <blocks>
+    <block name="Wait GPS">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 2)"/>
+      <call fun="NavSetAltitudeReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block key="s" name="Start Engine">
+      <call fun="NavResurrect()"/>
+      <set value="stateGetNedToBodyEulers_i()->psi" var="nav_heading"/>      
+      <attitude pitch="0" roll="0" throttle="0" until="stage_time > 0.5" vmode="throttle"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
+      <exception cond="stateGetPositionEnu_f()->z > 1.2" deroute="Standby"/>
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <stay climb="0.3" vmode="climb" wp="STDBY"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
+      <exception cond="electrical.bat_low" deroute="land here"/>
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <call fun="NavCopyWaypoint(WP_PREVGOAL,WP_STDBY)"/>
+      <call fun="NavCopyWaypoint(WP_GOAL,WP_STDBY)"/>
+      <call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)"/>        
+      <stay wp="STDBY"/>
+    </block>
+
+    <block key="g" name="ReadyAtStart">
+      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
+      <exception cond="electrical.bat_low" deroute="land here"/>
+      <exception cond="noDataCounter>100" deroute="land here"/>      
+      <stay until="stage_time > 3" wp="LStart"/>
+      <call fun="nav_set_heading_towards_waypoint(WP_LStop)"/>
+      <stay until="stage_time > 0.5" wp="LStart"/>
+    </block>
+
+
+    <block name="GoToWall">
+      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
+      <exception cond="electrical.bat_low" deroute="land here"/>
+      <exception cond="noDataCounter>100" deroute="land here"/>    
+      <exception cond="obstacle_detected==1" deroute="GoBack"/>  
+      <call fun="nav_set_heading_towards_waypoint(WP_LStop)"/>
+      <go from="LStart" hmode="route" wp="LStop"/>
+      <stay until="stage_time > 15" wp="LStop"/>      
+    </block>
+
+    <block name="GoBack">
+      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
+      <exception cond="electrical.bat_low" deroute="land here"/>
+      <exception cond="noDataCounter>100" deroute="land here"/>
+      <exception cond="obstacle_detected==0" deroute="GoToWall"/>
+      <go from="LStop" hmode="route" wp="LStart"/>      
+      <stay until="stage_time > 15" wp="LStart"/>   
+      <deroute block="GoToWall"/>   
+    </block>
+
+    <block key="l" name="land here" strip_button="Land Here" strip_icon="land-right.png">
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+    </block>
+    <block name="land">
+      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
+      <go wp="STDBY"/>
+    </block>
+    <block name="flare">
+      <exception cond="NavDetectGround()" deroute="landed"/>
+      <exception cond="!nav_is_in_flight()" deroute="landed"/>
+      <call fun="NavStartDetectGround()"/>
+      <stay climb="-1.0" until="stage_time > 3" vmode="climb" wp="STDBY"/>
+    </block>
+    <block name="landed">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="attitude_land">
+      <attitude climb="-1.0" pitch="0" roll="0" until="stage_time >3" vmode="climb"/>
+      <deroute block="landed"/>
+    </block>
+  </blocks>
+</flight_plan>
