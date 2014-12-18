@@ -3,11 +3,12 @@
 <airframe name="ardrone2_IC">
 
   <firmware name="rotorcraft">
+    <define name="DEBUG_VFF_EXTENDED"/>
     <target name="ap" board="ardrone2_raw">
       <!-- <define name="AUTOPILOT_DISABLE_AHRS_KILL"/> -->
       <define name="FAILSAFE_DESCENT_SPEED" value="0.5"/>
-      <define name="USE_SONAR" value="0"/>
-      <define name="USE_BARO" value="0"/>
+      <define name="USE_SONAR" value="0"/>      
+      <!-- <configure name="USE_BARO_BOARD" value="FALSE"/> -->
       <define name="INS_SONAR_VARIANCE_THRESHOLD"/>
       <configure name="USE_MAGNETOMETER" value="0"/>
 
@@ -234,8 +235,9 @@
   <section name="AUTOPILOT">
     <define name="MODE_STARTUP" value="AP_MODE_NAV"/>
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-   <define name="MODE_AUTO1" value="AP_MODE_NAV"/>
-    <define name="MODE_AUTO2" value="AP_MODE_HOVER_Z_HOLD"/>
+    <define name="MODE_AUTO1" value="AP_MODE_HOVER_Z_HOLD"/>
+    <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
+    
 
     <define name="ARRIVED_AT_WAYPOINT" value="0.15"/>
     <define name="AUTOPILOT_IN_FLIGHT_MIN_THRUST" value="1500"/>
