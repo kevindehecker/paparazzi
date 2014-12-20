@@ -401,7 +401,8 @@ elif args.command == 'upload_file_and_run':
     parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buffer.xml", "rb")) 
     parrot_utils.uploadfile(ftp, "drone/distribution_buf_pointer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_pointer.xml", "rb"))    
     parrot_utils.uploadfile(ftp, "drone/distribution_buf_size.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_size.xml", "rb"))    
-    parrot_utils.uploadfile(ftp, "drone/textons.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons.dat", "rb"))
+    parrot_utils.uploadfile(ftp, "drone/textons_intensity.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons_intensity.dat", "rb"))
+    parrot_utils.uploadfile(ftp, "drone/textons_gradient.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons_gradient.dat", "rb"))
     
     sleep(0.5)
 

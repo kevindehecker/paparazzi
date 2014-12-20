@@ -35,6 +35,8 @@ struct ICDataPackage {
   int avgdisp_gt;
   int avgdisp_gt_stdev;
   int avgdisp_nn;
+  float fps;
+
   char endl;             // endl fix :)
 };
 extern struct ICDataPackage video_impl;

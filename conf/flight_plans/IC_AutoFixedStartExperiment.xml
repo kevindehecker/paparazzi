@@ -48,19 +48,19 @@
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
     <block key="s" name="Start Engine">
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <call fun="NavSetWaypointHere(WP_HOME)"/>
       <call fun="NavResurrect()"/>
       <set value="stateGetNedToBodyEulers_i()->psi" var="nav_heading"/>      
       <attitude pitch="0" roll="0" throttle="0" until="stage_time > 0.5" vmode="throttle"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
-      <exception cond="stateGetPositionEnu_f()->z > 1.2" deroute="Standby"/>
-      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <exception cond="stateGetPositionEnu_f()->z > 1.2" deroute="Standby"/>      
       <stay climb="0.3" vmode="climb" wp="STDBY"/>
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
       <exception cond="electrical.bat_low" deroute="land here"/>
-      <call fun="NavSetWaypointHere(WP_STDBY)"/>
       <call fun="NavCopyWaypoint(WP_PREVGOAL,WP_STDBY)"/>
       <call fun="NavCopyWaypoint(WP_GOAL,WP_STDBY)"/>
       <call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)"/>        
@@ -77,7 +77,7 @@
     <block name="route_to_GOAL">
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
       <exception cond="electrical.bat_low" deroute="land here"/>
-      <exception cond="obstacle_detected==1" deroute="GoBackaBit"/>
+      <exception cond="obstacle_detected==1" deroute="GoBackToStartBit"/>
       <exception cond="noDataCounter>100" deroute="land here"/>      
       <call fun="nav_set_heading_towards_waypoint(WP_GOAL)"/>
 
@@ -92,14 +92,15 @@
     </block>
 
 
-    <block name="GoBackaBit">
+    <block name="GoBackToStartBit">
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
       <exception cond="electrical.bat_low" deroute="land here"/>
       <exception cond="noDataCounter>100" deroute="land here"/>      
       <!-- <call fun="NavSetWaypointHere(WP_STDBY)"/>           -->
       <!-- <call fun="goBackaBit(WP_STDBY,WP_PREVGOAL)"/>   -->
-      <call fun="NavCopyWaypoint(WP_STDBY,WP_PREVGOAL)"/>
-      <call fun="NavCopyWaypoint(WP_GOAL,WP_PREVGOAL)"/>
+      <!-- <call fun="NavCopyWaypoint(WP_STDBY,WP_PREVGOAL)"/> -->
+      <call fun="NavCopyWaypoint(WP_GOAL,WP_STDBY)"/>
+      <call fun="NavCopyWaypoint(WP_PREVGOAL,WP_STDBY)"/>
 
       <!-- <stay until="stage_time > 0.3" wp="PREVGOAL"/>  -->
     </block>

@@ -115,10 +115,10 @@ bool initSocket() {
 
 
 
-    int test = connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) ;
+    connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) ;
     //if(!connect(list_s, (struct sockaddr *)&servaddr, sizeof(servaddr)) )
     //{
-       printf("Error connect failed: %s:%d, %d \n",ipa,PORT, test);
+    //   printf("Error connect failed: %s:%d, %d \n",ipa,PORT, test);
       // return true;
     //} 
      printf("Started IC program tcp listener: %s:%d \n",ipa,PORT);
@@ -227,9 +227,9 @@ extern void IC_periodic(void) {
         noDataCounter=0;
     }
 	if (IC_flymode==stereo) {
-        printf("IC gt: %d, std: %d, thresh_gt: %d \n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,IC_threshold_gt);        
+        printf("IC gt: %d, std: %d, thresh_gt: %d, fps: %f\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,IC_threshold_gt, tcp_data.fps);
     } else {
-        printf("IC nn: %d, thresh_nn: %d\n",tcp_data.avgdisp_nn,IC_threshold_nn);        
+        printf("IC nn: %d, thresh_nn: %d, fps: %f\n",tcp_data.avgdisp_nn,IC_threshold_nn, tcp_data.fps);
     }
     
 
@@ -249,7 +249,7 @@ if (IC_flymode==stereo){
     obstacle_detected = (tcp_data.avgdisp_nn > IC_threshold_nn); 
 }
 
-    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_nn), &IC_threshold_gt,&IC_threshold_gtstd,&IC_threshold_nn, &alpha);
+    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_nn), &IC_threshold_gt,&IC_threshold_gtstd,&IC_threshold_nn, &alpha,&(tcp_data.fps));
 
 
    //obstacle_detected = IC_turnbutton;  // test switch in  IC settings tab
