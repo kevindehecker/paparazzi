@@ -13,7 +13,7 @@
           <dl_setting var="IC_threshold_gtstd"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Treshold gtstd" param="IC_THRESHOLD_STD"/>
           <dl_setting var="IC_threshold_nn"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Treshold nn" param="IC_THRESHOLD_NN"/>                    
           <dl_setting var="IC_flymode" min="0" step="1"    max="1"   module="IC/IC_slave" shortname="FlyMode" values="Stereo|Textons" handler="FlyModeButton"/>
-          <dl_setting var="IC_learnmode" min="0" step="1"    max="3"   module="IC/IC_slave" shortname="LearnMode" values="none|textons|stereo|both" handler="LearnModeButton"/>
+          <dl_setting var="IC_learnmode" min="0" step="1"    max="4"   module="IC/IC_slave" shortname="LearnMode" values="none|textons|stereo|both|active learning" handler="LearnModeButton"/>
           <dl_setting var="IC_actionDummy" min="0" step="1"    max="3"   module="IC/IC_slave" shortname="Action" values="Clear|Learn|Save|Reload" handler="ActionButton"/>
         </dl_settings>
      </dl_settings>

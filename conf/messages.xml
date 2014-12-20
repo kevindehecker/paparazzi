@@ -1886,7 +1886,8 @@
     <field name="IC_threshold_gt" type="int32"/>
     <field name="IC_threshold_gtstd" type="int32"/>
     <field name="IC_threshold_nn" type="int32"/>
-    <field name="nav_heading" type="float"/>    
+    <field name="nav_heading" type="float"/>   
+    <field name="fps" type="float"/>    
   </message>
 
   <message name="BEBOP_ACTUATORS" id="218">

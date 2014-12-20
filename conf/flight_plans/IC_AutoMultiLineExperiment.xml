@@ -8,17 +8,31 @@
 #include "guidance/guidance_h_ref.h"
 </header>
   <waypoints>
-    <waypoint name="HOME" x="-2.6" y="0.7"/>    
-    <waypoint name="STDBY" x="-2.5" y="0.7"/>            
-    <waypoint lat="51.9906235" lon="4.3768652" name="FA1"/>     
-    <waypoint lat="51.9905905" lon="4.3767770" name="FA2"/>   
-    <waypoint lat="51.9906456" lon="4.3767026" name="FA3"/>   
-    <waypoint lat="51.9906852" lon="4.3767952" name="FA4"/>   
-    <waypoint lat="51.990643" lon="4.376721" name="GOAL"/>
-    <waypoint lat="51.990643" lon="4.376721" name="PREVGOAL"/>
-    <waypoint lat="51.9906190" lon="4.3767322" name="R2"/>  
+    <waypoint name="HOME" x="-1.9" y="1.0"/>
+    <waypoint name="STDBY" x="-1.8" y="1.0"/>
+    <waypoint lat="51.9906235" lon="4.3768652" name="FA1"/>
+    <waypoint lat="51.9905905" lon="4.3767770" name="FA2"/>
+    <waypoint lat="51.9906456" lon="4.3767026" name="FA3"/>
+    <waypoint lat="51.9906852" lon="4.3767952" name="FA4"/>
+    <waypoint lat="51.9906190" lon="4.3767322" name="R2"/>
     <waypoint lat="51.9906399" lon="4.3767861" name="R3"/>
-    <waypoint lat="51.9906682" lon="4.3767512" name="R4"/>    
+    <waypoint lat="51.9906682" lon="4.3767512" name="R4"/>
+    <waypoint lat="51.990629" lon="4.376743" name="LS1"/>
+    <waypoint lat="51.990645" lon="4.376714" name="LE1"/>
+    <waypoint lat="51.990631" lon="4.376753" name="LS2"/>
+    <waypoint lat="51.990649" lon="4.376723" name="LE2"/>
+    <waypoint lat="51.990635" lon="4.376761" name="LS3"/>
+    <waypoint lat="51.990654" lon="4.376732" name="LE3"/>
+    <waypoint lat="51.990637" lon="4.376768" name="LS4"/>
+    <waypoint lat="51.990657" lon="4.376742" name="LE4"/>
+    <waypoint lat="51.990629" lon="4.376735" name="LS5"/>
+    <waypoint lat="51.990643" lon="4.376772" name="LE5"/>
+    <waypoint lat="51.990632" lon="4.376729" name="LS6"/>
+    <waypoint lat="51.990648" lon="4.376766" name="LE6"/>
+    <waypoint lat="51.990636" lon="4.376723" name="LS7"/>
+    <waypoint lat="51.990653" lon="4.376758" name="LE7"/>
+    <waypoint lat="51.990641" lon="4.376719" name="LS8"/>
+    <waypoint lat="51.990658" lon="4.376753" name="LE8"/>
   </waypoints>
   <sectors>
     <sector color="red" name="Flight_Area">
@@ -49,7 +63,7 @@
     </block>
     <block key="s" name="Start Engine">
       <call fun="NavResurrect()"/>
-      <set value="stateGetNedToBodyEulers_i()->psi" var="nav_heading"/>      
+      <set value="stateGetNedToBodyEulers_i()->psi" var="nav_heading"/>
       <attitude pitch="0" roll="0" throttle="0" until="stage_time > 0.5" vmode="throttle"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
@@ -63,65 +77,55 @@
       <call fun="NavSetWaypointHere(WP_STDBY)"/>
       <call fun="NavCopyWaypoint(WP_PREVGOAL,WP_STDBY)"/>
       <call fun="NavCopyWaypoint(WP_GOAL,WP_STDBY)"/>
-      <call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)"/>        
+      <call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)"/>
       <stay wp="STDBY"/>
     </block>
-    <block key="g" name="heading_to_GOAL">
-      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
-      <exception cond="electrical.bat_low" deroute="land here"/> 
-      <exception cond="noDataCounter>100" deroute="land here"/>      
-      <call fun="nav_set_heading_towards_waypoint(WP_GOAL)"/>      
-      <!-- <call fun="NavSetWaypointHere(WP_PREVGOAL)"/> -->
-      <stay until="stage_time > 0.1" wp="PREVGOAL"/>
-    </block>
-    <block name="route_to_GOAL">
+    <block key="g" name="ReadyAtStart">
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
       <exception cond="electrical.bat_low" deroute="land here"/>
-      <exception cond="obstacle_detected==1" deroute="GoBackaBit"/>
-      <exception cond="noDataCounter>100" deroute="land here"/>      
-      <call fun="nav_set_heading_towards_waypoint(WP_GOAL)"/>
-
-      
-      <while cond="obstacle_detected==0">
-        <go from="PREVGOAL" hmode="route" wp="GOAL"/>
-        <stay until="stage_time > 1" wp="GOAL"/>     
-        <!-- <call fun="NavSetWaypointHere(WP_PREVGOAL)"/>  -->
-        <call fun="NavCopyWaypoint(WP_PREVGOAL,WP_GOAL)"/>         
-        <call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,200,nav_heading)"/>  
-      </while>      
+      <exception cond="noDataCounter>100" deroute="land here"/>
+      <stay until="stage_time > 3" wp="LStart"/>
+      <call fun="nav_set_heading_towards_waypoint(WP_LStop)"/>
+      <stay until="stage_time > 0.5" wp="LStart"/>
     </block>
-
-
-    <block name="GoBackaBit">
+    <block name="GoToWall1">
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
       <exception cond="electrical.bat_low" deroute="land here"/>
-      <exception cond="noDataCounter>100" deroute="land here"/>      
-      <!-- <call fun="NavSetWaypointHere(WP_STDBY)"/>           -->
-      <!-- <call fun="goBackaBit(WP_STDBY,WP_PREVGOAL)"/>   -->
-      <call fun="NavCopyWaypoint(WP_STDBY,WP_PREVGOAL)"/>
-      <call fun="NavCopyWaypoint(WP_GOAL,WP_PREVGOAL)"/>
-
-      <!-- <stay until="stage_time > 0.3" wp="PREVGOAL"/>  -->
+      <exception cond="noDataCounter>100" deroute="land here"/>
+      <exception cond="obstacle_detected==1" deroute="GoBack1"/>
+      <call fun="nav_set_heading_towards_waypoint(WP_LStop)"/>
+      <go from="LStart" hmode="route" wp="LStop"/>
+      <stay until="stage_time > 15" wp="LStop"/>
     </block>
-
-    <block key="t" name="TurnAway" pre_call="increase_nav_heading(&nav_heading,45);increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)">
-      <exception cond="obstacle_detected==0" deroute="TurnaBitMore"/>
-      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
-      <exception cond="electrical.bat_low" deroute="land here"/>     
-      <exception cond="noDataCounter>100" deroute="land here"/>           
-      <stay wp="PREVGOAL"/>
-    </block>
-
-    <block name="TurnaBitMore" pre_call="increase_nav_heading(&nav_heading,45)">
+    <block name="GoBack1">
       <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
       <exception cond="electrical.bat_low" deroute="land here"/>
-      <exception cond="obstacle_detected==1" deroute="TurnAway"/>
-      <exception cond="noDataCounter>30" deroute="land here"/>      
-      <stay until="stage_time > 0.9" wp="PREVGOAL" />
-      <call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,100,nav_heading)"/>      
-      <deroute block="route_to_GOAL"/>
+      <exception cond="noDataCounter>100" deroute="land here"/>
+      <exception cond="obstacle_detected==0" deroute="GoToWall1"/>
+      <go from="LStop" hmode="route" wp="LStart"/>
+      <stay until="stage_time > 15" wp="LStart"/>
+      <deroute block="GoToWall"/>
     </block>
 
+
+    <block name="GoToWall2">
+      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
+      <exception cond="electrical.bat_low" deroute="land here"/>
+      <exception cond="noDataCounter>100" deroute="land here"/>
+      <exception cond="obstacle_detected==1" deroute="GoBack"/>
+      <call fun="nav_set_heading_towards_waypoint(WP_LStop)"/>
+      <go from="LStart" hmode="route" wp="LStop"/>
+      <stay until="stage_time > 15" wp="LStop"/>
+    </block>
+    <block name="GoBack2">
+      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
+      <exception cond="electrical.bat_low" deroute="land here"/>
+      <exception cond="noDataCounter>100" deroute="land here"/>
+      <exception cond="obstacle_detected==0" deroute="GoToWall"/>
+      <go from="LStop" hmode="route" wp="LStart"/>
+      <stay until="stage_time > 15" wp="LStart"/>
+      <deroute block="GoToWall"/>
+    </block>
 
 
 
