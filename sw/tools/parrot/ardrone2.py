@@ -412,14 +412,14 @@ elif args.command == 'upload_file_and_run':
     parrot_utils.uploadfile(ftp, "drone/build/IC", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/drone/build/IC", "rb"))
 
     print("Uploading IC related data")
-    parrot_utils.uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/graph_buffer.xml", "rb"))    
-    parrot_utils.uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/groundtruth_buffer.xml", "rb"))
-    parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buffer.xml", "rb")) 
-    parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buffer.xml", "rb")) 
-    parrot_utils.uploadfile(ftp, "drone/distribution_buf_pointer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_pointer.xml", "rb"))    
-    parrot_utils.uploadfile(ftp, "drone/distribution_buf_size.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_size.xml", "rb"))    
-    parrot_utils.uploadfile(ftp, "drone/textons_intensity.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons_intensity.dat", "rb"))
-    parrot_utils.uploadfile(ftp, "drone/textons_gradient.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons_gradient.dat", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/graph_buffer.xml", "rb"))    
+    #parrot_utils.uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/groundtruth_buffer.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buffer.xml", "rb")) 
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buffer.xml", "rb")) 
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buf_pointer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_pointer.xml", "rb"))    
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buf_size.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_size.xml", "rb"))    
+    parrot_utils.uploadfile(ftp, "drone/textons10_intensity_flightarena.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons10_intensity_flightarena.dat", "rb"))
+    parrot_utils.uploadfile(ftp, "drone/textons10_gradient_flightarena.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons10_gradient_flightarena.dat", "rb"))
     
     sleep(0.5)
 
