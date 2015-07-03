@@ -274,8 +274,8 @@ bool increase_nav_heading(int32_t *heading, int32_t increment) {
 
     alpha = -ANGLE_FLOAT_OF_BFP(heading) +1.5708;
 
-    struct EnuCoor_i *wpc = &waypoints[wp_id_current];
-    struct EnuCoor_i *wpg = &waypoints[wp_id_goal];
+    struct EnuCoor_i *wpc = &waypoints[wp_id_current].enu_i;
+    struct EnuCoor_i *wpg = &waypoints[wp_id_goal].enu_i;
 
     float x= cosf(alpha) * (float)distance;
     float y= sinf(alpha) * (float)distance;
@@ -288,9 +288,9 @@ bool increase_nav_heading(int32_t *heading, int32_t increment) {
 
 bool goBackaBit(int wp_id_current,int wp_id_prevgoal) {
 
-    struct EnuCoor_i wpc = waypoints[wp_id_current];
+    struct EnuCoor_i wpc = waypoints[wp_id_current].enu_i;
     //struct EnuCoor_i *wpg = &waypoints[wp_id_goal];
-    struct EnuCoor_i wpp = waypoints[wp_id_prevgoal];
+    struct EnuCoor_i wpp = waypoints[wp_id_prevgoal].enu_i;
 
     wpc.x = wpp.x+ (wpc.x - wpp.x)/2;
     wpc.y = wpp.y+ (wpc.y - wpp.y)/2;
