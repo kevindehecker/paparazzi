@@ -296,4 +296,3 @@ bool goBackaBit(int wp_id_current,int wp_id_prevgoal) {
     wpc.y = wpp.y+ (wpc.y - wpp.y)/2;
     return false;
 }
-
