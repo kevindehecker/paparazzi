@@ -40,7 +40,10 @@
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <time.h> 
+#include <time.h>
+
+ #include <unistd.h>
+#include <fcntl.h>
 
 #include "firmwares/rotorcraft/guidance/guidance_h.h" // to set heading
 #include "generated/modules.h" // to get periodic frequency
@@ -59,7 +62,7 @@
 
  /*  private function declarations  */
 bool initSocket(void) ;
-bool Read_socket(char * c, size_t maxlen) ;
+int Read_socket(void);
 int closeSocket(void);
 bool Write_socket(char * c, size_t n);
 
@@ -69,7 +72,8 @@ int       conn_s;                /*  connection socket         */
 struct    sockaddr_in servaddr;  /*  socket address structure  */
 struct 	ICDataPackage tcp_data;
 
-
+struct  ICDataPackage tcp_data_tmpbuf;
+int nBytesInBuf;
 
 float alpha;
 
@@ -111,7 +115,7 @@ bool initSocket() {
     {
         printf("inet_pton error occured\n");
         return true;
-    } 
+    }
 
 
 
@@ -120,23 +124,41 @@ bool initSocket() {
     //{
     //   printf("Error connect failed: %s:%d, %d \n",ipa,PORT, test);
       // return true;
-    //} 
+    //}
      printf("Started IC program tcp listener: %s:%d \n",ipa,PORT);
+     nBytesInBuf=0;
+
+     fcntl(list_s, F_SETFL, O_NONBLOCK);
 
 	return false;
 }
 
-bool Read_socket(char * c, size_t maxlen) {
-    int n = 0;    
-    while (n<maxlen) {    
-        usleep(1000); //TODO: improve this
-        int tmpn = read(list_s, c+n, maxlen-n);        
+/*
+* Reads the in buffer until all data has been processed. If more than one new tcp_data struct is received, they are overwritten with the last fully received struct
+*/
+int Read_socket() {
+    char *c = (char *) &tcp_data_tmpbuf;
+    int tmpn = 1;
+    int totaln =0;
+
+    while (true) { // run until all data has been received, or an error occured
+        tmpn =read(list_s, c+nBytesInBuf, sizeof(tcp_data)-nBytesInBuf);
         if (tmpn>0) {
-        	n+=tmpn;      	
-        } else {return true;} // return problem == true
-        
+            totaln+=tmpn;
+            nBytesInBuf+=tmpn;
+            //printf("Received %d bytes\n", nBytesInBuf );
+            if (nBytesInBuf==sizeof(tcp_data)) {
+                nBytesInBuf=0;
+                memcpy(&tcp_data,&tcp_data_tmpbuf,sizeof(tcp_data));
+            }
+        } else if (tmpn<0)  {
+            //printf("Err %d, %d, %d\n", tmpn,nBytesInBuf,totaln );
+            return totaln;
+        } else { // I don't think this output is possible with non-blocking read?
+            //printf("No data available, %d from %d bytes\n", nBytesInBuf,sizeof(tcp_data));
+            return totaln;
+        }
     }
-    return false;
 }
 bool Write_socket(char * c, size_t n) {
 
@@ -158,7 +180,7 @@ extern void IC_slave_FlyModeButton(int8_t value) {
     IC_flymode = value;
 }
 extern void IC_slave_LearnModeButton(int8_t value) {
-    IC_learnmode = value;    
+    IC_learnmode = value;
     char str[2];
     str[0]=value+48;
     str[1]=0;
@@ -169,15 +191,15 @@ extern void IC_slave_LearnModeButton(int8_t value) {
 extern void IC_slave_ActionButton(int8_t value) {
     char str[2];
     IC_actionDummy = value;
-    if (value==0) { 
+    if (value==0) {
         str[0]='c';
-    } else if(value==1) { 
+    } else if(value==1) {
         str[0]='i';
-    } else if(value==2) { 
+    } else if(value==2) {
         str[0]='s';
-    } else if(value==3) { 
+    } else if(value==3) {
         str[0]='l';
-    } 
+    }
     str[1]=0;
     Write_socket(str,2);
     printf("Send to IC %s\n", str);
@@ -185,53 +207,51 @@ extern void IC_slave_ActionButton(int8_t value) {
 
 
 
-extern void IC_start(void){		
+extern void IC_start(void){
 	obstacle_detected = false;
-    
+
     IC_threshold_gt = 100;
     IC_threshold_nn = 30;
     IC_threshold_gtstd = 55;
-            
+
     IC_turnbutton=true;
     noDataCounter=0;
 
     IC_learnmode = stereo_textons; // current default in IC
-    
+
     if (initSocket()) {
         printf("Could not connect to IC\n"); // hmm, this does not work
         exit(1);
-    }	
+    }
 	printf("IC module started\n");
 }
 
 
-extern void IC_stop(void) {	
+extern void IC_stop(void) {
 	closeSocket();
-	printf("IC module stopped\n");	
+	printf("IC module stopped\n");
 }
 
 extern void IC_periodic(void) {
 	//read the data from the video tcp socket
-	
-	char * c = (char *) &tcp_data; 
-	if (Read_socket(c,sizeof(tcp_data))) {
+	if (!Read_socket()) {
         noDataCounter++;
         if (noDataCounter>100) {
             printf("No IC data received for too long.") ;
             closeSocket();
             initSocket();
-            noDataCounter=0;           
+            noDataCounter=0;
         }
-        return;
-    } else {
-        noDataCounter=0;
+        return; // no new data, so exit the function
     }
+    noDataCounter=0; // reset time out counter
+
 	if (IC_flymode==stereo) {
         printf("IC gt: %d, std: %d, thresh_gt: %d, fps: %f\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,IC_threshold_gt, tcp_data.fps);
     } else {
         printf("IC nn: %d, thresh_nn: %d, fps: %f\n",tcp_data.avgdisp_nn,IC_threshold_nn, tcp_data.fps);
     }
-    
+
 
 if (IC_flymode==stereo){
     //if (tcp_data.avgdisp_gt_stdev < IC_threshold_gtstd) {
@@ -246,7 +266,7 @@ if (IC_flymode==stereo){
     }
 
 } else {
-    obstacle_detected = (tcp_data.avgdisp_nn > IC_threshold_nn); 
+    obstacle_detected = (tcp_data.avgdisp_nn > IC_threshold_nn);
 }
 
     DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_nn), &IC_threshold_gt,&IC_threshold_gtstd,&IC_threshold_nn, &alpha,&(tcp_data.fps));
@@ -283,7 +303,7 @@ bool increase_nav_heading(int32_t *heading, int32_t increment) {
     (*wpg).y = (*wpc).y+ y;
 
     return false;
-  
+
 }
 
 bool goBackaBit(int wp_id_current,int wp_id_prevgoal) {
