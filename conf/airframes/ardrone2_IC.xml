@@ -3,7 +3,7 @@
 <airframe name="ardrone2_IC">
 
   <firmware name="rotorcraft">
-    <define name="DEBUG_VFF_EXTENDED"/>
+    <!-- <define name="DEBUG_VFF_EXTENDED"/> -->
     <target name="ap" board="ardrone2">
       <!-- <define name="AUTOPILOT_DISABLE_AHRS_KILL"/> -->
       <define name="FAILSAFE_DESCENT_SPEED" value="0.5"/>
@@ -12,8 +12,8 @@
       <define name="INS_SONAR_VARIANCE_THRESHOLD"/>
       <configure name="USE_MAGNETOMETER" value="0"/>
 
-      <subsystem name="telemetry" type="transparent_udp"/>
-      <subsystem name="radio_control" type="datalink"/>
+      <!-- <subsystem name="telemetry" type="transparent_udp"/> -->
+      <!-- <subsystem name="radio_control" type="datalink"/> -->
     </target>
 
     <target name="nps" board="pc">
@@ -119,6 +119,7 @@
 
     <!-- Use GPS heading instead of magneto -->
     <define name="USE_GPS_HEADING" value="1"/>
+    <define name="HEADING_UPDATE_GPS_MIN_SPEED" value="0"/>
   </section>
 
   <section name="INS" prefix="INS_">
