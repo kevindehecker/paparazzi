@@ -123,6 +123,7 @@ int main(void)
   while (1) {
     handle_periodic_tasks();
     main_event();
+    usleep(1000);
   }
   return 0;
 }
