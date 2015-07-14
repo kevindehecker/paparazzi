@@ -8,12 +8,8 @@
       <!-- <define name="AUTOPILOT_DISABLE_AHRS_KILL"/> -->
       <define name="FAILSAFE_DESCENT_SPEED" value="0.5"/>
       <define name="USE_SONAR" value="0"/>      
-      <!-- <configure name="USE_BARO_BOARD" value="FALSE"/> -->
-      <define name="INS_SONAR_VARIANCE_THRESHOLD"/>
+      <configure name="USE_BARO_BOARD" value="FALSE"/>
       <configure name="USE_MAGNETOMETER" value="0"/>
-
-      <!-- <subsystem name="telemetry" type="transparent_udp"/> -->
-      <!-- <subsystem name="radio_control" type="datalink"/> -->
     </target>
 
     <target name="nps" board="pc">
@@ -33,8 +29,6 @@
   </firmware>
 
   <modules main_freq="512">
-    <load name="send_imu_mag_current.xml"/>
-    <!--- load name="../../sw/ext/ardrone2_vision/modules/OpticFlowHist/OpticFlowHist.xml"/> --->
     <load name="IC.xml"/> 
     <!-- load name="../../sw/ext/ardrone2_vision/modules/Mjpeg/ViewVideo.xml"/ -->
   </modules>
@@ -250,5 +244,9 @@
     <define name="CRITIC_BAT_LEVEL" value="9.6" unit="V"/>
     <define name="LOW_BAT_LEVEL" value="9.7" unit="V"/>
     <define name="MAX_BAT_LEVEL" value="12.4" unit="V"/>
+  </section>
+
+  <section name="GCS">
+    <define name="SPEECH_NAME"         value="KHUT"/>
   </section>
 </airframe>
