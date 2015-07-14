@@ -208,9 +208,9 @@ extern void IC_slave_ActionButton(int8_t value) {
 
 
 extern void IC_start(void){
-	obstacle_detected = false;
+	obstacle_detected = true;
 
-    IC_threshold_gt = 100;
+    IC_threshold_gt = 1;
     IC_threshold_nn = 30;
     IC_threshold_gtstd = 55;
 
@@ -233,6 +233,7 @@ extern void IC_stop(void) {
 }
 
 extern void IC_periodic(void) {
+    obstacle_detected = true;
 	//read the data from the video tcp socket
 	if (!Read_socket()) {
         noDataCounter++;
