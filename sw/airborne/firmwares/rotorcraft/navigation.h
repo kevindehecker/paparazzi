@@ -121,6 +121,7 @@ extern bool_t nav_set_heading_current(void);
 
 /*********** Copy a  waypoint *************************************/
 #define NavCopyWaypoint(_wp_dst, _wp_src) { \
+    waypoints[_wp_dst].flags = waypoints[_wp_src].flags; \
     VECT3_COPY(waypoints[_wp_dst].enu_i, waypoints[_wp_src].enu_i); \
     FALSE; \
   }
