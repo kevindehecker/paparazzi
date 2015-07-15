@@ -30,6 +30,7 @@
 #define AUTOPILOT_ARMING_YAW_H
 
 #include "autopilot_rc_helpers.h"
+#include "subsystems/radio_control/rc_datalink.h"
 
 /** Delay until motors are armed/disarmed.
  * In number of rc frames recieved.
@@ -86,7 +87,7 @@ static inline void autopilot_arming_check_motors_on(void)
       case STATUS_MOTORS_OFF:
         autopilot_motors_on = FALSE;
         autopilot_motors_on_counter = 0;
-        if (THROTTLE_STICK_DOWN() && YAW_STICK_PUSHED()) { // stick pushed
+        if (THROTTLE_STICK_DOWN() && YAW_STICK_PUSHED() && yaw_was_low) { // stick pushed
           autopilot_check_motor_status = STATUS_M_OFF_STICK_PUSHED;
         }
         break;
