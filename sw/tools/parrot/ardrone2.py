@@ -405,29 +405,29 @@ elif args.command == 'upload_file_and_run':
     parrot_utils.execute_command(tn, "mkdir -p /data/video/" + args.folder)
     print('Uploading \'' + f[1] + "\' from " + f[0] + " to " + args.folder)
     parrot_utils.uploadfile(ftp, args.folder + "/" + f[1], file(args.file, "rb"))
-    print("Uploading \'IC\' from /home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/drone/build to drone/build/IC" )
+    print("Uploading \'IC\' from /home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/drone/build to drone/build/IC" )
     parrot_utils.execute_command(tn,"killall IC")
     parrot_utils.execute_command(tn,"killall -9 IC")
     sleep(0.5)
-    parrot_utils.uploadfile(ftp, "drone/build/IC", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/drone/build/IC", "rb"))
+    parrot_utils.uploadfile(ftp, "drone/build/IC", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/drone/build/IC", "rb"))
 
     print("Uploading IC related data")
-    #parrot_utils.uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/graph_buffer.xml", "rb"))    
-    #parrot_utils.uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/groundtruth_buffer.xml", "rb"))
-    #parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buffer.xml", "rb")) 
-    #parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buffer.xml", "rb")) 
-    #parrot_utils.uploadfile(ftp, "drone/distribution_buf_pointer.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_pointer.xml", "rb"))    
-    #parrot_utils.uploadfile(ftp, "drone/distribution_buf_size.xml", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/distribution_buf_size.xml", "rb"))    
-    parrot_utils.uploadfile(ftp, "drone/textons10_intensity_flightarena.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons10_intensity_flightarena.dat", "rb"))
-    parrot_utils.uploadfile(ftp, "drone/textons10_gradient_flightarena.dat", file("/home/houjebek/paparazzi/sw/ext/ardrone2_vision/IC/pc/textons10_gradient_flightarena.dat", "rb"))
-    
+    #parrot_utils.uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/graph_buffer.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/groundtruth_buffer.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buffer.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buffer.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buf_pointer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buf_pointer.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buf_size.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buf_size.xml", "rb"))
+    parrot_utils.uploadfile(ftp, "drone/textons10_intensity_flightarena.dat", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/textons10_intensity_flightarena.dat", "rb"))
+    parrot_utils.uploadfile(ftp, "drone/textons10_gradient_flightarena.dat", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/textons10_gradient_flightarena.dat", "rb"))
+
     sleep(0.5)
 
     parrot_utils.execute_command(tn,"chmod 777 /data/video/drone/build/IC")
 
     parrot_utils.execute_command(tn,"mount /dev/sda1 /data/video/stick/")
     parrot_utils.execute_command(tn,"export PATH=/opt/arm_light/gst/bin:$PATH")
-    parrot_utils.execute_command(tn,"cd /data/video/drone/build/")    
+    parrot_utils.execute_command(tn,"cd /data/video/drone/build/")
     parrot_utils.execute_command(tn,"./IC > /dev/null 2>&1 &")
 
 
