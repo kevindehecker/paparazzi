@@ -26,14 +26,16 @@
 
 #include "subsystems/radio_control/rc_datalink.h"
 #include "subsystems/radio_control.h"
+#include "autopilot_rc_helpers.h"
 
 int8_t rc_dl_values[ RC_DL_NB_CHANNEL ];
 volatile bool_t rc_dl_frame_available;
-
+volatile int8_t yaw_was_low;
 
 void radio_control_impl_init(void)
 {
   rc_dl_frame_available = FALSE;
+  yaw_was_low=0;
 }
 
 
@@ -65,6 +67,13 @@ void parse_rc_4ch_datalink(
   rc_dl_values[RADIO_ROLL] = roll;
   rc_dl_values[RADIO_PITCH] = pitch;
   rc_dl_values[RADIO_YAW] = yaw;
+
+  if (!YAW_STICK_PUSHED() && !yaw_was_low) {
+    // Set a flag if the yaw stick was NOT pushed at some point, such that it
+    // is sure that the next time yaw is pushed this is actually intentional
+    // instead of just a possible joystick initialisaion problem.
+    yaw_was_low=1;
+  }
 
   rc_dl_frame_available = TRUE;
 }
