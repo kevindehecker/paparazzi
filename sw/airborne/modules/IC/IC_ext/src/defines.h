@@ -48,7 +48,7 @@
 //#define USE_SOCKET // communication to the pprz IC module
 
 #else /*************************    DRONE     *****************************************************************************/
-#define RUNMODE stereo_textons
+#define RUNMODE stereo_only
 #define DELFLY
 
 #define VIDEORAW
