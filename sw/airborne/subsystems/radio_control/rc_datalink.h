@@ -44,7 +44,6 @@
 
 extern int8_t rc_dl_values[ RC_DL_NB_CHANNEL ];
 extern volatile bool_t rc_dl_frame_available;
-extern volatile int8_t yaw_was_low; // remembers if yaw stick has ever been released. (fixes initialisation problem)
 
 /**
  * Decode datalink message to get rc values with RC_3CH message
