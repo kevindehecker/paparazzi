@@ -29,7 +29,7 @@
   </firmware>
 
   <modules main_freq="512">
-    <load name="IC.xml"/> 
+    <!--  <load name="IC.xml"/>  -->
     <!-- load name="../../sw/ext/ardrone2_vision/modules/Mjpeg/ViewVideo.xml"/ -->
   </modules>
 
