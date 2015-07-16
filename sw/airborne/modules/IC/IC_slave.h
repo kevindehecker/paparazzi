@@ -58,6 +58,7 @@ extern float navHeading;
 
 extern bool obstacle_detected;
 
+extern bool init_nav_heading(void);
 extern bool increase_nav_heading( float increment);
 extern bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, float distance);
 extern bool goBackaBit(int wp_id_current,int wp_id_prevgoal);

@@ -286,6 +286,13 @@ extern void IC_periodic(void) {
        //obstacle_detected = IC_turnbutton;  // test switch in  IC settings tab
 }
 
+
+bool init_nav_heading() {
+    navHeading = POS_FLOAT_OF_BFP(stateGetNedToBodyEulers_i()->psi);
+    return false;
+}
+
+
 /************************** FLIGHT PLAN FUNCTIONS *********************************/
 /*
 * Rotates (yaw) the heading of drone with increment
