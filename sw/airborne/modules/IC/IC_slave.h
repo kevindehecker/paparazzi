@@ -30,7 +30,7 @@
 #include <unistd.h>             /*  for ssize_t data type  */
 #include "std.h"
 
- 
+
 struct ICDataPackage {
   int avgdisp_gt;
   int avgdisp_gt_stdev;
@@ -53,11 +53,13 @@ extern int8_t IC_flymode;
 extern int8_t IC_learnmode;
 extern int8_t IC_actionDummy;
 
+extern float navHeading;
+
 
 extern bool obstacle_detected;
 
-extern bool increase_nav_heading(int32_t *heading,int32_t increment);
-extern bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, int32_t distance, int32_t heading);
+extern bool increase_nav_heading( float increment);
+extern bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, float distance);
 extern bool goBackaBit(int wp_id_current,int wp_id_prevgoal);
 
 extern int noDataCounter;
@@ -73,4 +75,4 @@ extern void IC_slave_LearnModeButton(int8_t value);
 extern void IC_slave_ActionButton(int8_t value);
 
 #endif /* IC_SLAVE_H_ */
- 
+

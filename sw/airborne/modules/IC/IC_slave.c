@@ -75,6 +75,8 @@ struct 	ICDataPackage tcp_data;
 struct  ICDataPackage tcp_data_tmpbuf;
 int nBytesInBuf;
 
+float navHeading;
+
 float alpha;
 
 int32_t IC_threshold_nn;
@@ -215,6 +217,7 @@ extern void IC_start(void){
 
     IC_turnbutton=true;
     noDataCounter=0;
+    nav_heading=0;
 
     IC_learnmode = stereo_textons; // current default in IC
 
@@ -233,8 +236,18 @@ extern void IC_stop(void) {
 
 extern void IC_periodic(void) {
 	//read the data from the video tcp socket
+
+    static int8_t tmp = 0;
+    tmp++;
+    if (tmp == 10) {
+        tmp=0;
+        DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_nn), &IC_threshold_gt,&IC_threshold_gtstd,&IC_threshold_nn, &navHeading,&(tcp_data.fps));
+    }
+
+
+
 	if (!Read_socket()) {
-        noDataCounter++;
+       // noDataCounter++;
         if (noDataCounter>100) {
             printf("No IC data received for too long.") ;
             closeSocket();
@@ -251,27 +264,26 @@ extern void IC_periodic(void) {
         printf("IC nn: %d, thresh_nn: %d, fps: %f\n",tcp_data.avgdisp_nn,IC_threshold_nn, tcp_data.fps);
     }
 
+    if (IC_flymode==stereo) {
+        //if (tcp_data.avgdisp_gt_stdev < IC_threshold_gtstd) {
+        if (tcp_data.avgdisp_gt > IC_threshold_gt) {
+                obstacle_detected = true;
+            // } else {
+            //     obstacle_detected = false;
+            // }
+        }
+        else { // if variance is too high, probably only far away objects....
+            obstacle_detected = false;
+        }
 
-if (IC_flymode==stereo){
-    //if (tcp_data.avgdisp_gt_stdev < IC_threshold_gtstd) {
-    if (tcp_data.avgdisp_gt > IC_threshold_gt) {
-            obstacle_detected = true;
-        // } else {
-        //     obstacle_detected = false;
-        // }
+    } else {
+        obstacle_detected = (tcp_data.avgdisp_nn > IC_threshold_nn);
     }
-    else { // if variance is too high, probably only far away objects....
-        obstacle_detected = false;
-    }
-
-} else {
-    obstacle_detected = (tcp_data.avgdisp_nn > IC_threshold_nn);
-}
-
-    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_nn), &IC_threshold_gt,&IC_threshold_gtstd,&IC_threshold_nn, &alpha,&(tcp_data.fps));
 
 
-   //obstacle_detected = IC_turnbutton;  // test switch in  IC settings tab
+
+
+       //obstacle_detected = IC_turnbutton;  // test switch in  IC settings tab
 }
 
 /************************** FLIGHT PLAN FUNCTIONS *********************************/
@@ -279,8 +291,12 @@ if (IC_flymode==stereo){
 * Rotates (yaw) the heading of drone with increment
 *
 */
-bool increase_nav_heading(int32_t *heading, int32_t increment) {
-     *heading = *heading + increment;
+bool increase_nav_heading( float increment) {
+     navHeading = navHeading + increment;
+     if (navHeading > 6.27) {
+        navHeading=0.0;
+     }
+     NavHeading(navHeading);
   return false;
 }
 
@@ -289,17 +305,23 @@ bool increase_nav_heading(int32_t *heading, int32_t increment) {
 * Moves goal waypoint *wp_id_goal* forward with *distance* in direction of *heading* from *wp_id_current*
 *
 */
- bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, int32_t distance, int32_t heading) {
+ bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, float distance) {
 
-    alpha = -ANGLE_FLOAT_OF_BFP(heading) +1.5708;
 
-    struct EnuCoor_i *wpc = &waypoints[wp_id_current].enu_i;
-    struct EnuCoor_i *wpg = &waypoints[wp_id_goal].enu_i;
+    alpha = -navHeading+1.57;
 
-    float x= cosf(alpha) * (float)distance;
-    float y= sinf(alpha) * (float)distance;
+    struct EnuCoor_f *wpc = &waypoints[wp_id_current].enu_f;
+    struct EnuCoor_f *wpg = &waypoints[wp_id_goal].enu_f;
+
+    float x= cos(alpha) * distance;
+    float y= sin(alpha) * distance;
     (*wpg).x = (*wpc).x+ x;
     (*wpg).y = (*wpc).y+ y;
+
+    struct EnuCoor_i *wpg_i = &waypoints[wp_id_goal].enu_i;
+    wpg_i->x = POS_BFP_OF_REAL(wpg->x);
+    wpg_i->y = POS_BFP_OF_REAL(wpg->y);
+    waypoint_globalize(wp_id_goal);
 
     return false;
 
