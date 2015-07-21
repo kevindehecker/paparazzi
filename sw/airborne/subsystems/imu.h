@@ -72,6 +72,7 @@ extern void imu_SetBodyToImuTheta(float theta);
 extern void imu_SetBodyToImuPsi(float psi);
 extern void imu_SetBodyToImuCurrent(float set);
 extern void imu_ResetBodyToImu(float reset);
+bool setBodyToImuCurrent(void);
 
 /* can be provided implementation */
 extern void imu_scale_gyro(struct Imu *_imu);

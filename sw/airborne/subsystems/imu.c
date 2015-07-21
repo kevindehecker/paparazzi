@@ -178,6 +178,11 @@ void imu_SetBodyToImuPsi(float psi)
   AbiSendMsgBODY_TO_IMU_QUAT(1, orientationGetQuat_f(&imu.body_to_imu));
 }
 
+bool setBodyToImuCurrent(void) {
+  imu_SetBodyToImuCurrent(1);
+  return false;
+}
+
 void imu_SetBodyToImuCurrent(float set)
 {
   imu.b2i_set_current = set;
