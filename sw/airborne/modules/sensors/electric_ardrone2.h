@@ -22,12 +22,11 @@
  */
 
 /**
- * @file boards/ardrone/electrical_raw.h
+ * @file modules/electric_ardrone2/electric_ardrone2.c
  * arch specific electrical status readings
  */
-
-#ifndef ELECTRICAL_RAW_H_
-#define ELECTRICAL_RAW_H_
+#ifndef ELECTRICAL_ARDRONE2_H_
+#define ELECTRICAL_ARDRONE2_H_
 
 // these ARDrone2 batteries often drop very quickly, set to 1 instead of default 5
 #ifndef BAT_CHECKER_DELAY
@@ -36,6 +35,7 @@
 
 #include "subsystems/electrical.h"
 
-void electrical_setup(void);
+void electric_ardrone2_init(void);
+void electric_ardrone2_periodic(void);
 
-#endif /* ELECTRICAL_RAW_H_ */
+#endif /* ELECTRICAL_ARDRONE2_H_ */
