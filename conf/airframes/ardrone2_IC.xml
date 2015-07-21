@@ -7,7 +7,7 @@
     <target name="ap" board="ardrone2">
       <!-- <define name="AUTOPILOT_DISABLE_AHRS_KILL"/> -->
       <define name="FAILSAFE_DESCENT_SPEED" value="0.5"/>
-      <define name="USE_SONAR" value="0"/>      
+      <define name="USE_SONAR" value="0"/>
       <configure name="USE_BARO_BOARD" value="FALSE"/>
       <configure name="USE_MAGNETOMETER" value="0"/>
     </target>
@@ -29,7 +29,8 @@
   </firmware>
 
   <modules main_freq="512">
-    <load name="IC.xml"/> 
+    <load name="IC.xml"/>
+    <load name="electric_ardrone2.xml"/>
     <!-- load name="../../sw/ext/ardrone2_vision/modules/Mjpeg/ViewVideo.xml"/ -->
   </modules>
 
@@ -119,7 +120,7 @@
   <section name="INS" prefix="INS_">
     <!-- Use GPS altitude measurments and set the R gain -->
     <define name="SONAR_MAX_RANGE" value="4"/>
-    <define name="SONAR_UPDATE_ON_AGL" value="FALSE"/>    
+    <define name="SONAR_UPDATE_ON_AGL" value="FALSE"/>
     <define name="USE_GPS_ALT" value="1"/>
     <define name="VFF_R_GPS" value="0.01"/>
   </section>
@@ -264,7 +265,7 @@
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1" value="AP_MODE_HOVER_Z_HOLD"/>
     <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
-    
+
 
     <define name="ARRIVED_AT_WAYPOINT" value="0.15"/>
     <define name="AUTOPILOT_IN_FLIGHT_MIN_THRUST" value="1500"/>
