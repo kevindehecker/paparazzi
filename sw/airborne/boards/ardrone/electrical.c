@@ -144,4 +144,15 @@ void electrical_periodic(void)
    */
   electrical.current = b - pow((pow(b, electrical_priv.nonlin_factor) - pow((b * x), electrical_priv.nonlin_factor)),
                                (1. / electrical_priv.nonlin_factor));
+
+
+electrical_checks();
+
+
+//printf("%d,, %d %f, %d, %d, %d \n", electrical.vsupply, MIN_BAT_LEVEL , LOW_BAT_LEVEL, bat_low_counter, vsupply_check_started, electrical.bat_low  );
+
 }
+
+
+
+
