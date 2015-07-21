@@ -1,12 +1,13 @@
 <!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
 
-<flight_plan alt="0.4" ground_alt="0" lat0="51.990634" lon0="4.376771" max_dist_from_home="15" name="Vision_drone" security_height="0.1">
+<flight_plan alt="1.0" ground_alt="0" lat0="51.990634" lon0="4.376771" max_dist_from_home="15" name="Vision_drone" security_height="0.1">
   <header>
 #include "autopilot.h"
 #include "subsystems/electrical.h"
 #include "modules/IC/IC_slave.h"
 #include "guidance/guidance_h_ref.h"
 #include "subsystems/ahrs/ahrs_aligner.h"
+#include "subsystems/imu.h"
 </header>
   <waypoints>
     <waypoint name="HOME" x="-2.6" y="0.7"/>    
@@ -41,8 +42,9 @@
       <while cond="!GpsFixValid()"/>
     </block>
     <block name="Geo init">
-      <while cond="LessThan(NavBlockTime(), 2)"/>
+      <while cond="!(ahrs_aligner.status == AHRS_ALIGNER_LOCKED)"/>
       <call fun="NavSetAltitudeReferenceHere()"/>
+      <call fun="setBodyToImuCurrent()"/>
     </block>
     <block name="Holding point">
       <call fun="NavKillThrottle()"/>
@@ -52,10 +54,10 @@
        <exception cond="!GpsFixValid() || !(ahrs_aligner.status == AHRS_ALIGNER_LOCKED)" deroute ="Wait GPS"/>
       <call fun="NavResurrect()"/>
 <!--      <set value="stateGetNedToBodyEulers_i()->psi" var="nav_heading"/>      -->
-      <attitude pitch="0" roll="0" throttle="0" until="stage_time > 0.5" vmode="throttle"/>
+    <!--  <attitude pitch="0" roll="0" throttle="0" until="stage_time > 0.5" vmode="throttle"/> -->
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
-      <exception cond="stateGetPositionEnu_f()->z > 0.2" deroute="Standby"/>
+      <exception cond="stateGetPositionEnu_f()->z > 0.0" deroute="Standby"/>
       <call fun="NavSetWaypointHere(WP_STDBY)"/>
       <stay climb="0.3" vmode="climb" wp="STDBY"/>
     </block>
