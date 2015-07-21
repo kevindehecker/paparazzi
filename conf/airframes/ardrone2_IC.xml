@@ -232,7 +232,7 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP" value="283"/>
+    <define name="HOVER_KP" value="583"/>
     <define name="HOVER_KD" value="82"/>
     <define name="HOVER_KI" value="13"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.645"/>
@@ -245,7 +245,7 @@
     <!-- Bad weather -->
     <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
 
-    <define name="PGAIN" value="79"/>
+    <define name="PGAIN" value="279"/>
     <define name="DGAIN" value="100"/>
     <define name="IGAIN" value="30"/>
     <define name="VGAIN" value="0"/>
