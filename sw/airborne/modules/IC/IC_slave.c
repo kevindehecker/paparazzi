@@ -247,8 +247,9 @@ extern void IC_periodic(void) {
 
 
 	if (!Read_socket()) {
-       // noDataCounter++;
+        noDataCounter++;
         if (noDataCounter>100) {
+            IC_threshold_gt=16;
             printf("No IC data received for too long.") ;
             closeSocket();
             initSocket();

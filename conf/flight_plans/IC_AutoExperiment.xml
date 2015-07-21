@@ -51,28 +51,29 @@
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
     <block key="s" name="Start Engine">
-       <exception cond="!GpsFixValid() || !(ahrs_aligner.status == AHRS_ALIGNER_LOCKED)" deroute ="Wait GPS"/>
-      <call fun="NavResurrect()"/>
+	<exception cond="!GpsFixValid() || !(ahrs_aligner.status == AHRS_ALIGNER_LOCKED)" deroute ="Wait GPS"/>
+	<call fun="NavResurrect()"/>
 <!--      <set value="stateGetNedToBodyEulers_i()->psi" var="nav_heading"/>      -->
     <!--  <attitude pitch="0" roll="0" throttle="0" until="stage_time > 0.5" vmode="throttle"/> -->
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
-      <exception cond="stateGetPositionEnu_f()->z > 0.0" deroute="Standby"/>
-      <call fun="NavSetWaypointHere(WP_STDBY)"/>
-      <stay climb="0.3" vmode="climb" wp="STDBY"/>
+	<exception cond="stateGetPositionEnu_f()->z > 0.0" deroute="Standby"/>
+	<call fun="NavSetWaypointHere(WP_STDBY)"/>
+	<stay climb="0.3" vmode="climb" wp="STDBY"/>
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
-      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
-      <exception cond="electrical.bat_low" deroute="land here"/>
-      <call fun="NavSetWaypointHere(WP_STDBY)"/>
-      <call fun="NavCopyWaypoint(WP_PREVGOAL,WP_STDBY)"/>
-      <call fun="NavCopyWaypoint(WP_GOAL,WP_STDBY)"/>    
-      <stay wp="STDBY"/>
+  	<exception cond="GpsIsLost()" deroute="gps_lost"/> 
+	<exception cond="electrical.bat_low" deroute="bat_low"/>
+      	<exception cond="noDataCounter>50" deroute="no_IC_data"/>
+	<call fun="NavSetWaypointHere(WP_STDBY)"/>
+	<call fun="NavCopyWaypoint(WP_PREVGOAL,WP_STDBY)"/>
+	<call fun="NavCopyWaypoint(WP_GOAL,WP_STDBY)"/>    
+	<stay wp="STDBY"/>
     </block>
     <block key="g" name="heading_to_GOAL">
-      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
-      <exception cond="electrical.bat_low" deroute="land here"/> 
-      <exception cond="noDataCounter>50" deroute="land here"/>      
+      <exception cond="GpsIsLost()" deroute="gps_lost"/>
+      <exception cond="electrical.bat_low" deroute="bat_low"/> 
+      <exception cond="noDataCounter>50" deroute="no_IC_data"/>     
       <call fun="nav_set_heading_towards_waypoint(WP_GOAL)"/>      
       <call fun="init_nav_heading()"/>
       <call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,1)"/>   
@@ -80,10 +81,10 @@
       <stay until="stage_time > 0.1" wp="PREVGOAL"/>
     </block>
     <block name="route_to_GOAL">
-      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
-      <exception cond="electrical.bat_low" deroute="land here"/>
+      <exception cond="GpsIsLost()" deroute="gps_lost"/>
+      <exception cond="electrical.bat_low" deroute="bat_low"/> 
       <exception cond="obstacle_detected==1" deroute="GoBackaBit"/>
-      <exception cond="noDataCounter>50" deroute="land here"/>      
+      <exception cond="noDataCounter>50" deroute="no_IC_data"/>         
         <call fun="nav_set_heading_towards_waypoint(WP_GOAL)"/> 
 
       <while cond="obstacle_detected==0">
@@ -97,9 +98,9 @@
 
 
     <block name="GoBackaBit">
-      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
-      <exception cond="electrical.bat_low" deroute="land here"/>
-      <exception cond="noDataCounter>50" deroute="land here"/>      
+      <exception cond="GpsIsLost()" deroute="gps_lost"/>
+      <exception cond="electrical.bat_low" deroute="bat_low"/> 
+      <exception cond="noDataCounter>50" deroute="no_IC_data"/>    
       <!-- <call fun="NavSetWaypointHere(WP_STDBY)"/>       -->
       <!-- <call fun="goBackaBit(WP_STDBY,WP_PREVGOAL)"/>   -->
       <call fun="NavCopyWaypoint(WP_STDBY,WP_PREVGOAL)"/>
@@ -110,17 +111,17 @@
 
     <block key="t" name="TurnAway" pre_call="increase_nav_heading(0.05);increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,1)">
       <exception cond="obstacle_detected==0" deroute="TurnaBitMore"/>
-      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
-      <exception cond="electrical.bat_low" deroute="land here"/>     
-      <exception cond="noDataCounter>50" deroute="land here"/>           
+      <exception cond="GpsIsLost()" deroute="gps_lost"/>
+       	<exception cond="electrical.bat_low" deroute="bat_low"/> 
+      <exception cond="noDataCounter>50" deroute="no_IC_data"/>           
       <stay wp="PREVGOAL"/>
     </block>
 
     <block name="TurnaBitMore" > <!-- pre_call="increase_nav_heading(0.05)" -->
-      	<exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
-       	<exception cond="electrical.bat_low" deroute="land here"/> 
+        <exception cond="GpsIsLost()" deroute="gps_lost"/>
+       	<exception cond="electrical.bat_low" deroute="bat_low"/> 
       	<exception cond="obstacle_detected==1" deroute="TurnAway"/>
-       	<exception cond="noDataCounter>50" deroute="land here"/>            
+        <exception cond="noDataCounter>50" deroute="no_IC_data"/>              
       	<call fun="increase_nav_waypoint(WP_PREVGOAL,WP_GOAL,1)"/> 
 	<call fun="nav_set_heading_towards_waypoint(WP_GOAL)"/>  
 	<stay until="stage_time > 1" wp="PREVGOAL" />    
@@ -128,11 +129,27 @@
     </block>
 
 
+
+    <block name="gps_lost">
+      	<deroute block="flare"/>
+    </block>
+
+    <block name="bat_low">
+      	<deroute block="land here"/>
+    </block>
+
+    <block name="no_IC_data">
+        <exception cond="GpsIsLost()" deroute="gps_lost"/>
+       	<exception cond="electrical.bat_low" deroute="bat_low"/> 
+	<stay until="stage_time > 5" wp="STDBY" />    
+      	<deroute block="land here"/>
+    </block>
+
     <block key="l" name="land here" strip_button="Land Here" strip_icon="land-right.png">
       <call fun="NavSetWaypointHere(WP_STDBY)"/>
     </block>
     <block name="land">
-      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/>
+<!--      <exception cond="GpsIsLost() && ((nav_stage>14) || (14> nav_stage) )" deroute="attitude_land"/> -->
       <go wp="STDBY"/>
     </block>
     <block name="flare">
