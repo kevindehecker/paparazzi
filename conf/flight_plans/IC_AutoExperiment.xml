@@ -18,9 +18,10 @@
     <waypoint lat="51.9906852" lon="4.3767952" height="2." name="FA4"/>
     <waypoint name="GOAL" x="0.0" y="0.5"/>    
     <waypoint name="PREVGOAL" x="0.0" y="0.5"/>    
-    <waypoint lat="51.9906190" lon="4.3767322" height="2." name="R2"/>  
-    <waypoint lat="51.9906399" lon="4.3767861" height="2." name="R3"/>
-    <waypoint lat="51.9906682" lon="4.3767512" height="2." name="R4"/>    
+    <waypoint lat="51.9906403" lon="4.3767354" height="2." name="R1"/>   
+    <waypoint lat="51.9906119" lon="4.3767631" height="2." name="R2"/>  	
+    <waypoint lat="51.9906306" lon="4.3768150" height="2." name="R3"/>	
+    <waypoint lat="51.9906628" lon="4.3767851" height="2." name="R4"/>   	 
   </waypoints>
   <sectors>
     <sector color="red" name="Flight_Area">
@@ -30,7 +31,7 @@
       <corner name="FA1"/>
     </sector>
     <sector color="orange" name="Room">
-      <corner name="FA3"/>
+      <corner name="R1"/>
       <corner name="R2"/>
       <corner name="R3"/>
       <corner name="R4"/>
