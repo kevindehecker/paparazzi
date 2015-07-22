@@ -211,7 +211,7 @@ extern void IC_slave_ActionButton(int8_t value) {
 
 extern void IC_start(void){
 
-    IC_threshold_gt = 1;
+    IC_threshold_gt = 4;
     IC_threshold_nn = 1;
     IC_threshold_gtstd = 55;
 
@@ -235,8 +235,7 @@ extern void IC_stop(void) {
 }
 
 extern void IC_periodic(void) {
-	//read the data from the video tcp socket
-
+    //read the data from the video tcp socket
     static int8_t tmp = 0;
     tmp++;
     if (tmp == 10) {
@@ -249,7 +248,7 @@ extern void IC_periodic(void) {
 	if (!Read_socket()) {
         noDataCounter++;
         if (noDataCounter>100) {
-            IC_threshold_gt=16;
+            tcp_data.avgdisp_gt=16;
             printf("No IC data received for too long.") ;
             closeSocket();
             initSocket();
@@ -289,7 +288,7 @@ extern void IC_periodic(void) {
 
 
 bool init_nav_heading() {
-    navHeading = POS_FLOAT_OF_BFP(stateGetNedToBodyEulers_i()->psi);
+    navHeading =stateGetNedToBodyEulers_f()->psi;
     return false;
 }
 
@@ -315,8 +314,10 @@ bool increase_nav_heading( float increment) {
 */
  bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, float distance) {
 
+distance = distance/2; //tmp test
 
     alpha = -navHeading+1.57;
+
 
     struct EnuCoor_f *wpc = &waypoints[wp_id_current].enu_f;
     struct EnuCoor_f *wpg = &waypoints[wp_id_goal].enu_f;
@@ -330,6 +331,10 @@ bool increase_nav_heading( float increment) {
     wpg_i->x = POS_BFP_OF_REAL(wpg->x);
     wpg_i->y = POS_BFP_OF_REAL(wpg->y);
     waypoint_globalize(wp_id_goal);
+
+
+    DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice, (uint8_t *)&wp_id_goal, &(wpg_i->x), &(wpg_i->y), &(wpg_i->z));
+
 
     return false;
 
@@ -345,3 +350,31 @@ bool goBackaBit(int wp_id_current,int wp_id_prevgoal) {
     wpc.y = wpp.y+ (wpc.y - wpp.y)/2;
     return false;
 }
+
+
+//VOLGENS EWOUD:
+//                    x
+//                     |       *
+//                     |      *
+//                     |alpha*
+//                     |    s
+//                     |   *
+//                     |  *
+//                     | *
+// -------------------------------------------y
+
+//PRAKTIJK:
+//                    y
+//                     |       *
+//                     |      *
+//                     |     *
+//                     o    s
+//                     |   *
+//                     |  *
+//                     | *  -alpha+pi/2
+// --------------------------a----------------x
+//
+//  cos(alpha) = a*s -> a = cos(alpha)/s
+//
+//  sin(alpha) = o*s -> o = sin(alpha)/s
+
