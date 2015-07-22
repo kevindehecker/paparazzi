@@ -10,6 +10,7 @@
       <define name="USE_SONAR" value="0"/>      
       <configure name="USE_BARO_BOARD" value="FALSE"/>
       <configure name="USE_MAGNETOMETER" value="0"/>
+      <define name="LOW_NOISE_TIME" value="1"/>
     </target>
 
     <target name="nps" board="pc">
