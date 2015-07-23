@@ -104,8 +104,6 @@
 
   <section name="INS" prefix="INS_">
     <!-- Use GPS altitude measurments and set the R gain -->
-    <define name="SONAR_MAX_RANGE" value="4"/>
-    <define name="SONAR_UPDATE_ON_AGL" value="FALSE"/>
     <define name="USE_GPS_ALT" value="1"/>
     <define name="VFF_R_GPS" value="0.01"/>
   </section>
