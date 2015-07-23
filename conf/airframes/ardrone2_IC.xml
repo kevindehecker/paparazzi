@@ -155,10 +155,10 @@
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="380.0"/>
     <define name="REF_ERR_Q" value="380.0"/>
-    <define name="REF_ERR_R" value="250.0"/>
+    <define name="REF_ERR_R" value="70.0"/>
     <define name="REF_RATE_P" value="21.6"/>
     <define name="REF_RATE_Q" value="21.6"/>
-    <define name="REF_RATE_R" value="21.0"/>
+    <define name="REF_RATE_R" value="11.0"/>
 
     <!-- second order filter parameters -->
     <define name="FILT_OMEGA" value="20.0"/>
