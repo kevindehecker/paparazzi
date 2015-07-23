@@ -211,7 +211,7 @@ extern void IC_slave_ActionButton(int8_t value) {
 
 extern void IC_start(void){
 
-    IC_threshold_gt = 4;
+    IC_threshold_gt = 7;
     IC_threshold_nn = 1;
     IC_threshold_gtstd = 55;
 
@@ -306,6 +306,25 @@ bool increase_nav_heading( float increment) {
      NavHeading(navHeading);
   return false;
 }
+
+bool set_rand_heading() {
+    //float r1 = (float)rand()/(float)(RAND_MAX);
+    //if (r1 > 0.8) {
+
+float r2 = (float)rand()/(float)(RAND_MAX);
+r2*=2;
+printf("Rand: %f\n",r2);
+        navHeading = navHeading + r2;
+
+     if (navHeading > 6.27) {
+        navHeading-=6.27;
+     }
+
+        NavHeading(navHeading);
+    //}
+    return false;
+}
+
 
 
 /*

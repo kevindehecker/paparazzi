@@ -63,6 +63,8 @@ extern bool increase_nav_heading( float increment);
 extern bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, float distance);
 extern bool goBackaBit(int wp_id_current,int wp_id_prevgoal);
 
+extern bool set_rand_heading(void);
+
 extern int noDataCounter;
 
 #define PORT	6969
