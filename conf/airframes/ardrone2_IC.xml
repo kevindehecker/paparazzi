@@ -30,6 +30,7 @@
   </firmware>
 
   <modules main_freq="512">
+    <load name="bat_voltage_ardrone2.xml"/>
     <load name="IC.xml"/> 
     <!-- load name="../../sw/ext/ardrone2_vision/modules/Mjpeg/ViewVideo.xml"/ -->
   </modules>
