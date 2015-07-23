@@ -22,20 +22,13 @@
  */
 
 /**
- * @file boards/ardrone/electrical_raw.h
- * arch specific electrical status readings
+ * @file modules/sensors/bat_voltage_ardrone2.c
+ * Read the battery voltage on ARDrone2.
  */
+#ifndef BAT_VOLTAGE_ARDRONE2_H_
+#define BAT_VOLTAGE_ARDRONE2_H_
 
-#ifndef ELECTRICAL_RAW_H_
-#define ELECTRICAL_RAW_H_
+void bat_voltage_ardrone2_init(void);
+void bat_voltage_ardrone2_periodic(void);
 
-// these ARDrone2 batteries often drop very quickly, set to 1 instead of default 5
-#ifndef BAT_CHECKER_DELAY
-#define BAT_CHECKER_DELAY 1
-#endif
-
-#include "subsystems/electrical.h"
-
-void electrical_setup(void);
-
-#endif /* ELECTRICAL_RAW_H_ */
+#endif /* BAT_VOLTAGE_ARDRONE2_H_ */
