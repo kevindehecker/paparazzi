@@ -11,7 +11,10 @@ bool FileCam::init () {
 	scaleFactor = 1;
 //	video = cv::VideoCapture("/home/goggles/Desktop/cubicle_walk/LeftRight.avi");
 	//video = cv::VideoCapture("/home/goggles/Desktop/LeftRight_glasstablemanualhfps.avi");
-    video = cv::VideoCapture("/home/houjebek/AfstudeerData/DroneCam/AutonomousFlightGroundtruth1/video_dsp.avi");
+    //video = cv::VideoCapture("/home/houjebek/AfstudeerData/DroneCam/AutonomousFlightGroundtruth1/video_dsp.avi");
+    //video = cv::VideoCapture("/home/houjebek/Desktop/video_walk_house.avi");
+    //video = cv::VideoCapture("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/drone/build/video_dsp.avi");
+    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_23__16_36_02.avi");
 
     if (!video.isOpened()) {
         std::cerr << "Error opening video file!\n";
