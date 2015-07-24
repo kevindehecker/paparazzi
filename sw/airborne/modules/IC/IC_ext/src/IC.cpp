@@ -206,11 +206,12 @@ void process_video() {
 		}
 		if ((mode==stereo_textons_active || mode==stereo_textons ) || mode==textons_only) {
 			textonizer.getTextonDistributionFromImage(svcam.frameL_mat,stereo.avgDisparity,mode==stereo_textons_active,pauseVideo,stereoOK);  //perform the texton stuff
-			tcp.commdata_nn = textonizer.getLast_est();
+            tcp.commdata_est = textonizer.last_est;
 		}
 		if (mode==stereo_only || mode==stereo_textons || stereo_textons_active) {
-			tcp.commdata_gt = stereo.avgDisparity;
-			tcp.commdata_gt_stdev = stereo.stddevDisparity;
+            tcp.commdata_gt = stereo.avgDisparity;
+            //tcp.commdata_gt = textonizer.last_gt;
+            tcp.commdata_gt_stdev = stereo.stddevDisparity; // deprecated
 		}
 
 		if (stereoOK && (mode==stereo_textons || mode==stereo_textons_active)) {
@@ -261,7 +262,7 @@ void process_video() {
 
 		float time = stopWatch.Read()/1000;
 		tcp.commdata_fps = imgcount /(time);
-        std::cout << "#" << imgcount << ", fps: " << tcp.commdata_fps << ", GT: " << tcp.commdata_gt << std::endl;
+        std::cout << "#" << imgcount << ", fps: " << tcp.commdata_fps << ", GT: " << tcp.commdata_gt <<  ", Est: " << tcp.commdata_est << std::endl;
 
 #ifdef USE_SOCKET
 		tcp.Unlock();
@@ -590,7 +591,7 @@ int main( int argc, char **argv )
 	if (init(argc,argv)) {return 1;}
 
 	/* clear learning buffer instead of using old stuff */
-	//textonizer.initLearner(true);
+    textonizer.initLearner(true);
 
 	process_video();	
 	textonizer.printReport(tcp.commdata_fps);

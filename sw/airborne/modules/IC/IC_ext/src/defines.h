@@ -16,7 +16,7 @@
 //#define DUOWEBCAM // use the double webcam stereo set up
 
 //#define DELFLY_WIFI // use the delfly stereo cam, while it is connected to the ardrone2, streaming over wifi
-//#define FILECAM // use a video as source instead of the camera. The file name is defined in filecam.cpp
+#define FILECAM // use a video as source instead of the camera. The file name is defined in filecam.cpp
 
 //#define FILESTEREO
 //#define GEIGER // use libelas Geiger stereo algorithm
@@ -48,7 +48,7 @@
 //#define USE_SOCKET // communication to the pprz IC module
 
 #else /*************************    DRONE     *****************************************************************************/
-#define RUNMODE stereo_only
+#define RUNMODE stereo_textons
 #define DELFLY
 
 #define VIDEORAW

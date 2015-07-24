@@ -68,6 +68,9 @@ public:
 	int threshold_gt;
 	int *result_input2Mode;
 
+    int last_est;
+    int last_gt;
+
 	float tpr_threshold;
 	float fpr_threshold; //only used to determine when to switch est/gt
     //float avgdisp_smoothed;
@@ -113,8 +116,6 @@ public:
 	int initLearner(bool nulltrain);
     int loadPreviousRegression();
     void reload();    
-	int getLast_est();
-    int getLast_gt();
     void drawMeanHists(cv::Mat histimage);
 	void setAutoThreshold();
 

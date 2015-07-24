@@ -79,7 +79,7 @@ float navHeading;
 
 float alpha;
 
-int32_t IC_threshold_nn;
+int32_t IC_threshold_est;
 int32_t IC_threshold_gt;
 int32_t IC_threshold_gtstd;
 bool IC_turnbutton;
@@ -212,7 +212,7 @@ extern void IC_slave_ActionButton(int8_t value) {
 extern void IC_start(void){
 
     IC_threshold_gt = 7;
-    IC_threshold_nn = 1;
+    IC_threshold_est = 1;
     IC_threshold_gtstd = 55;
 
     IC_turnbutton=true;
@@ -240,7 +240,7 @@ extern void IC_periodic(void) {
     tmp++;
     if (tmp == 10) {
         tmp=0;
-        DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_nn), &IC_threshold_gt,&IC_threshold_gtstd,&IC_threshold_nn, &navHeading,&(tcp_data.fps));
+        DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_est), &IC_threshold_gt,&IC_threshold_gtstd,&IC_threshold_est, &navHeading,&(tcp_data.fps));
     }
 
 
@@ -259,9 +259,9 @@ extern void IC_periodic(void) {
     noDataCounter=0; // reset time out counter
 
 	if (IC_flymode==stereo) {
-        printf("IC gt: %d, std: %d, thresh_gt: %d, fps: %f\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,IC_threshold_gt, tcp_data.fps);
+        printf("IC gt: %d, std: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,IC_threshold_gt,tcp_data.avgdisp_est,IC_threshold_est, tcp_data.fps);
     } else {
-        printf("IC nn: %d, thresh_nn: %d, fps: %f\n",tcp_data.avgdisp_nn,IC_threshold_nn, tcp_data.fps);
+        printf("IC est: %d, thresh_est: %d, fps: %f\n",tcp_data.avgdisp_est,IC_threshold_est, tcp_data.fps);
     }
 
     if (IC_flymode==stereo) {
@@ -277,7 +277,7 @@ extern void IC_periodic(void) {
         }
 
     } else {
-        obstacle_detected = (tcp_data.avgdisp_nn > IC_threshold_nn);
+        obstacle_detected = (tcp_data.avgdisp_est > IC_threshold_est);
     }
 
 

@@ -586,17 +586,17 @@ void Textons::getDisparity(int mode,float *disparity, float *threshold) {
 
 	if (mode == ROC_BASED_RESULT) {
 		if (_tpr_trn > tpr_threshold && _fpr_trn < fpr_threshold ) {
-			*disparity = getLast_est();
+            *disparity = last_est;
 			 *threshold=threshold_est;
 		} else {
-			*disparity = getLast_gt();
+            *disparity = last_gt;
 			*threshold=threshold_gt;
 		}
 	} else if (mode == ESTIMATE_BASED_RESULT) {
-		*disparity = getLast_est();
+        *disparity = last_est;
 		*threshold=threshold_est;
 	} else if (mode == STEREO_BASED_RESULT) {
-		*disparity = getLast_gt();
+        *disparity = last_gt;
 		*threshold=threshold_gt;
 	}
 }
@@ -736,6 +736,8 @@ void Textons::getTextonDistributionFromImage(cv::Mat grayframe, float gt, bool a
 	float est = knn.find_nearest(M1,k,0,0,0,0); // if segfault here, clear xmls!
     //perform smoothing:
 	est = est_smoother.addSample(est);
+    last_est = est;
+    last_gt = gt;
 
 	//save values for visualisation	in graph
 	if (stereoOK) {
@@ -771,22 +773,6 @@ void Textons::getTextonDistributionFromImage(cv::Mat grayframe, float gt, bool a
 		drawTextonAnotatedImage(grayframe);
 	}
 #endif
-}
-
-/*
- * Retrieves and returns the last added ground truth
- */
-int Textons::getLast_gt() {
-    int gt = graph_buffer.at<float>(distribution_buf_pointer,1);
-    return gt;
-}
-
-/*
- * Retrieves and returns the last added texton result
- */
-int Textons::getLast_est() {
-	int est = graph_buffer.at<float>(distribution_buf_pointer,0);
-	return est;
 }
 
 inline bool checkFileExist (const std::string& name) {

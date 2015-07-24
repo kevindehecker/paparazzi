@@ -30,11 +30,10 @@
 #include <unistd.h>             /*  for ssize_t data type  */
 #include "std.h"
 
-
 struct ICDataPackage {
   int avgdisp_gt;
   int avgdisp_gt_stdev;
-  int avgdisp_nn;
+  int avgdisp_est;
   float fps;
 
   char endl;             // endl fix :)
@@ -47,7 +46,7 @@ enum learnmode{none,stereo_only,textons_only,stereo_textons};
 
 extern int32_t IC_threshold_gt;
 extern int32_t IC_threshold_gtstd;
-extern int32_t IC_threshold_nn;
+extern int32_t IC_threshold_est;
 extern bool IC_turnbutton;
 extern int8_t IC_flymode;
 extern int8_t IC_learnmode;
