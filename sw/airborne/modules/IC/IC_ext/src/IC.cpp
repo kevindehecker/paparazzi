@@ -63,7 +63,7 @@ Exporter exporter;
 #endif
 int countmsgclear=0;
 int pauseVideo=0;
-int result_input2Mode = VIZ_ROC;
+int result_input2Mode = VIZ_right_input_image;
 
 #ifdef FILECAM
 FileCam svcam;
@@ -207,11 +207,11 @@ void process_video() {
 		if ((mode==stereo_textons_active || mode==stereo_textons ) || mode==textons_only) {
 			textonizer.getTextonDistributionFromImage(svcam.frameL_mat,stereo.avgDisparity,mode==stereo_textons_active,pauseVideo,stereoOK);  //perform the texton stuff
             tcp.commdata_est = textonizer.last_est;
+            tcp.commdata_est_thresh =  textonizer.threshold_est;
 		}
 		if (mode==stereo_only || mode==stereo_textons || stereo_textons_active) {
-            tcp.commdata_gt = stereo.avgDisparity;
-            //tcp.commdata_gt = textonizer.last_gt;
-            tcp.commdata_gt_stdev = stereo.stddevDisparity; // deprecated
+            tcp.commdata_gt = stereo.avgDisparity;            
+            tcp.commdata_gt_stdev = stereo.stddevDisparity; // deprecated            
 		}
 
 		if (stereoOK && (mode==stereo_textons || mode==stereo_textons_active)) {
@@ -252,7 +252,7 @@ void process_video() {
 		//	textonizer.retrainAll();
 		//}
 
-		if ((imgcount % 200) == 199) {
+        if ((imgcount % 1000) == 199) {
 			textonizer.retrainAll();
 			textonizer.saveRegression();
 			std::cout << "mod: " << imgcount % 200 << "\n|" ;
@@ -525,7 +525,9 @@ int init(int argc, char **argv) {
 	cv::Size size(svcam.getImWidth()*2,svcam.getImHeight()); // for dsp encoding, ensure multiples of 16
 #ifdef _PC
 	//outputVideo.open("appsrc ! ffmpegcolorspace ! ffenc_mpeg4 ! avimux ! filesink location=video_wifi.avi",CV_FOURCC('H','O','E','R'),VIDEOFPS,size,false);
-	outputVideo.open("video_wifi.avi",CV_FOURCC('M','P','E','G'),VIDEOFPS,size,false);
+    //.open("video_wifi.avi",CV_FOURCC('M','P','E','G'),VIDEOFPS,size,false);
+     outputVideo.open("video.avi",CV_FOURCC('F','M','P','4'),VIDEOFPS,size,false);
+
 #else
     //wifi currently does not seem to work properly (IC halts after 22 frames)
     //outputVideo.open("appsrc ! ffmpegcolorspace ! dspmp4venc mode=1 ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.2 port=5000",CV_FOURCC('H','O','E','R'),VIDEOFPS,size,false);
@@ -598,7 +600,7 @@ int main( int argc, char **argv )
 	close();
 
 	/* auto save at the end */	
-	textonizer.saveRegression();
+    textonizer.saveRegression();
 
 	return 0;
 }

@@ -34,6 +34,7 @@ struct ICDataPackage {
   int avgdisp_gt;
   int avgdisp_gt_stdev;
   int avgdisp_est;
+  int avgdisp_est_thresh;
   float fps;
 
   char endl;             // endl fix :)
@@ -56,13 +57,15 @@ extern float navHeading;
 
 
 extern bool obstacle_detected;
+extern bool rh_reached;
 
 extern bool init_nav_heading(void);
 extern bool increase_nav_heading( float increment);
 extern bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, float distance);
-extern bool goBackaBit(int wp_id_current,int wp_id_prevgoal);
+//extern bool goBackaBit(int wp_id_current,int wp_id_prevgoal);
 
 extern bool set_rand_heading(void);
+extern bool increase_nav_heading_till_r(float increment);
 
 extern int noDataCounter;
 

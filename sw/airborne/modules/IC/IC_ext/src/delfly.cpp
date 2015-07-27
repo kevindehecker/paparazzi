@@ -190,8 +190,8 @@ void DelFly::workerThread() {
                             frameYUYV.at<uint8_t>(current_line,j*2+1) = buffer[jj];
                             frameYUYV.at<uint8_t>(current_line,j*2) = buffer[jj+1];
 #else
-                            int caliblineR = current_line + 4; // for sv cam 10, this seems to work ok
-                            int caliblineL = current_line - 4;
+                            int caliblineR = current_line ; //+ 4; // for sv cam 10, this seems to work ok
+                            int caliblineL = current_line ; //- 4;
 
                             if (caliblineL >= 0 && caliblineL < im_height )
                                 frameL.at<uint8_t>(caliblineL,j) = buffer[jj++];

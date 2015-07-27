@@ -14,6 +14,7 @@ struct ICDataPackage {
     int avgdisp_gt;
     int avgdisp_gt_stdev;
     int avgdisp_est;
+    int avgdisp_est_thresh;
     float fps;
     char endl;             // endl fix, makes it worker nicer in terminal for debugging :)
 };
@@ -53,6 +54,7 @@ public:
     int commdata_gt;
     int commdata_gt_stdev;
     int commdata_est;
+    int commdata_est_thresh;
     float commdata_fps;
 
     /*  Function declarations  */

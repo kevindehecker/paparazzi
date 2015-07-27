@@ -28,6 +28,8 @@ private:
     unsigned char n_textons_intensity;
     unsigned char patch_size;
     unsigned char patch_square_size;
+    int s_patch_sse;
+    int n_patch_sse;
 
 	int countsincelearn;
 
@@ -94,8 +96,8 @@ public:
 		method = TEXTON_MINIMUM_DISTANCE;
 		distribution_buf_size = 2435;
 		distribution_buf_pointer =0;
-		threshold_est = 150;
-		threshold_gt = 200;
+        threshold_est = 11;
+        threshold_gt = 12;
 
 		tpr_threshold = 0.95f;
 		fpr_threshold = 0.4f;

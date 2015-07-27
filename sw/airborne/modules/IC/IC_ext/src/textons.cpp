@@ -34,18 +34,70 @@ int Textons::init (int * result_input2Mode) {
 *Calculates the Eucladian distance between a patch and a texton
 */
 double Textons::getEuclDistance(int16_t sample[], int texton_id) {
+#ifndef SSE2
+#ifdef NEON
+
+#else
+
     int sum =0;
     std::vector<int16_t> v =textons[texton_id];
     std::vector<int16_t> sample_;
     sample_.assign(sample, sample + patch_square_size);
 
-	for(int i = 0; i < patch_square_size; i++) {
+    for(int i = 0; i < patch_square_size; i++) {
         sum += pow(sample_[i] - v[i],2);
     }
     float distance = sqrt((float)sum);
 
     return distance;
+#endif
+#else
+    uint32_t sum =0;
+
+
+    int16_t *texton = &(textons[texton_id][0]) ;
+    for (int i = 0; i < n_patch_sse<<3; i += 8) {
+        __m128i i1_register = _mm_loadu_si128( (__m128i*)( &sample[i] ));
+        __m128i i2_register = _mm_loadu_si128( (__m128i*)( &texton[i] ));
+        //(sample-texton)^2
+        __m128i i3_register = _mm_sub_epi16  (i1_register ,i2_register );
+        //std::cout << __m128i_toString<int16_t>(i3_register) << std::endl;
+        __m128i i4h_register = _mm_mulhi_epi16(i3_register,i3_register);
+        __m128i i4l_register = _mm_mullo_epi16(i3_register,i3_register);
+        //sum:
+        for (int j=0;j<8;j++){
+            sum+=(((uint16_t *)&i4h_register)[j]  <<1) + ((uint16_t *)&i4l_register)[j];
+        }
+    }
+
+
+    //perform unalligned bytes:
+    for (int i = n_patch_sse<<3; i < (n_patch_sse<<3)+s_patch_sse; i++) {
+        sum += pow(sample[i] - texton[i],2);
+    }
+
+    //float distance = sqrt((float)sum);
+
+    return (float)sum;
+#endif
 }
+#ifdef SSE2
+template <typename T>
+std::string __m128i_toString(const __m128i var) {
+    std::stringstream sstr;
+    const T* values = (const T*) &var;
+    if (sizeof(T) == 1) {
+        for (unsigned int i = 0; i < sizeof(__m128i); i++) {
+            sstr << (int) values[i] << " ";
+        }
+    } else {
+        for (unsigned int i = 0; i < sizeof(__m128i) / sizeof(T); i++) {
+            sstr << values[i] << " ";
+        }
+    }
+    return sstr.str();
+}
+#endif
 
 /*
  * Creates an histogram image
@@ -811,6 +863,8 @@ int Textons::initTextons() {
     if (buffer_gr[1] != buffer_i[1]) {std::cerr << "Error: patch sizes don't match\n";return 1;}
     patch_size = buffer_gr[1];
     patch_square_size = patch_size*patch_size;
+    s_patch_sse = patch_square_size % 8;
+    n_patch_sse = (patch_square_size- s_patch_sse)>>3;
 
 
     textons.resize(n_textons);

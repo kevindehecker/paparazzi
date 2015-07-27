@@ -10,6 +10,7 @@
 #define VIZ_ROC 7
 
 #ifdef _PC /*************************     PC     **************************************************************************/
+#define SSE2
 
 #define RUNMODE stereo_textons // start with this mode (enum defined in IC.cpp)
 #define DELFLY //use the Delfly stereo cam over usb2serial
@@ -26,7 +27,7 @@
 
 
 
-#define SKIPFRAMES_START 0
+#define SKIPFRAMES_START 100
 
 #define VIDEORESULTS // show the main results window
 #define DRAWVIZS    //show secundairy results (histograms and texton visulaisations
@@ -37,7 +38,9 @@
   #endif
 #endif
 
+#ifdef DEBUG_FLAG
 #define HASSCREEN // dont disable in qt debugger!
+#endif
 #ifndef FILECAM
 //#define VIDEORAW // write the raw video footage from the camera to a video file
 #endif
@@ -58,7 +61,7 @@
 //#define SGM
 #define LONGSEC // use Sjoerds improved sparse stereo algorithm
 
-#define VIDEOFPS 10.0f // setting this lower than 5 will crash the drone...
+#define VIDEOFPS 5.0f // setting this lower than 5 will crash the drone...
 
 //#define USE_TERMINAL_INPUT // using this disables running in background
 #define USE_SOCKET

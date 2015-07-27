@@ -79,7 +79,7 @@ float navHeading;
 
 float alpha;
 
-int32_t IC_threshold_est;
+int32_t IC_threshold_est; // unused!
 int32_t IC_threshold_gt;
 int32_t IC_threshold_gtstd;
 bool IC_turnbutton;
@@ -188,6 +188,7 @@ extern void IC_slave_LearnModeButton(int8_t value) {
     str[1]=0;
     Write_socket(str,2);
     printf("Send to IC %s\n", str);
+   // IC_slave_setThreshold(IC_threshold_gt); //tmp solution...
 }
 
 extern void IC_slave_ActionButton(int8_t value) {
@@ -207,13 +208,19 @@ extern void IC_slave_ActionButton(int8_t value) {
     printf("Send to IC %s\n", str);
 }
 
-
+extern void IC_slave_setThreshold(int8_t value) {
+    char str[2];
+    str[0]=value;
+    str[1]=0;
+    Write_socket(str,2);
+    printf("Send to IC %s\n", str);
+}
 
 extern void IC_start(void){
 
-    IC_threshold_gt = 7;
-    IC_threshold_est = 1;
-    IC_threshold_gtstd = 55;
+    IC_threshold_gt = 12;
+    // IC_threshold_est = 1;
+    // IC_threshold_gtstd = 55;
 
     IC_turnbutton=true;
     noDataCounter=0;
@@ -240,7 +247,7 @@ extern void IC_periodic(void) {
     tmp++;
     if (tmp == 10) {
         tmp=0;
-        DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_est), &IC_threshold_gt,&IC_threshold_gtstd,&IC_threshold_est, &navHeading,&(tcp_data.fps));
+        DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_est), &IC_threshold_gt,&IC_threshold_gtstd,&(tcp_data.avgdisp_est_thresh), &navHeading,&(tcp_data.fps));
     }
 
 
@@ -257,11 +264,12 @@ extern void IC_periodic(void) {
         return; // no new data, so exit the function
     }
     noDataCounter=0; // reset time out counter
+    IC_threshold_est= tcp_data.avgdisp_est_thresh;
 
 	if (IC_flymode==stereo) {
-        printf("IC gt: %d, std: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,IC_threshold_gt,tcp_data.avgdisp_est,IC_threshold_est, tcp_data.fps);
+        printf("IC gt: %d, std: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps);
     } else {
-        printf("IC est: %d, thresh_est: %d, fps: %f\n",tcp_data.avgdisp_est,IC_threshold_est, tcp_data.fps);
+        printf("IC est: %d, thresh_est: %d, fps: %f\n",tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps);
     }
 
     if (IC_flymode==stereo) {
@@ -277,7 +285,7 @@ extern void IC_periodic(void) {
         }
 
     } else {
-        obstacle_detected = (tcp_data.avgdisp_est > IC_threshold_est);
+        obstacle_detected = (tcp_data.avgdisp_est > tcp_data.avgdisp_est_thresh);
     }
 
 
@@ -306,24 +314,44 @@ bool increase_nav_heading( float increment) {
      NavHeading(navHeading);
   return false;
 }
-
+float rh; //random heading
+bool rh_reached;
 bool set_rand_heading() {
-    //float r1 = (float)rand()/(float)(RAND_MAX);
-    //if (r1 > 0.8) {
-
-float r2 = (float)rand()/(float)(RAND_MAX);
-r2*=2;
-printf("Rand: %f\n",r2);
-        navHeading = navHeading + r2;
-
-     if (navHeading > 6.27) {
-        navHeading-=6.27;
-     }
-
-        NavHeading(navHeading);
-    //}
+    rh=(float)rand()/(float)(RAND_MAX);
+    rh*=2;
+    rh_reached=false;
     return false;
 }
+bool increase_nav_heading_till_r(float increment) {
+    rh-=increment;
+    if (rh>0) {
+        navHeading = navHeading + increment;
+        if (navHeading > 6.27) {
+            navHeading=0.0;
+        }
+        NavHeading(navHeading);
+    } else {
+        rh_reached=true;
+    }
+  return false;
+}
+// bool set_rand_heading() {
+//     //float r1 = (float)rand()/(float)(RAND_MAX);
+//     //if (r1 > 0.8) {
+
+// float r2 = (float)rand()/(float)(RAND_MAX);
+// r2*=2;
+// printf("Rand: %f\n",r2);
+//         navHeading = navHeading + r2;
+
+//      if (navHeading > 6.27) {
+//         navHeading-=6.27;
+//      }
+
+//         NavHeading(navHeading);
+//     //}
+//     return false;
+// }
 
 
 
@@ -359,16 +387,16 @@ distance = distance/2; //tmp test
 
 }
 
-bool goBackaBit(int wp_id_current,int wp_id_prevgoal) {
+// bool goBackaBit(int wp_id_current,int wp_id_prevgoal) {
 
-    struct EnuCoor_i wpc = waypoints[wp_id_current].enu_i;
-    //struct EnuCoor_i *wpg = &waypoints[wp_id_goal];
-    struct EnuCoor_i wpp = waypoints[wp_id_prevgoal].enu_i;
+//     struct EnuCoor_i wpc = waypoints[wp_id_current].enu_i;
+//     //struct EnuCoor_i *wpg = &waypoints[wp_id_goal];
+//     struct EnuCoor_i wpp = waypoints[wp_id_prevgoal].enu_i;
 
-    wpc.x = wpp.x+ (wpc.x - wpp.x)/2;
-    wpc.y = wpp.y+ (wpc.y - wpp.y)/2;
-    return false;
-}
+//     wpc.x = wpp.x+ (wpc.x - wpp.x)/2;
+//     wpc.y = wpp.y+ (wpc.y - wpp.y)/2;
+//     return false;
+// }
 
 
 //VOLGENS EWOUD:
