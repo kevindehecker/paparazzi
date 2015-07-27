@@ -11,6 +11,12 @@ FILE(GLOB MY_SRC_FILES "../src/*.cpp" "../src/*.h" "../src/*.c")
 #set compile flags, for threading
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -pthread")
 
+IF(CMAKE_BUILD_TYPE STREQUAL Debug)
+        set(DEBUG_FLAG 1)
+        ADD_DEFINITIONS(-DDEBUG_FLAG=${DEBUG_FLAG})
+        MESSAGE( STATUS "DEBUG MODE" )
+ENDIF(CMAKE_BUILD_TYPE STREQUAL Debug)
+
 # add packages
 set(OpenCV_DIR "/opt/arm_light/gst/")
 find_package( OpenCV REQUIRED )
