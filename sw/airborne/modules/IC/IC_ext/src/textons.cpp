@@ -408,17 +408,13 @@ void Textons::drawRegressionGraph(std::string msg) {
 				cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX , barsize),cv::Scalar(0,255,0), line_width, 8, 0);
 			}
 
-
-
-
-
 			//draw knn est result:
 			cv::line(graphFrame, cv::Point(j*scaleX , rows- prev_est*scaleY), cv::Point((j+1)*scaleX , rows -  est*scaleY), color_est, line_width, CV_AA, 0);
 			//draw stereo vision groundtruth:
-			if (gt>5) { // ignore instances with unknown groundtruth (minDisparity >5). TODO: make minDispairty a const
+            //if (gt>5) { // ignore instances with unknown groundtruth (minDisparity >5). TODO: make minDispairty a const
 				cv::line(graphFrame, cv::Point(j*scaleX , rows- prev_gt*scaleY), cv::Point((j+1)*scaleX , rows -  gt*scaleY),color_gt, line_width, CV_AA, 0);
 				prev_gt = gt;
-			}
+            //}
 			prev_est = est;
 		}
 
@@ -783,18 +779,19 @@ void Textons::getTextonDistributionFromImage(cv::Mat grayframe, float gt, bool a
     //copy new data into learning buffer:
     cv::Mat M1 = distribution_buffer.row((distribution_buf_pointer+0) % distribution_buf_size) ;
     hist.convertTo(M1,cv::DataType<float>::type,1,0); // floats are needed for knn
-	groundtruth_buffer.at<float>((distribution_buf_pointer)% distribution_buf_size) = gt;
+    last_gt = gt_smoothed.addSample(gt);
+    groundtruth_buffer.at<float>((distribution_buf_pointer)% distribution_buf_size) = last_gt;
     //run knn
 	float est = knn.find_nearest(M1,k,0,0,0,0); // if segfault here, clear xmls!
     //perform smoothing:
 	est = est_smoother.addSample(est);
     last_est = est;
-    last_gt = gt;
+
 
 	//save values for visualisation	in graph
 	if (stereoOK) {
 		graph_buffer.at<float>((distribution_buf_pointer+0) % distribution_buf_size,0) = est;
-		graph_buffer.at<float>(distribution_buf_pointer,1) = gt;
+        graph_buffer.at<float>(distribution_buf_pointer,1) = last_gt;
 	} else { // delete to be sure, should not matter
 		graph_buffer.at<float>((distribution_buf_pointer+0) % distribution_buf_size,0) = 0;
 		graph_buffer.at<float>(distribution_buf_pointer,1) = 0;
@@ -806,10 +803,10 @@ void Textons::getTextonDistributionFromImage(cv::Mat grayframe, float gt, bool a
 		if (!activeLearning) {        //if not active learning, learn all samples
 			distribution_buf_pointer = (distribution_buf_pointer+1) % distribution_buf_size;
 		} else {            //otherwise, only learn errornous samples
-			if (est < threshold_est && gt > threshold_gt) {
+            if (est < threshold_est && last_gt > threshold_gt) {
 				//false negative; drone should stop according to stereo, but didn't if textons were used
 				distribution_buf_pointer = (distribution_buf_pointer+1) % distribution_buf_size;
-			} else if (est > threshold_est && gt < threshold_gt) {
+            } else if (est > threshold_est && last_gt < threshold_gt) {
 				//false positive; drone could have proceeded according to stereo, but stopped if textons were used
 				distribution_buf_pointer = (distribution_buf_pointer+1) % distribution_buf_size;
 			}
@@ -921,7 +918,7 @@ int Textons::initLearner(bool nulltrain) {
     groundtruth_buffer = groundtruth_buffer +6.2; //for testing...
     distribution_buf_pointer = 0;
 	est_smoother.init(filterwidth);
-	//gt_smoothed.init(filterwidth);
+    gt_smoothed.init(2);
     lastLearnedPosition = 0;
     countsincelearn=0;
     if (nulltrain) {
@@ -950,7 +947,7 @@ void Textons::retrainAll() {
         int jj = (i+distribution_buf_pointer) % distribution_buf_size;
         cv::Mat M1 = distribution_buffer.row(jj); // prevent smoothing filter discontinuity
 		graph_buffer.at<float>(jj,0) = est_smoother.addSample(knn.find_nearest(M1,k,0,0,0,0));
-		//gt_smoothed.addSample(graph_buffer.at<float>(jj,1)); // prepare the gt filter, not really necessary
+        gt_smoothed.addSample(graph_buffer.at<float>(jj,1)); // prepare the gt filter, not really necessary
     }	
 #endif
 }

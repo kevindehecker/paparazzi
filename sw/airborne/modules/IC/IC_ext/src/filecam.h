@@ -30,6 +30,9 @@ private:
     cv::VideoCapture video;
     stopwatch_c stopWatch;
 
+    int skipstart;
+    int videoLength;
+
 public:
 
     int nFrames;

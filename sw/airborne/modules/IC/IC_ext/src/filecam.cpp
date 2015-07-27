@@ -15,8 +15,12 @@ bool FileCam::init () {
     //video = cv::VideoCapture("/home/houjebek/Desktop/video_walk_house.avi");    
 #ifdef DEBUG_FLAG
     video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_25__15_16_30_suc_on_lowfps.avi");
+    skipstart = 100;
+    videoLength = 9999;
 #else
     video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_25__14_24_30_halfwaycrash.avi");
+    skipstart = 100;
+    videoLength = 3000;
 #endif
 
 
@@ -69,10 +73,11 @@ void FileCam::workerThread() {
     cv::Mat frameR = cv::Mat::zeros(im_height,im_width, CV_8UC1);
     stopWatch.Start();
 
-	int skipstart = SKIPFRAMES_START;
+    int currentFrame =0;
     //skip start
-    for (int i =0; i < skipstart;i++)
-        video >> frameC;
+    for (int i =0; i < skipstart;i++) {
+        video >> frameC;        
+    }
 
     while (cams_are_running)  {
 
@@ -87,9 +92,10 @@ void FileCam::workerThread() {
 #endif
         g_lockWaitForImage1.lock();
 
-
+        currentFrame++;
         if (rewind==1) {
          int id = video.get(CV_CAP_PROP_POS_FRAMES);
+         currentFrame-=2;
          if (id>0) {
              id-=2;
          }
@@ -98,7 +104,7 @@ void FileCam::workerThread() {
 
         video >> frameC;
 
-        if (frameC.empty())
+        if (frameC.empty() || currentFrame > videoLength)
         {
             cams_are_running=false;
             g_lockWaitForImage2.unlock();

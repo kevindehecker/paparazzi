@@ -198,47 +198,63 @@ bool stereoAlg::calcDisparityMap(cv::Mat frameL_mat,cv::Mat frameR_mat) {
     combineImage(frameL_mat,frameR_mat);
     performSparseMatching(frameC_mat,&DisparityMat );
 
-//    //create histogram of the disparities
-//    cv::Mat hist = cv::Mat::zeros(15,1,CV_16UC1);
-//    for (int i=0; i<DisparityMat.cols;i++ ) {
-//        for (int j=0; j<DisparityMat.rows;j++ ) {
-
-//            int tmp = DisparityMat.at<uint16_t>(j, i);
-//            tmp = tmp>>4;
-//            hist.at<uint16_t>(tmp)++;
-//        }
-//    }
-//    int sum = 0;
-//    avgDisparity=0;
-//    for (int i=14; i>0;i-- ) {
-//        sum +=  hist.at<uint16_t>(i);
-//        if (sum>75) {
-//            avgDisparity = i;
-//            break;
-//        }
-//    }
-
-
-
-    avgDisparity=0;
+    //create histogram of the disparities
     int okcount = 0; //keeps track how many pixels are OK (not 0 = NaN) in the disparity map
+    cv::Mat hist = cv::Mat::zeros(15,1,CV_16UC1);
     for (int i=0; i<DisparityMat.cols;i++ ) {
         for (int j=0; j<DisparityMat.rows;j++ ) {
+
             int tmp = DisparityMat.at<uint16_t>(j, i);
             if (tmp >0) {
                 okcount++;
-                avgDisparity+=tmp;
             }
+            tmp = tmp>>4;
+            hist.at<uint16_t>(tmp)++;
         }
     }
 
-    if (okcount>0) {
-    avgDisparity /= okcount;
-    } else {
-        avgDisparity =0;
+    float okF = (float)okcount / (128.0*96.0*0.0254754);
+   // std::cout << "OKOKOK: " << okF <<std::endl;
+    //to determince average OK factor: (one time calib)
+//    static float okF_total = 0;
+//    static int okF_avgcount =0;
+//    okF_total += okF;
+//    okF_avgcount ++;
+//    std::cout << "Avg OK F: " << okF_total / (float)okF_avgcount << std::endl;
+
+    int threshold_today = 75*okF;
+
+    int sum = 0;
+    avgDisparity=0;
+    for (int i=14; i>0;i-- ) {
+        sum +=  hist.at<uint16_t>(i);
+        if (sum>threshold_today) {
+            avgDisparity = i;
+            break;
+        }
     }
-    avgDisparity /=10; // heuristic scaling for better visualisation and smoother thresh config
-    avgDisparity = (int) avgDisparity;
+
+
+
+//    avgDisparity=0;
+//    int okcount = 0; //keeps track how many pixels are OK (not 0 = NaN) in the disparity map
+//    for (int i=0; i<DisparityMat.cols;i++ ) {
+//        for (int j=0; j<DisparityMat.rows;j++ ) {
+//            int tmp = DisparityMat.at<uint16_t>(j, i);
+//            if (tmp >0) {
+//                okcount++;
+//                avgDisparity+=tmp;
+//            }
+//        }
+//    }
+
+//    if (okcount>0) {
+//    avgDisparity /= okcount;
+//    } else {
+//        avgDisparity =0;
+//    }
+//    avgDisparity /=10; // heuristic scaling for better visualisation and smoother thresh config
+//    avgDisparity = (int) avgDisparity;
 
 #else
     //avgDisparity = cv::mean(DisparityMat)(0);
@@ -280,7 +296,7 @@ bool stereoAlg::calcDisparityMap(cv::Mat frameL_mat,cv::Mat frameR_mat) {
     double min,max;
     cv::minMaxIdx(DisparityMat, &min, &max);
 
-    std::cout << " mean/std: " << avgDisparity << " / " << stddevDisparity << std::endl;
+    //std::cout << " mean/std: " << avgDisparity << " / " << stddevDisparity << std::endl;
     //std::cout << " min/max: " << min << " / " << max << std::endl;
     DisparityMat.convertTo(DisparityMat,CV_8UC1, 256.0 / dispScale, 0.0); // expand range to 0..255.
 #endif

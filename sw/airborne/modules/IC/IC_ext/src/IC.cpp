@@ -367,7 +367,7 @@ void handleKey() {
 	case 42: // [*]: show ROC curve
 		result_input2Mode=VIZ_ROC;
 		break;
-#ifdef FILESTEREO
+#ifdef FILECAM
 	case '>': // fast forward filecam
 		svcam.fastforward=1;
 		svcam.rewind=0;
