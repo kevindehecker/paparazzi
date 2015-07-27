@@ -12,10 +12,12 @@ bool FileCam::init () {
 //	video = cv::VideoCapture("/home/goggles/Desktop/cubicle_walk/LeftRight.avi");
 	//video = cv::VideoCapture("/home/goggles/Desktop/LeftRight_glasstablemanualhfps.avi");
     //video = cv::VideoCapture("/home/houjebek/AfstudeerData/DroneCam/AutonomousFlightGroundtruth1/video_dsp.avi");
-    //video = cv::VideoCapture("/home/houjebek/Desktop/video_walk_house.avi");
-    //video = cv::VideoCapture("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/drone/build/video_dsp.avi");
-    //video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_24__15_04_00_foonfilmpie_10fps.avi");
+    //video = cv::VideoCapture("/home/houjebek/Desktop/video_walk_house.avi");    
+#ifdef DEBUG_FLAG
+    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_25__15_16_30_suc_on_lowfps.avi");
+#else
     video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_25__14_24_30_halfwaycrash.avi");
+#endif
 
 
     if (!video.isOpened()) {

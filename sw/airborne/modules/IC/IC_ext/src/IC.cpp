@@ -254,7 +254,7 @@ void process_video() {
 
         if ((imgcount % 1000) == 199) {
 			textonizer.retrainAll();
-			textonizer.saveRegression();
+            //textonizer.saveRegression();
 			std::cout << "mod: " << imgcount % 200 << "\n|" ;
 		}
 
@@ -593,14 +593,17 @@ int main( int argc, char **argv )
 	if (init(argc,argv)) {return 1;}
 
 	/* clear learning buffer instead of using old stuff */
-    textonizer.initLearner(true);
-
+#ifndef DEBUG_FLAG
+      textonizer.initLearner(true);
+#endif
 	process_video();	
 	textonizer.printReport(tcp.commdata_fps);
 	close();
 
 	/* auto save at the end */	
+#ifndef DEBUG_FLAG
     textonizer.saveRegression();
+#endif
 
 	return 0;
 }

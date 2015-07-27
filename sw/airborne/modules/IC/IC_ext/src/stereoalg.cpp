@@ -232,7 +232,11 @@ bool stereoAlg::calcDisparityMap(cv::Mat frameL_mat,cv::Mat frameR_mat) {
         }
     }
 
+    if (okcount>0) {
     avgDisparity /= okcount;
+    } else {
+        avgDisparity =0;
+    }
     avgDisparity /=10; // heuristic scaling for better visualisation and smoother thresh config
     avgDisparity = (int) avgDisparity;
 
