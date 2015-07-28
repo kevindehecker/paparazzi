@@ -162,7 +162,7 @@ void Socket::commOutThread() {
         out.avgdisp_gt_stdev = commdata_gt_stdev;
         out.avgdisp_est = commdata_est;
         out.fps = commdata_fps;
-        out.avgdisp_est_thresh = commdata_est_thresh;
+        out.avgdisp_est_thresh = 6; //commdata_est_thresh;
         out.endl = 0;
 
         //tmp test!

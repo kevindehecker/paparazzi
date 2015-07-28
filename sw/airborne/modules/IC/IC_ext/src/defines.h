@@ -12,7 +12,11 @@
 #ifdef _PC /*************************     PC     **************************************************************************/
 #define SSE2
 
+#ifndef DEBUG_FLAG
 #define RUNMODE stereo_textons // start with this mode (enum defined in IC.cpp)
+#else
+#define RUNMODE stereo_textons // start with this mode (enum defined in IC.cpp)
+#endif
 #define DELFLY //use the Delfly stereo cam over usb2serial
 //#define DUOWEBCAM // use the double webcam stereo set up
 
@@ -51,17 +55,17 @@
 //#define USE_SOCKET // communication to the pprz IC module
 
 #else /*************************    DRONE     *****************************************************************************/
-#define RUNMODE stereo_textons
+#define RUNMODE textons_only
 #define DELFLY
 
-//#define VIDEORAW
+#define VIDEORAW
 
 //#define VIDEORESULTS
 
 //#define SGM
 #define LONGSEC // use Sjoerds improved sparse stereo algorithm
 
-#define VIDEOFPS 5.0f // setting this lower than 5 will crash the drone...
+#define VIDEOFPS 10.0f // setting this lower than 5 will crash the drone...
 
 //#define USE_TERMINAL_INPUT // using this disables running in background
 #define USE_SOCKET

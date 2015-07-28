@@ -14,12 +14,13 @@ bool FileCam::init () {
     //video = cv::VideoCapture("/home/houjebek/AfstudeerData/DroneCam/AutonomousFlightGroundtruth1/video_dsp.avi");
     //video = cv::VideoCapture("/home/houjebek/Desktop/video_walk_house.avi");    
 #ifdef DEBUG_FLAG
-    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/wazige6.avi");
-    //video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_27__17_04_50_crashMono.avi");
-    skipstart = 100;
-    videoLength = 9999;
+    //video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_25__15_16_30_suc_on_lowfps.avi");
+    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_28__19_14_46_foonfilmpie_stereo10fps.avi");
+    skipstart = 500;
+    videoLength = 5070;
 #else
-    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_25__14_24_30_halfwaycrash.avi");
+    //video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_25__14_24_30_halfwaycrash.avi");
+    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_28__15_01_48_first10fps.avi");
     skipstart = 100;
     videoLength = 4600;
 #endif

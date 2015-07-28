@@ -263,7 +263,7 @@ void process_video() {
 
 		float time = stopWatch.Read()/1000;
 		tcp.commdata_fps = imgcount /(time);
-        std::cout << "#" << imgcount << ", fps: " << tcp.commdata_fps << ", GT: " << tcp.commdata_gt <<  ", Est: " << tcp.commdata_est << std::endl;
+        std::cout << "#" << imgcount << "(" << textonizer.distribution_buf_pointer << "), fps: " << tcp.commdata_fps << ", GT: " << tcp.commdata_gt <<  ", Est: " << tcp.commdata_est << "@" << textonizer.threshold_est << std::endl;
 
 #ifdef USE_SOCKET
 		tcp.Unlock();

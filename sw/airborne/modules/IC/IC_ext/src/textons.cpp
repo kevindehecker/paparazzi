@@ -443,12 +443,9 @@ void Textons::drawRegressionGraph(std::string msg) {
 
     std::stringstream s;
     s << std::fixed << std::showpoint;
-    s << std::setprecision(1);
+    s << std::setprecision(2);
     s << msg << " TPR: " << tpr << " --> FPR: " << fpr;
-    s << ". MSE trn: " << (int)_mse_trn << ", tst: " << (int)_mse_tst;
-    //msg = s.str();
-
-
+    s << ". MSE trn: " << _mse_trn << ", tst: " << _mse_tst;
 
     //draw text to inform about the mode and ratios or to notify user a key press was handled
     putText(frame_regressGraph,s.str(),cv::Point(0, rows+barsize-2),cv::FONT_HERSHEY_SIMPLEX,0.5,color_vert);
@@ -593,7 +590,7 @@ void Textons::setAutoThreshold() {
 
 	}
 
-	threshold_est = best;
+    threshold_est = round(((float)best)*0.8);
 
 	_tpr_trn = tprs_trn.at<float>(best);
 	_fpr_trn = fprs_trn.at<float>(best);
@@ -779,11 +776,11 @@ void Textons::getTextonDistributionFromImage(cv::Mat grayframe, float gt, bool a
     //copy new data into learning buffer:
     cv::Mat M1 = distribution_buffer.row((distribution_buf_pointer+0) % distribution_buf_size) ;
     hist.convertTo(M1,cv::DataType<float>::type,1,0); // floats are needed for knn
-    last_gt = gt_smoothed.addSample(gt);
-    groundtruth_buffer.at<float>((distribution_buf_pointer)% distribution_buf_size) = last_gt;
+    gt = gt_smoothed.addSample(gt);
+    groundtruth_buffer.at<float>((distribution_buf_pointer)% distribution_buf_size) = gt;
+    last_gt = gt;
     //run knn
 	float est = knn.find_nearest(M1,k,0,0,0,0); // if segfault here, clear xmls!
-std::cout << "WTF: " << est <<std::endl;
     //perform smoothing:
 	est = est_smoother.addSample(est);
     last_est = est;
@@ -791,7 +788,7 @@ std::cout << "WTF: " << est <<std::endl;
 	//save values for visualisation	in graph
 	if (stereoOK) {
 		graph_buffer.at<float>((distribution_buf_pointer+0) % distribution_buf_size,0) = est;
-        graph_buffer.at<float>(distribution_buf_pointer,1) = last_gt;
+        graph_buffer.at<float>(distribution_buf_pointer,1) = gt;
 	} else { // delete to be sure, should not matter
 		graph_buffer.at<float>((distribution_buf_pointer+0) % distribution_buf_size,0) = 0;
 		graph_buffer.at<float>(distribution_buf_pointer,1) = 0;
@@ -803,13 +800,17 @@ std::cout << "WTF: " << est <<std::endl;
 		if (!activeLearning) {        //if not active learning, learn all samples
 			distribution_buf_pointer = (distribution_buf_pointer+1) % distribution_buf_size;
 		} else {            //otherwise, only learn errornous samples
-            if (est < threshold_est && last_gt > threshold_gt) {
-				//false negative; drone should stop according to stereo, but didn't if textons were used
-				distribution_buf_pointer = (distribution_buf_pointer+1) % distribution_buf_size;
-            } else if (est > threshold_est && last_gt < threshold_gt) {
-				//false positive; drone could have proceeded according to stereo, but stopped if textons were used
-				distribution_buf_pointer = (distribution_buf_pointer+1) % distribution_buf_size;
-			}
+
+            if (gt-est > 0.5 ||  gt-est < -1.0) { // check error.
+                distribution_buf_pointer = (distribution_buf_pointer+1) % distribution_buf_size;
+            }
+//            if (est < threshold_est && gt > threshold_gt) {
+//				//false negative; drone should stop according to stereo, but didn't if textons were used
+//				distribution_buf_pointer = (distribution_buf_pointer+1) % distribution_buf_size;
+//            } else if (est > threshold_est && gt < threshold_gt) {
+//				//false positive; drone could have proceeded according to stereo, but stopped if textons were used
+//				distribution_buf_pointer = (distribution_buf_pointer+1) % distribution_buf_size;
+//			}
 		}
 	}
 
@@ -918,8 +919,8 @@ int Textons::initLearner(bool nulltrain) {
     graph_buffer = cv::Mat::zeros(distribution_buf_size, 2, cv::DataType<float>::type);
     groundtruth_buffer = groundtruth_buffer +6.2; //for testing...
     distribution_buf_pointer = 0;
-	est_smoother.init(filterwidth);
-    gt_smoothed.init(2);
+    est_smoother.init(filterwidth); //
+    gt_smoothed.init(1);
     lastLearnedPosition = 0;
     countsincelearn=0;
     if (nulltrain) {

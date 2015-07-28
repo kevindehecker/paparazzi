@@ -227,6 +227,7 @@ extern void IC_start(void){
     nav_heading=0;
 
     IC_learnmode = stereo_textons; // current default in IC
+    IC_flymode = textons;
 
     if (initSocket()) {
         printf("Could not connect to IC\n"); // hmm, this does not work
@@ -323,6 +324,13 @@ bool set_rand_heading() {
     return false;
 }
 bool increase_nav_heading_till_r(float increment) {
+
+if (IC_flymode==stereo) { // TODO: make also fps dependents
+
+} else {
+    increment = increment/4;
+}
+
     rh-=increment;
     if (rh>0) {
         navHeading = navHeading + increment;
@@ -361,7 +369,12 @@ bool increase_nav_heading_till_r(float increment) {
 */
  bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, float distance) {
 
-distance = distance/2; //tmp test
+if (IC_flymode==stereo) { // TODO: make also fps dependents
+    distance = distance/2;
+} else {
+    distance = distance/6;
+}
+
 
     alpha = -navHeading+1.57;
 

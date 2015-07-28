@@ -53,7 +53,7 @@ private:
     cv::Mat graph_buffer;
     int lastLearnedPosition;
 	int distribution_buf_size;
-	int distribution_buf_pointer;
+
     CvKNearest knn;
 
 	//moving average filters:
@@ -73,6 +73,9 @@ public:
     int last_est;
     int last_gt;
 
+    int distribution_buf_pointer; //for active learning printout
+
+
 	float tpr_threshold;
 	float fpr_threshold; //only used to determine when to switch est/gt
     //float avgdisp_smoothed;
@@ -90,7 +93,7 @@ public:
         n_samples = 200;
 		n_samples_sqrt = round(sqrt(n_samples ));
 		n_samples = n_samples_sqrt *n_samples_sqrt;		
-		filterwidth = 5;
+        filterwidth = 4;
         k = 5;
 		countsincelearn =0;
 		method = TEXTON_MINIMUM_DISTANCE;
