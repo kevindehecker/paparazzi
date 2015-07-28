@@ -87,17 +87,17 @@ public:
 
 	Textons() {
 
-		n_samples = 50;
+        n_samples = 200;
 		n_samples_sqrt = round(sqrt(n_samples ));
 		n_samples = n_samples_sqrt *n_samples_sqrt;		
 		filterwidth = 5;
         k = 5;
 		countsincelearn =0;
 		method = TEXTON_MINIMUM_DISTANCE;
-        distribution_buf_size = 2500;
+        distribution_buf_size = 4500;
 		distribution_buf_pointer =0;
-        threshold_est = 11;
-        threshold_gt = 12;
+        threshold_est = 8;
+        threshold_gt = 8;
 
 		tpr_threshold = 0.95f;
 		fpr_threshold = 0.4f;

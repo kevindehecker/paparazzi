@@ -14,15 +14,15 @@ bool FileCam::init () {
     //video = cv::VideoCapture("/home/houjebek/AfstudeerData/DroneCam/AutonomousFlightGroundtruth1/video_dsp.avi");
     //video = cv::VideoCapture("/home/houjebek/Desktop/video_walk_house.avi");    
 #ifdef DEBUG_FLAG
-    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_25__15_16_30_suc_on_lowfps.avi");
+    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/wazige6.avi");
+    //video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_27__17_04_50_crashMono.avi");
     skipstart = 100;
     videoLength = 9999;
 #else
     video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_25__14_24_30_halfwaycrash.avi");
     skipstart = 100;
-    videoLength = 3000;
+    videoLength = 4600;
 #endif
-
 
     if (!video.isOpened()) {
         std::cerr << "Error opening video file!\n";

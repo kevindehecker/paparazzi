@@ -218,7 +218,7 @@ extern void IC_slave_setThreshold(int8_t value) {
 
 extern void IC_start(void){
 
-    IC_threshold_gt = 12;
+    IC_threshold_gt = 8;
     // IC_threshold_est = 1;
     // IC_threshold_gtstd = 55;
 

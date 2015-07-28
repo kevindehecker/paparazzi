@@ -252,11 +252,12 @@ void process_video() {
 		//	textonizer.retrainAll();
 		//}
 
-        if ((imgcount % 1000) == 199) {
-			textonizer.retrainAll();
-            //textonizer.saveRegression();
-			std::cout << "mod: " << imgcount % 200 << "\n|" ;
-		}
+
+//        if ((imgcount % 1000) == 199) {
+//			textonizer.retrainAll();
+//            //textonizer.saveRegression();
+//			std::cout << "mod: " << imgcount % 200 << "\n|" ;
+//		}
 
 
 
@@ -555,8 +556,7 @@ int init(int argc, char **argv) {
 	}
 #endif
 
-	mode = RUNMODE;
-	//result_input2Mode = VIZ_right_input_image;
+	mode = RUNMODE;	
 	msg="";
 
 
@@ -594,7 +594,9 @@ int main( int argc, char **argv )
 
 	/* clear learning buffer instead of using old stuff */
 #ifndef DEBUG_FLAG
+#ifdef _PC
       textonizer.initLearner(true);
+#endif
 #endif
 	process_video();	
 	textonizer.printReport(tcp.commdata_fps);
@@ -602,7 +604,9 @@ int main( int argc, char **argv )
 
 	/* auto save at the end */	
 #ifndef DEBUG_FLAG
+#ifdef _PC
     textonizer.saveRegression();
+#endif
 #endif
 
 	return 0;

@@ -783,10 +783,10 @@ void Textons::getTextonDistributionFromImage(cv::Mat grayframe, float gt, bool a
     groundtruth_buffer.at<float>((distribution_buf_pointer)% distribution_buf_size) = last_gt;
     //run knn
 	float est = knn.find_nearest(M1,k,0,0,0,0); // if segfault here, clear xmls!
+std::cout << "WTF: " << est <<std::endl;
     //perform smoothing:
 	est = est_smoother.addSample(est);
     last_est = est;
-
 
 	//save values for visualisation	in graph
 	if (stereoOK) {
@@ -837,13 +837,14 @@ inline bool checkFileExist (const std::string& name) {
  * Loads the texton dictionaries from file
  */
 int Textons::initTextons() {
-	std::cout << "Opening textons file\n";
+    std::cout << "Opening textons files:\n";
 
 	std::string path = "../";
 
     std::string text_gr = "textons10_gradient_flightarena.dat";
     std::string text_i = "textons10_intensity_flightarena.dat";
-    std::cout << path + text_gr << std::endl;
+    std::cout <<  path + text_gr << std::endl;
+    std::cout <<  path + text_i << std::endl;
     if (!checkFileExist(path + text_gr)) {std::cerr << "Error: gradient textons not available\n";return 1;}
     if (!checkFileExist(path + text_i)) {std::cerr << "Error: intensity textons not available\n";return 1;}
 
@@ -970,6 +971,16 @@ int Textons::loadPreviousRegression() {
 
         cv::FileStorage where_fs("../distribution_buf_pointer.xml", cv::FileStorage::READ);
         where_fs["distribution_buf_pointer"] >> distribution_buf_pointer;
+
+        int tmp_size;
+        cv::FileStorage size_fs("../distribution_buf_size.xml", cv::FileStorage::READ);
+        size_fs["distribution_buf_size"] >> tmp_size;
+        if (tmp_size != distribution_buf_size) {
+            std::cout << "Error: tmp_size != distribution_buf_size: " << tmp_size << ", " << distribution_buf_size << std::endl;
+            initLearner(true);
+        } else {
+            std::cout << "Buf size: " << distribution_buf_size << std::endl;
+        }
 
         std::cout << "Training...\n";
         //draw the training set results:

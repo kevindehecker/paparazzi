@@ -69,6 +69,7 @@
 	<call fun="NavCopyWaypoint(WP_PREVGOAL,WP_STDBY)"/>
 	<call fun="NavCopyWaypoint(WP_GOAL,WP_STDBY)"/>    
 	<stay until="stage_time > 3" wp="STDBY"/>
+	<!-- stay wp="STDBY"/--->
     </block>
     <block key="g" name="heading_to_GOAL">
       <exception cond="GpsIsLost()" deroute="gps_lost"/>
