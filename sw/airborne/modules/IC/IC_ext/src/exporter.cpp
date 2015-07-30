@@ -9,26 +9,26 @@
 
 #ifdef EXPORT
 
-void Exporter::write(int avgdisp_gt,int avgdisp_gt_stdev, int avgdisp_nn) {
+void Exporter::write(int avgdisp_gt, int avgdisp_est, int frameID) {
     std::stringstream s;
-    s << avgdisp_gt << ";" << avgdisp_gt_stdev << ";" << avgdisp_nn << std::endl;
+    s <<frameID << " "<<  avgdisp_gt << " " << avgdisp_est << std::endl;
     myfile << s.str();	
 
-    std::stringstream s2;
-    s2 << "/left" << saveid << ".png " << avgdisp_gt << std::endl;
-    s2 << "/right" << saveid << ".png " << avgdisp_gt << std::endl;
-    caffefile << s2.str();
+   // std::stringstream s2;
+   // s2 << "/left" << saveid << ".png " << avgdisp_gt << std::endl;
+  //  s2 << "/right" << saveid << ".png " << avgdisp_gt << std::endl;
+  //  caffefile << s2.str();
 
 }
 
 void Exporter::init() {
     myfile.open ("export.txt");
-    caffefile.open("data.txt");
+  //  caffefile.open("data.txt");
 }
 
 void Exporter::close() {
     myfile.close();
-    caffefile.close();
+   // caffefile.close();
 }
 
 

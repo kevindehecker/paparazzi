@@ -32,7 +32,7 @@
 
 struct ICDataPackage {
   int avgdisp_gt;
-  int avgdisp_gt_stdev;
+  int frameID;
   int avgdisp_est;
   int avgdisp_est_thresh;
   float fps;

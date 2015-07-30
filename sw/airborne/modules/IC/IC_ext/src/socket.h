@@ -12,7 +12,7 @@
 #define TCPPORT 6969
 struct ICDataPackage {
     int avgdisp_gt;
-    int avgdisp_gt_stdev;
+    int frameID;
     int avgdisp_est;
     int avgdisp_est_thresh;
     float fps;
@@ -51,8 +51,8 @@ private:
 
 public:
     /*  Global variables  */
+    int commdata_frameID;
     int commdata_gt;
-    int commdata_gt_stdev;
     int commdata_est;
     int commdata_est_thresh;
     float commdata_fps;

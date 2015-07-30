@@ -210,8 +210,7 @@ void process_video() {
             tcp.commdata_est_thresh =  textonizer.threshold_est;
 		}
 		if (mode==stereo_only || mode==stereo_textons || stereo_textons_active) {
-            tcp.commdata_gt = stereo.avgDisparity;            
-            tcp.commdata_gt_stdev = stereo.stddevDisparity; // deprecated            
+            tcp.commdata_gt = stereo.avgDisparity;                                
 		}
 
 		if (stereoOK && (mode==stereo_textons || mode==stereo_textons_active)) {
@@ -263,14 +262,15 @@ void process_video() {
 
 		float time = stopWatch.Read()/1000;
 		tcp.commdata_fps = imgcount /(time);
+        tcp.commdata_frameID = imgcount;
         std::cout << "#" << imgcount << "(" << textonizer.distribution_buf_pointer << "), fps: " << tcp.commdata_fps << ", GT: " << tcp.commdata_gt <<  ", Est: " << tcp.commdata_est << "@" << textonizer.threshold_est << std::endl;
 
 #ifdef USE_SOCKET
 		tcp.Unlock();
 #endif
 #ifdef EXPORT
-		exporter.write(tcp.commdata_gt,tcp.commdata_gt_stdev,tcp.commdata_nn);
-		exporter.saveStereoPair(svcam.frameL_mat,svcam.frameR_mat,stereo.DisparityMat);
+        exporter.write(tcp.commdata_gt,tcp.commdata_est,tcp.commdata_frameID);
+        //exporter.saveStereoPair(svcam.frameL_mat,svcam.frameR_mat,stereo.DisparityMat);
 #endif
 
 	} // main while loop
@@ -595,7 +595,7 @@ int main( int argc, char **argv )
 	/* clear learning buffer instead of using old stuff */
 #ifndef DEBUG_FLAG
 #ifdef _PC
-      textonizer.initLearner(true);
+  //    textonizer.initLearner(true);
 #endif
 #endif
 	process_video();	
@@ -605,7 +605,7 @@ int main( int argc, char **argv )
 	/* auto save at the end */	
 #ifndef DEBUG_FLAG
 #ifdef _PC
-    textonizer.saveRegression();
+ //   textonizer.saveRegression();
 #endif
 #endif
 

@@ -19,7 +19,7 @@ bool stereoAlg::init (int im_width,int im_height) {
 
 	//get length of the file
 	std::ifstream sfile;
-	sfile.open(filename);
+    sfile.open(filename);
 	std::ifstream f(filename);
 	std::string line;	
 	int flength;
@@ -262,18 +262,18 @@ bool stereoAlg::calcDisparityMap(cv::Mat frameL_mat,cv::Mat frameR_mat) {
     cv::Scalar mean,stddev;
     cv::meanStdDev(DisparityMat,mean,stddev,cv::Mat());
 
-    stddevDisparity = stddev(0);
+    //stddevDisparity = stddev(0);
     avgDisparity = mean(0);
-    stddevDisparity = (stddevDisparity/avgDisparity ) * 100;
+    //stddevDisparity = (stddevDisparity/avgDisparity ) * 100;
 #endif
 
 
 
-#ifdef SGM
-    if (stddevDisparity  > 55) {
-        avgDisparity =0;
-    }
-#endif
+//#ifdef SGM
+//    if (stddevDisparity  > 55) {
+//        avgDisparity =0;
+//    }
+//#endif
 
 
 	//calc depth in mm from disparity

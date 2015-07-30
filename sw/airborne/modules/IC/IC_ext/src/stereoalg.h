@@ -50,8 +50,7 @@ void initGeigerParam(void);
 
 public:
 	cv::Mat DisparityMat;
-	float avgDisparity;
-    float stddevDisparity;
+	float avgDisparity;    
     cv::Mat frameC_mat;
 
 	bool init (int im_width,int im_height);

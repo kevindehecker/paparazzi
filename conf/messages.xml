@@ -1881,7 +1881,7 @@
 
     <message name="STEREO" id="217">
     <field name="avgdisp_gt" type="int32"/>
-    <field name="avgdisp_gt_stdev" type="int32"/>
+    <field name="frameID" type="int32"/>
     <field name="avgdisp_est" type="int32"/>
     <field name="IC_threshold_gt" type="int32"/>
     <field name="IC_threshold_gtstd" type="int32"/>

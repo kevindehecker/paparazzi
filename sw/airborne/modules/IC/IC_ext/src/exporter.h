@@ -31,7 +31,7 @@ public:
     /*  Function declarations  */
     void close();
     void init();
-    void write(int avgdisp_gt,int avgdisp_gt_stdev, int avgdisp_nn);
+    void write(int avgdisp_gt, int avgdisp_est, int frameID);
     void saveStereoPair(cv::Mat frameL_mat,cv::Mat frameR_mat,cv::Mat DisparityMat);
 };
 #endif // EXPORT

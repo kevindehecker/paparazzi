@@ -244,14 +244,12 @@ extern void IC_stop(void) {
 
 extern void IC_periodic(void) {
     //read the data from the video tcp socket
-    static int8_t tmp = 0;
-    tmp++;
-    if (tmp == 10) {
-        tmp=0;
-        DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.avgdisp_gt_stdev),&(tcp_data.avgdisp_est), &IC_threshold_gt,&IC_threshold_gtstd,&(tcp_data.avgdisp_est_thresh), &navHeading,&(tcp_data.fps));
-    }
-
-
+    // static int8_t tmp = 0;
+    // tmp++;
+    // if (tmp == 10) {
+    //     tmp=0;
+    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.frameID),&(tcp_data.avgdisp_est), &IC_threshold_gt,&IC_threshold_gtstd,&(tcp_data.avgdisp_est_thresh), &navHeading,&(tcp_data.fps));
+    // }
 
 	if (!Read_socket()) {
         noDataCounter++;
@@ -268,18 +266,14 @@ extern void IC_periodic(void) {
     IC_threshold_est= tcp_data.avgdisp_est_thresh;
 
 	if (IC_flymode==stereo) {
-        printf("IC gt: %d, std: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f\n",tcp_data.avgdisp_gt,tcp_data.avgdisp_gt_stdev,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps);
+        printf("IC gt: %d, std: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f\n",tcp_data.avgdisp_gt,tcp_data.frameID,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps);
     } else {
         printf("IC est: %d, thresh_est: %d, fps: %f\n",tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps);
     }
 
     if (IC_flymode==stereo) {
-        //if (tcp_data.avgdisp_gt_stdev < IC_threshold_gtstd) {
         if (tcp_data.avgdisp_gt > IC_threshold_gt) {
                 obstacle_detected = true;
-            // } else {
-            //     obstacle_detected = false;
-            // }
         }
         else { // if variance is too high, probably only far away objects....
             obstacle_detected = false;

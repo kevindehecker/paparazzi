@@ -159,7 +159,7 @@ void Socket::commOutThread() {
 
         ICDataPackage out;
         out.avgdisp_gt = commdata_gt;
-        out.avgdisp_gt_stdev = commdata_gt_stdev;
+        out.fps = commdata_frameID;
         out.avgdisp_est = commdata_est;
         out.fps = commdata_fps;
         out.avgdisp_est_thresh = 6; //commdata_est_thresh;
