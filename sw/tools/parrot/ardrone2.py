@@ -428,14 +428,16 @@ elif args.command == 'upload_file_and_run':
     parrot_utils.execute_command(tn,"mount /dev/sda1 /data/video/stick/")
     parrot_utils.execute_command(tn,"export PATH=/opt/arm_light/gst/bin:$PATH")
     parrot_utils.execute_command(tn,"cd /data/video/drone/build/")
-    parrot_utils.execute_command(tn,"./IC > /dev/null 2>&1 &")
+    parrot_utils.execute_command(tn,"rm ICLog.txt")
+    parrot_utils.execute_command(tn,"./IC 2>&1 | tee -a ICLog.txt > /dev/null &")
 
 
     print("#pragma message: Upload and Start of IC to ARDrone2 Succes!")
     sleep(1)
     sleep(0.5)
     parrot_utils.execute_command(tn, "chmod 777 /data/video/" + args.folder + "/" + f[1])
-    parrot_utils.execute_command(tn, "/data/video/" + args.folder + "/" + f[1] + " > /dev/null 2>&1 &")
+    parrot_utils.execute_command(tn,"rm /data/video/" + args.folder + "/APlog.txt")
+    parrot_utils.execute_command(tn, "/data/video/" + args.folder + "/" + f[1] + " 2>&1 | tee -a APLog.txt > /dev/null &")
     print("#pragma message: Upload and Start of ap.elf to ARDrone2 Succes!")
 
 elif args.command == 'upload_file':

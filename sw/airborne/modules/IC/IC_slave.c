@@ -58,6 +58,7 @@
 #include "guidance/guidance_h_ref.h"
 
  #include "subsystems/datalink/downlink.h"
+ #include "subsystems/gps.h"
 
 
  /*  private function declarations  */
@@ -265,11 +266,14 @@ extern void IC_periodic(void) {
     noDataCounter=0; // reset time out counter
     IC_threshold_est= tcp_data.avgdisp_est_thresh;
 
-	if (IC_flymode==stereo) {
-        printf("IC gt: %d, std: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f\n",tcp_data.avgdisp_gt,tcp_data.frameID,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps);
-    } else {
-        printf("IC est: %d, thresh_est: %d, fps: %f\n",tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps);
-    }
+	//if (IC_flymode==stereo) {
+    printf("IC; gt: %d, frameID: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f, yaw: %f\n",tcp_data.avgdisp_gt,tcp_data.frameID,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps,navHeading);
+    printf("GPS; %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d" , gps.lla_pos.lat,gps.lla_pos.lon, gps.lla_pos.alt,  gps.hmsl, gps.ecef_pos.x, gps.ecef_pos.y, gps.ecef_pos.z, gps.course,gps.num_sv, gps.tow , gps.fix);
+
+
+    //} else {
+        //printf("IC est: %d, thresh_est: %d, fps: %f\n",tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps);
+    //}
 
     if (IC_flymode==stereo) {
         if (tcp_data.avgdisp_gt > IC_threshold_gt) {
