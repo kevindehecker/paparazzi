@@ -590,6 +590,21 @@ void close() {
 
 int main( int argc, char **argv )
 {
+//if (textonizer.init(&result_input2Mode)) {return 1;}
+
+//    int16_t sample[25];
+//    float sum;
+
+//    for (int j = -10; j< 10; j++) {
+//        for (int i = 0; i< 25; i++) {
+//            sample[i] = i-j;
+//        }
+//        sum = textonizer.getEuclDistance(sample,1);
+//        std::cout << "sum: "<< sum << std::endl;
+//    }
+//    exit(0);
+
+
 	if (init(argc,argv)) {return 1;}
 
 	/* clear learning buffer instead of using old stuff */

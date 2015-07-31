@@ -30,7 +30,8 @@ private:
     unsigned char patch_square_size;
     int s_patch_sse;
     int n_patch_sse;
-
+    int s_patch_neon;
+    int n_patch_neon;
 	int countsincelearn;
 
 	float _mse_tst;

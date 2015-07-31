@@ -51,6 +51,8 @@
 #define RUNMODE textons_only
 #define DELFLY
 
+#define NEON
+
 #define VIDEORAW
 
 //#define VIDEORESULTS

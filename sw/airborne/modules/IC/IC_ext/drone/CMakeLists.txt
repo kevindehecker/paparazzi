@@ -9,7 +9,7 @@ set ( CMAKE_PREFIX_PATH /opt/arm_light/gst)
 FILE(GLOB MY_SRC_FILES "../src/*.cpp" "../src/*.h" "../src/*.c")
 
 #set compile flags, for threading
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -pthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -pthread -mfloat-abi=softfp -mfpu=neon -O3")
 
 IF(CMAKE_BUILD_TYPE STREQUAL Debug)
         set(DEBUG_FLAG 1)

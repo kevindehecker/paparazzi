@@ -7,6 +7,10 @@
 
 #include <iomanip>
 
+#ifdef NEON
+#include <arm_neon.h>
+#endif
+
 //from HSV colorspace:
 float r[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9523809523809526, 0.8571428571428568, 0.7619047619047614, 0.6666666666666665, 0.5714285714285716, 0.4761904761904763, 0.3809523809523805, 0.2857142857142856, 0.1904761904761907, 0.0952380952380949, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.09523809523809557, 0.1904761904761905, 0.2857142857142854, 0.3809523809523809, 0.4761904761904765, 0.5714285714285714, 0.6666666666666663, 0.7619047619047619, 0.8571428571428574, 0.9523809523809523, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 float g[] = { 0, 0.09523809523809523, 0.1904761904761905, 0.2857142857142857, 0.3809523809523809, 0.4761904761904762, 0.5714285714285714, 0.6666666666666666, 0.7619047619047619, 0.8571428571428571, 0.9523809523809523, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9523809523809526, 0.8571428571428577, 0.7619047619047619, 0.6666666666666665, 0.5714285714285716, 0.4761904761904767, 0.3809523809523814, 0.2857142857142856, 0.1904761904761907, 0.09523809523809579, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -35,9 +39,30 @@ int Textons::init (int * result_input2Mode) {
 */
 double Textons::getEuclDistance(int16_t sample[], int texton_id) {
 #ifndef SSE2
-#ifdef NEON
+#ifdef NEON  
+    uint32_t sum =0;
 
-#else
+    int16_t *texton = &(textons[texton_id][0]) ;
+    for (int i = 0; i < n_patch_neon<<3; i += 8) {
+        int16x8_t i1_register = vld1q_s16(&sample[i]);
+        int16x8_t i2_register = vld1q_s16(&texton[i]);
+        //(sample-texton)^2
+        int16x8_t i3_register = vabdq_s16(i1_register,i2_register);
+        uint16x8_t i4_register = vmulq_u16((uint16x8_t)i3_register,(uint16x8_t)i3_register);
+
+        //sum:
+        for (int j=0;j<8;j++){
+            sum+= ((uint16_t *)&i4_register)[j];
+        }
+    }
+
+    //perform unalligned bytes:
+    for (int i = n_patch_neon<<3; i < (n_patch_neon<<3)+s_patch_neon; i++) {
+        sum += pow(sample[i] - texton[i],2);
+    }
+    return (float)sum;
+
+#else // no optimizations
 
     int sum =0;
     std::vector<int16_t> v =textons[texton_id];
@@ -51,10 +76,8 @@ double Textons::getEuclDistance(int16_t sample[], int texton_id) {
 
     return distance;
 #endif
-#else
+#else //SSE2 optimizations
     uint32_t sum =0;
-
-
     int16_t *texton = &(textons[texton_id][0]) ;
     for (int i = 0; i < n_patch_sse<<3; i += 8) {
         __m128i i1_register = _mm_loadu_si128( (__m128i*)( &sample[i] ));
@@ -69,7 +92,6 @@ double Textons::getEuclDistance(int16_t sample[], int texton_id) {
             sum+=(((uint16_t *)&i4h_register)[j]  <<1) + ((uint16_t *)&i4l_register)[j];
         }
     }
-
 
     //perform unalligned bytes:
     for (int i = n_patch_sse<<3; i < (n_patch_sse<<3)+s_patch_sse; i++) {
@@ -864,6 +886,9 @@ int Textons::initTextons() {
     patch_square_size = patch_size*patch_size;
     s_patch_sse = patch_square_size % 8;
     n_patch_sse = (patch_square_size- s_patch_sse)>>3;
+    s_patch_neon = patch_square_size % 8;
+    n_patch_neon = (patch_square_size- s_patch_neon)>>3;
+
 
 
     textons.resize(n_textons);
