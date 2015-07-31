@@ -1,7 +1,7 @@
-distribution_buf_pointer.xml
-distribution_buffer.xml
-graph_buffer.xml
-groundtruth_buffer.xml
-distribution_buf_size.xml
+distribution_buf_pointer*.xml
+distribution_buffer*.xml
+graph_buffer*.xml
+groundtruth_buffer*.xml
+distribution_buf_size*.xml
 
 images*

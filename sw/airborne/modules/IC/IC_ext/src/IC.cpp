@@ -250,18 +250,16 @@ void process_video() {
 
 
         if ((imgcount % 200) == 199) { // maybe should do this when disparity is low?
-            static int learnID =0;
+            //static int learnID =0;
             //textonizer.retrainAll(); //also happens in save, only enable one
-            textonizer.saveRegression(learnID++);
-            std::cout << "Learned at: " << imgcount % 200 << "\n|" ;
+            textonizer.saveRegression(1);
+            std::cout << "Learned at: " << imgcount % 200 << "\n" ;
         }
-
-
 
 		float time = stopWatch.Read()/1000;
 		tcp.commdata_fps = imgcount /(time);
         tcp.commdata_frameID = imgcount;
-        std::cout << "#" << imgcount << "(" << textonizer.distribution_buf_pointer << "), fps: " << tcp.commdata_fps << ", GT: " << tcp.commdata_gt <<  ", Est: " << tcp.commdata_est << "@" << textonizer.threshold_est << std::endl;
+        std::cout << "ICLOG " << time << " #" << imgcount << "(" << textonizer.distribution_buf_pointer << "), fps: " << tcp.commdata_fps << ", GT: " << tcp.commdata_gt <<  ", Est: " << tcp.commdata_est << "@" << textonizer.threshold_est << std::endl;
 
 #ifdef USE_SOCKET
 		tcp.Unlock();
@@ -299,7 +297,11 @@ void handleKey() {
 		msg="Learn";
 		break;
 	case 115: // [s]: save
+#ifdef DRONE
+        textonizer.saveRegression(6);
+#else
         textonizer.saveRegression(0);
+#endif
 		msg="Save";
 		break;
 	case 99: // [c]: clear
@@ -606,7 +608,9 @@ int main( int argc, char **argv )
     textonizer.saveRegression(0);
 #endif
 #endif
-
+#ifdef DRONE
+     textonizer.saveRegression(2);
+#endif
 	return 0;
 }
 

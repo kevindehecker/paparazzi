@@ -400,6 +400,8 @@ elif args.command == 'upload_file_and_run':
     f = parrot_utils.split_into_path_and_file(args.file)
 
     print("Kill running " + f[1] + " and make folder " + args.folder)
+    parrot_utils.execute_command(tn,"killall -9 program.elf")
+    parrot_utils.execute_command(tn,"killall -9 program.elf.respawner.sh")
     parrot_utils.execute_command(tn,"killall -9 " + f[1])
     sleep(1)
     parrot_utils.execute_command(tn, "mkdir -p /data/video/" + args.folder)
@@ -409,8 +411,11 @@ elif args.command == 'upload_file_and_run':
     parrot_utils.execute_command(tn,"killall IC")
     parrot_utils.execute_command(tn,"killall -9 IC")
     sleep(0.5)
+    parrot_utils.execute_command(tn,"mkdir -p /data/video/drone/build")
     parrot_utils.uploadfile(ftp, "drone/build/IC", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/drone/build/IC", "rb"))
 
+    print("Cleaning IC related data")
+    parrot_utils.execute_command(tn,"rm -f /data/video/drone/*.xml")
     print("Uploading IC related data")
     parrot_utils.uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/graph_buffer.xml", "rb"))
     parrot_utils.uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/groundtruth_buffer.xml", "rb"))
@@ -427,8 +432,10 @@ elif args.command == 'upload_file_and_run':
 
     parrot_utils.execute_command(tn,"mount /dev/sda1 /data/video/stick/")
     parrot_utils.execute_command(tn,"export PATH=/opt/arm_light/gst/bin:$PATH")
+
     parrot_utils.execute_command(tn,"cd /data/video/drone/build/")
-    parrot_utils.execute_command(tn,"rm ICLog.txt")
+    parrot_utils.execute_command(tn,"rm -f ICLog.txt")
+    parrot_utils.execute_command(tn,"rm -f APLog.txt")
     parrot_utils.execute_command(tn,"./IC 2>&1 | tee -a ICLog.txt > /dev/null &")
 
 
@@ -436,7 +443,6 @@ elif args.command == 'upload_file_and_run':
     sleep(1)
     sleep(0.5)
     parrot_utils.execute_command(tn, "chmod 777 /data/video/" + args.folder + "/" + f[1])
-    parrot_utils.execute_command(tn,"rm /data/video/" + args.folder + "/APlog.txt")
     parrot_utils.execute_command(tn, "/data/video/" + args.folder + "/" + f[1] + " 2>&1 | tee -a APLog.txt > /dev/null &")
     print("#pragma message: Upload and Start of ap.elf to ARDrone2 Succes!")
 

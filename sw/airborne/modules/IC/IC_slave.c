@@ -226,6 +226,7 @@ extern void IC_start(void){
     IC_turnbutton=true;
     noDataCounter=0;
     nav_heading=0;
+    rh=0;
 
     IC_learnmode = stereo_textons; // current default in IC
     IC_flymode = textons;
@@ -266,14 +267,8 @@ extern void IC_periodic(void) {
     noDataCounter=0; // reset time out counter
     IC_threshold_est= tcp_data.avgdisp_est_thresh;
 
-	//if (IC_flymode==stereo) {
-    printf("IC; gt: %d, frameID: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f, yaw: %f\n",tcp_data.avgdisp_gt,tcp_data.frameID,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps,navHeading);
-    printf("GPS; %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d" , gps.lla_pos.lat,gps.lla_pos.lon, gps.lla_pos.alt,  gps.hmsl, gps.ecef_pos.x, gps.ecef_pos.y, gps.ecef_pos.z, gps.course,gps.num_sv, gps.tow , gps.fix);
-
-
-    //} else {
-        //printf("IC est: %d, thresh_est: %d, fps: %f\n",tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps);
-    //}
+    printf("IC; gt: %d, frameID: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f, yaw: %f, fly_mode: %d \n",tcp_data.avgdisp_gt,tcp_data.frameID,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps,navHeading,IC_flymode);
+    printf("GPS; %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n" , gps.lla_pos.lat,gps.lla_pos.lon, gps.lla_pos.alt,  gps.hmsl, gps.ecef_pos.x, gps.ecef_pos.y, gps.ecef_pos.z, gps.course,gps.num_sv, gps.tow , gps.fix);
 
     if (IC_flymode==stereo) {
         if (tcp_data.avgdisp_gt > IC_threshold_gt) {
@@ -306,6 +301,7 @@ bool init_nav_heading() {
 *
 */
 bool increase_nav_heading( float increment) {
+     printf("increase_nav_heading %f\n" , increment);
      navHeading = navHeading + increment;
      if (navHeading > 6.27) {
         navHeading=0.0;
@@ -316,13 +312,14 @@ bool increase_nav_heading( float increment) {
 float rh; //random heading
 bool rh_reached;
 bool set_rand_heading() {
+    printf("set_rand_heading\n");
     rh=(float)rand()/(float)(RAND_MAX);
     rh*=2;
     rh_reached=false;
     return false;
 }
 bool increase_nav_heading_till_r(float increment) {
-
+printf("increase_nav_heading_till_r %f\n" , increment);
 if (IC_flymode==stereo) { // TODO: make also fps dependents
 
 } else {

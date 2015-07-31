@@ -50,7 +50,7 @@
 //#define USE_SOCKET // communication to the pprz IC module
 
 #else /*************************    DRONE     *****************************************************************************/
-#define RUNMODE textons_only
+#define RUNMODE stereo_textons
 #define DELFLY
 
 #define NEON
@@ -58,7 +58,7 @@
 #define VIDEORAW
 
 //#define VIDEORESULTS
-#define EXPORT
+//#define EXPORT
 
 //#define SGM
 #define LONGSEC // use Sjoerds improved sparse stereo algorithm

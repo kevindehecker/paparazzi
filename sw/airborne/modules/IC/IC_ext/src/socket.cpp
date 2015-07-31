@@ -159,7 +159,7 @@ void Socket::commOutThread() {
 
         ICDataPackage out;
         out.avgdisp_gt = commdata_gt;
-        out.fps = commdata_frameID;
+        out.frameID = commdata_frameID;
         out.avgdisp_est = commdata_est;
         out.fps = commdata_fps;
         out.avgdisp_est_thresh = 6; //commdata_est_thresh;
@@ -174,7 +174,7 @@ void Socket::commOutThread() {
 
 
 
-        //std::cout << "gt: " << out.avgdisp_gt << " nn: " << out.avgdisp_est << std::endl;
+        //std::cout << "gt: " << out.avgdisp_gt << " est: " << out.avgdisp_est << std::endl;
 
         char * c = (char *) (void *) &out; // struct in c++ will not come out of the kast.
         Write_socket(c, sizeof(out));
