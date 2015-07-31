@@ -89,6 +89,10 @@ int8_t IC_flymode;
 int8_t IC_learnmode;
 int8_t IC_actionDummy;
 
+float rh; //random heading
+bool rh_reached;
+
+
 bool obstacle_detected; // signal to flightplan if obstacle is detected
 int noDataCounter;      //signal to flightplan if IC is running OK
 
@@ -309,8 +313,7 @@ bool increase_nav_heading( float increment) {
      NavHeading(navHeading);
   return false;
 }
-float rh; //random heading
-bool rh_reached;
+
 bool set_rand_heading() {
     printf("set_rand_heading\n");
     rh=(float)rand()/(float)(RAND_MAX);
