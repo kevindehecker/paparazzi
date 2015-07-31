@@ -643,8 +643,10 @@ void Textons::setAutoThreshold() {
 
 	}
 #endif
-
-
+    std::cout << std::fixed << std::showpoint;
+    std::cout << std::setprecision(2);
+    std::cout << "AUTOTHRESH: " << _fpr_trn << ", " << _fpr_tst << ", " << _tpr_trn << ", " << _tpr_tst << ", " << _mse_trn
+              << ", " << _mse_tst << ", " << _mse_trn_cnt  << ", " << _mse_tst_cnt  << std::endl;
 
 }
 
@@ -959,7 +961,9 @@ int Textons::initLearner(bool nulltrain) {
  *  Retrains knn on all available data accumulated in the buffer
  */
 void Textons::retrainAll() {
-	std::cout << "Training knn regression\n";
+    setAutoThreshold(); // this way, tst data still available
+
+    std::cout << "Training knn regression\n";
 //	std::cout << distribution_buffer << std::endl;
 //	std::cout << groundtruth_buffer << std::endl;
     knn.train(distribution_buffer, groundtruth_buffer, cv::Mat(), true, 32, false );	
@@ -977,7 +981,7 @@ void Textons::retrainAll() {
         gt_smoothed.addSample(graph_buffer.at<float>(jj,1)); // prepare the gt filter, not really necessary
     }	
 #endif
-    setAutoThreshold();
+
 }
 
 /*

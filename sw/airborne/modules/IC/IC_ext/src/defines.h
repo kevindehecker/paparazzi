@@ -29,8 +29,10 @@
 //#define BM currently not completely implemented
 #define LONGSEC // use Sjoerds improved sparse stereo algorithm
 
-//#define VIDEORESULTS // show the main results window
-//#define DRAWVIZS    //show secundairy results (histograms and texton visulaisations
+#ifdef DEBUG_FLAG
+#define VIDEORESULTS // show the main results window
+#define DRAWVIZS    //show secundairy results (histograms and texton visulaisations
+#endif
 #ifndef FILESTEREO
   #define EXPORT //create export.txt and seperate stereo pair png images
 #endif
