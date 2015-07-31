@@ -98,7 +98,7 @@ public:
         k = 5;
 		countsincelearn =0;
 		method = TEXTON_MINIMUM_DISTANCE;
-        distribution_buf_size = 4500;
+        distribution_buf_size = 2000;
 		distribution_buf_pointer =0;
         threshold_est = 8;
         threshold_gt = 8;
@@ -114,7 +114,7 @@ public:
     cv::Mat drawHistogram(cv::Mat hist,int bins, int maxY);
 	void drawRegressionGraph(std::string msg);
 	void getTextonDistributionFromImage(cv::Mat grayframe, float avgdisp, bool activeLearning, int pauseVideo, bool stereoOK);
-    void saveRegression();
+    void saveRegression(int id);
     void retrainAll();
 	void printReport(float fps);
 	void getDisparity(int mode, float *disparity, float *threshold);

@@ -214,7 +214,7 @@ void process_video() {
 		}
 
 		if (stereoOK && (mode==stereo_textons || mode==stereo_textons_active)) {
-			textonizer.setAutoThreshold();
+        //	textonizer.setAutoThreshold(); // done from learning command
 		}
 
 #ifdef VIDEORAW
@@ -247,16 +247,14 @@ void process_video() {
 		if (!pauseVideo) {
 			imgcount++;
 		}
-		//if (imgcount == 1948) {
-		//	textonizer.retrainAll();
-		//}
 
 
-//        if ((imgcount % 1000) == 199) {
-//			textonizer.retrainAll();
-//            //textonizer.saveRegression();
-//			std::cout << "mod: " << imgcount % 200 << "\n|" ;
-//		}
+        if ((imgcount % 200) == 199) { // maybe should do this when disparity is low?
+            static int learnID =0;
+            //textonizer.retrainAll(); //also happens in save, only enable one
+            textonizer.saveRegression(learnID++);
+            std::cout << "Learned at: " << imgcount % 200 << "\n|" ;
+        }
 
 
 
@@ -301,7 +299,7 @@ void handleKey() {
 		msg="Learn";
 		break;
 	case 115: // [s]: save
-		textonizer.saveRegression();
+        textonizer.saveRegression(0);
 		msg="Save";
 		break;
 	case 99: // [c]: clear
@@ -590,27 +588,12 @@ void close() {
 
 int main( int argc, char **argv )
 {
-//if (textonizer.init(&result_input2Mode)) {return 1;}
-
-//    int16_t sample[25];
-//    float sum;
-
-//    for (int j = -10; j< 10; j++) {
-//        for (int i = 0; i< 25; i++) {
-//            sample[i] = i-j;
-//        }
-//        sum = textonizer.getEuclDistance(sample,1);
-//        std::cout << "sum: "<< sum << std::endl;
-//    }
-//    exit(0);
-
-
 	if (init(argc,argv)) {return 1;}
 
 	/* clear learning buffer instead of using old stuff */
 #ifndef DEBUG_FLAG
 #ifdef _PC
-  //    textonizer.initLearner(true);
+   textonizer.initLearner(true);
 #endif
 #endif
 	process_video();	
@@ -620,7 +603,7 @@ int main( int argc, char **argv )
 	/* auto save at the end */	
 #ifndef DEBUG_FLAG
 #ifdef _PC
- //   textonizer.saveRegression();
+    textonizer.saveRegression(0);
 #endif
 #endif
 

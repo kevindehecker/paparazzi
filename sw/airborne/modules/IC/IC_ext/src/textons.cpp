@@ -977,6 +977,7 @@ void Textons::retrainAll() {
         gt_smoothed.addSample(graph_buffer.at<float>(jj,1)); // prepare the gt filter, not really necessary
     }	
 #endif
+    setAutoThreshold();
 }
 
 /*
@@ -1022,20 +1023,36 @@ int Textons::loadPreviousRegression() {
 /*
  * Save the current learning buffer to xml files. Also train on the currently available data.
  */
-void Textons::saveRegression() {
-    cv::FileStorage dist_fs("../distribution_buffer.xml", cv::FileStorage::WRITE);
-    dist_fs << "distribution_buffer" << distribution_buffer;
+void Textons::saveRegression(int id) {
 
-    cv::FileStorage ground_fs("../groundtruth_buffer.xml", cv::FileStorage::WRITE);
+
+    std::ostringstream ids;
+    if (id>0) {
+        ids << id;
+    }
+    std::ostringstream tmp1;
+    tmp1 << "../distribution_buffer" << ids.str() << ".xml";
+    cv::FileStorage dist_fs(tmp1.str(), cv::FileStorage::WRITE);
+    dist_fs << "distribution_buffer" << distribution_buffer;   
+
+    std::ostringstream tmp2;
+    tmp2 << "../groundtruth_buffer" << ids.str() << ".xml";
+    cv::FileStorage ground_fs(tmp2.str(), cv::FileStorage::WRITE);
     ground_fs << "groundtruth_buffer" << groundtruth_buffer;
 
-    cv::FileStorage graph_fs("../graph_buffer.xml", cv::FileStorage::WRITE);
+    std::ostringstream tmp3;
+    tmp3 << "../graph_buffer" << ids.str() << ".xml";
+    cv::FileStorage graph_fs(tmp3.str(), cv::FileStorage::WRITE);
     graph_fs << "graph_buffer" << graph_buffer;
 
-    cv::FileStorage where_fs("../distribution_buf_pointer.xml", cv::FileStorage::WRITE);
+    std::ostringstream tmp4;
+    tmp4 << "../distribution_buf_pointer" << ids.str() << ".xml";
+    cv::FileStorage where_fs(tmp4.str(), cv::FileStorage::WRITE);
     where_fs << "distribution_buf_pointer" << distribution_buf_pointer;
 
-    cv::FileStorage size_fs("../distribution_buf_size.xml", cv::FileStorage::WRITE);
+    std::ostringstream tmp5;
+    tmp5 << "../distribution_buf_size" << ids.str() << ".xml";
+    cv::FileStorage size_fs(tmp5.str(), cv::FileStorage::WRITE);
     size_fs << "distribution_buf_size" << distribution_buf_size;
 
     retrainAll();
