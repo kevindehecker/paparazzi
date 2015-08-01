@@ -9,6 +9,7 @@ cd tmp
 telnet 192.168.1.1 <<script2
 
 killall ap.elf
+killall IC
 mount /dev/sda1 /data/video/stick/
 script2
 
