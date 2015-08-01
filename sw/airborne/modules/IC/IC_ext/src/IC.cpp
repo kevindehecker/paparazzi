@@ -215,6 +215,7 @@ void process_video() {
 
 		if (stereoOK && (mode==stereo_textons || mode==stereo_textons_active)) {
         //	textonizer.setAutoThreshold(); // done from learning command
+            textonizer.checkToLearn(imgcount);
 		}
 
 #ifdef VIDEORAW
@@ -248,7 +249,7 @@ void process_video() {
 			imgcount++;
 		}
 
-        textonizer.checkToLearn(imgcount);
+
 //        if ((imgcount % 200) == 199) { // maybe should do this when disparity is low?
 //            //static int learnID =0;
 //            //textonizer.retrainAll(); //also happens in save, only enable one
