@@ -46,6 +46,7 @@ enum flymode{ stereo, textons};
 enum learnmode{none,stereo_only,textons_only,stereo_textons};
 
 extern int32_t IC_threshold_gt;
+extern int32_t IC_threshold_gt_msg;
 extern int32_t IC_threshold_gtstd;
 extern int32_t IC_threshold_est;
 extern bool IC_turnbutton;

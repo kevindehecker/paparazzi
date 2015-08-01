@@ -124,6 +124,7 @@ public:
     void reload();    
     void drawMeanHists(cv::Mat histimage);
 	void setAutoThreshold();
+    void checkToLearn(int imgCount);
 
 
 }; 

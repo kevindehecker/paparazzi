@@ -1884,7 +1884,7 @@
     <field name="frameID" type="int32"/>
     <field name="avgdisp_est" type="int32"/>
     <field name="IC_threshold_gt" type="int32"/>
-    <field name="IC_threshold_gtstd" type="int32"/>
+    <field name="IC_threshold_gt_msg" type="int32"/>
     <field name="IC_threshold_est" type="int32"/>
     <field name="nav_heading" type="float"/>
     <field name="fps" type="float"/>

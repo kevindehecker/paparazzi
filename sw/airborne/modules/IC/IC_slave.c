@@ -83,6 +83,10 @@ float alpha;
 int32_t IC_threshold_est; // unused!
 int32_t IC_threshold_gt;
 int32_t IC_threshold_gtstd;
+
+int32_t overrideWarning_switcher =0;
+int32_t IC_threshold_gt_msg;
+
 bool IC_turnbutton;
 
 int8_t IC_flymode;
@@ -254,7 +258,8 @@ extern void IC_periodic(void) {
     // tmp++;
     // if (tmp == 10) {
     //     tmp=0;
-    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.frameID),&(tcp_data.avgdisp_est), &IC_threshold_gt,&IC_threshold_gtstd,&(tcp_data.avgdisp_est_thresh), &navHeading,&(tcp_data.fps));
+    IC_threshold_gt_msg = IC_threshold_gt + overrideWarning_switcher;
+    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.frameID),&(tcp_data.avgdisp_est), &IC_threshold_gt,&IC_threshold_gt_msg,&(tcp_data.avgdisp_est_thresh), &navHeading,&(tcp_data.fps));
     // }
 
 	if (!Read_socket()) {
@@ -284,6 +289,24 @@ extern void IC_periodic(void) {
 
     } else {
         obstacle_detected = (tcp_data.avgdisp_est > tcp_data.avgdisp_est_thresh);
+
+        static int override_counter =0;
+        if (tcp_data.avgdisp_gt > IC_threshold_gt+1 && !obstacle_detected) {
+            override_counter =  override_counter + tcp_data.avgdisp_gt - (IC_threshold_gt+1);
+        } else {
+            override_counter=0;
+        }
+
+        //stereo override:
+        if (override_counter>5 ) {
+                printf("STEREO OVERRIDE!\n");
+                obstacle_detected=true;
+                overrideWarning_switcher = !overrideWarning_switcher;
+        } else {
+            overrideWarning_switcher=0;
+        }
+
+
     }
 
 

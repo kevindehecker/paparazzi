@@ -248,13 +248,13 @@ void process_video() {
 			imgcount++;
 		}
 
-
-        if ((imgcount % 200) == 199) { // maybe should do this when disparity is low?
-            //static int learnID =0;
-            //textonizer.retrainAll(); //also happens in save, only enable one
-            textonizer.saveRegression(1);
-            std::cout << "Learned at: " << imgcount % 200 << "\n" ;
-        }
+        textonizer.checkToLearn(imgcount);
+//        if ((imgcount % 200) == 199) { // maybe should do this when disparity is low?
+//            //static int learnID =0;
+//            //textonizer.retrainAll(); //also happens in save, only enable one
+//            textonizer.saveRegression(1);
+//            std::cout << "Learned at: " << imgcount % 200 << "\n" ;
+//        }
 
 		float time = stopWatch.Read()/1000;
 		tcp.commdata_fps = imgcount /(time);

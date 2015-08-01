@@ -650,6 +650,24 @@ void Textons::setAutoThreshold() {
 
 }
 
+void Textons::checkToLearn(int imgCount) {
+    static bool delayed =false;
+
+    if ((imgCount % 500) == 499 && last_gt > threshold_gt-1) {
+        delayed=true;
+    }
+
+    if (((imgCount % 500) == 499 || delayed) && last_gt < threshold_gt) {
+        delayed=false;
+        static int learnID =1;
+        setAutoThreshold();
+        if (_tpr_tst < tpr_threshold || _fpr_trn > fpr_threshold) {
+            saveRegression(learnID++);
+            std::cout << "Learned at: " << imgCount % 200 << "\n" ;
+        }
+    }
+}
+
 
 void Textons::getDisparity(int mode,float *disparity, float *threshold) {
 
