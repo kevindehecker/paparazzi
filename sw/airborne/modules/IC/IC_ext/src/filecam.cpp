@@ -15,14 +15,14 @@ bool FileCam::init () {
     //video = cv::VideoCapture("/home/houjebek/Desktop/video_walk_house.avi");    
 #ifdef DEBUG_FLAG
     //video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_25__15_16_30_suc_on_lowfps.avi");
-    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_28__19_14_46_foonfilmpie_stereo10fps.avi");
-    skipstart = 500;
-    videoLength = 5070;
+    //video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/allinone_gt3m-rocrelearn/data/video/drone/build/video_dsp.avi");
+    skipstart = 0;
+    videoLength = 9999;
 #else
     //video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_25__14_24_30_halfwaycrash.avi");
-    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/15_07_28__15_01_48_first10fps.avi");
-    skipstart = 100;
-    videoLength = 4600;
+    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/allinone-early_gt4m_uneventfull/data/video/drone/build/video_dsp.avi");
+    skipstart = 0;
+    videoLength = 9999;
 #endif
 
     if (!video.isOpened()) {

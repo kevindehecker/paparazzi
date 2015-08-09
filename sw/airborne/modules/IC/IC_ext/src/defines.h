@@ -33,9 +33,7 @@
 #define VIDEORESULTS // show the main results window
 #define DRAWVIZS    //show secundairy results (histograms and texton visulaisations
 #endif
-#ifndef FILESTEREO
-  #define EXPORT //create export.txt and seperate stereo pair png images
-#endif
+#define EXPORT //create export.txt and seperate stereo pair png images
 
 #ifdef DEBUG_FLAG
 #define HASSCREEN // dont disable in qt debugger!

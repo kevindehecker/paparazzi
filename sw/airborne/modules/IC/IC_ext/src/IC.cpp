@@ -266,7 +266,7 @@ void process_video() {
 		tcp.Unlock();
 #endif
 #ifdef EXPORT
-        exporter.write(tcp.commdata_gt,tcp.commdata_est,tcp.commdata_frameID);
+        exporter.write(tcp.commdata_frameID,textonizer.last_gt,textonizer.last_estf, textonizer.threshold_est,textonizer.currentHist);
         //exporter.saveStereoPair(svcam.frameL_mat,svcam.frameR_mat,stereo.DisparityMat);
 #endif
 

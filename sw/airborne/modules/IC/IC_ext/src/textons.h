@@ -71,11 +71,12 @@ public:
 	int threshold_gt;
 	int *result_input2Mode;
 
+    float last_estf; // for export
     int last_est;
     int last_gt;
 
     int distribution_buf_pointer; //for active learning printout
-
+    cv::Mat currentHist;
 
 	float tpr_threshold;
 	float fpr_threshold; //only used to determine when to switch est/gt

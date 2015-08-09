@@ -9,9 +9,9 @@
 
 #ifdef EXPORT
 
-void Exporter::write(int avgdisp_gt, int avgdisp_est, int frameID) {
+void Exporter::write(int frameID, int avgdisp_gt, float avgdisp_est, int thresh_est, cv::Mat frame_currentHist) {
     std::stringstream s;
-    s <<frameID << " "<<  avgdisp_gt << " " << avgdisp_est << std::endl;
+    s <<frameID << ", "<<  avgdisp_gt << ", " << avgdisp_est << ", " << thresh_est << ", " << frame_currentHist << std::endl;
     myfile << s.str();	
 
    // std::stringstream s2;
@@ -22,7 +22,7 @@ void Exporter::write(int avgdisp_gt, int avgdisp_est, int frameID) {
 }
 
 void Exporter::init() {
-    myfile.open ("export.txt");
+    myfile.open ("offline_export.txt");
   //  caffefile.open("data.txt");
 }
 

@@ -825,6 +825,7 @@ void Textons::getTextonDistributionFromImage(cv::Mat grayframe, float gt, bool a
 	float est = knn.find_nearest(M1,k,0,0,0,0); // if segfault here, clear xmls!
     //perform smoothing:
 	est = est_smoother.addSample(est);
+    last_estf = est;
     last_est = est;
 
 	//save values for visualisation	in graph
@@ -855,7 +856,7 @@ void Textons::getTextonDistributionFromImage(cv::Mat grayframe, float gt, bool a
 //			}
 		}
 	}
-
+currentHist = hist; // for exporting
 #ifdef DRAWVIZS
 	if (*result_input2Mode == VIZ_histogram || *result_input2Mode == VIZ_texton_intensity_color_encoding || *result_input2Mode == VIZ_texton_gradient_color_encoding ) {
 		frame_currentHist = drawHistogram(hist,n_textons,200);
