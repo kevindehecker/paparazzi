@@ -43,6 +43,18 @@ private:
 	float _tpr_tst;
 	float _fpr_tst;
 
+    std::string currentModusMsg; // for visualisation
+
+    cv::Scalar regressionGraph_colorGT;
+    cv::Scalar regressionGraph_colorEstTrn;
+    cv::Scalar regressionGraph_colorEstTst;
+    cv::Scalar regressionGraph_colorVert;
+    cv::Scalar regressionGraph_colorInvert;
+    int regressionGraph_lineWidth;
+    int regressionGraph_barSize;
+
+    cv::Mat legendFrame;
+
     std::vector<std::vector<int16_t> > textons;
 #define TEXTON_CUMULATIVE_DISTANCE  0
 #define TEXTON_MINIMUM_DISTANCE 1
@@ -65,6 +77,7 @@ private:
     int initTextons();
     void drawTextonAnotatedImage(cv::Mat grayframe);	
     cv::Scalar getColor(int id);
+    void initLegendaFrame();
 
 public:
 	int threshold_est;
@@ -98,14 +111,28 @@ public:
         filterwidth = 4;
         k = 5;
 		countsincelearn =0;
-		method = TEXTON_MINIMUM_DISTANCE;
+        method = TEXTON_MINIMUM_DISTANCE;
         distribution_buf_size = 4500;
 		distribution_buf_pointer =0;
+#ifdef LONGSEC
         threshold_est = 8;
         threshold_gt = 8;
+#else
+        threshold_est = 150;
+        threshold_gt = 150;
+#endif
 
 		tpr_threshold = 0.95f;
 		fpr_threshold = 0.4f;
+
+        currentModusMsg = "";
+        regressionGraph_colorGT= cv::Scalar(255,0,0); // blue
+        regressionGraph_colorEstTrn= cv::Scalar(0,255,0); // green
+        regressionGraph_colorEstTst= cv::Scalar(0,0,255); // red
+        regressionGraph_colorVert= cv::Scalar(0,255,255); // orange
+        regressionGraph_colorInvert= cv::Scalar(255,255,0); // light blue
+        regressionGraph_lineWidth = 1;
+        regressionGraph_barSize = 10;
 
 
 	}

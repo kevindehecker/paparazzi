@@ -26,12 +26,43 @@ int Textons::init (int * result_input2Mode) {
 	if (initLearner(true)) {return 1;}
     loadPreviousRegression();
 
+#ifdef VIDEORESULTS
+    initLegendaFrame();
+#endif
 
 #ifdef HASSCREEN
 	frame_ROC = cv::Mat::zeros(400,400,CV_8UC3);
 #endif
 
 	return 0;
+}
+
+/*
+ * Prepares the legend frame one time, which is then copied into the regression graph every cycle
+*/
+void Textons::initLegendaFrame() {
+
+    legendFrame = cv::Mat::zeros(115,290,CV_8UC3);
+    cv::rectangle(legendFrame,cv::Point(0,0),cv::Point(290,50),cv::Scalar(128,128,128), CV_FILLED ,8 );
+    cv::line(legendFrame, cv::Point(5,10), cv::Point(100, 10), cv::Scalar(255,0,0), regressionGraph_lineWidth*2, 8, 0);
+    cv::line(legendFrame, cv::Point(5,25), cv::Point(100, 25), cv::Scalar(0,255,0), regressionGraph_lineWidth*2, 8, 0); // green train
+    cv::line(legendFrame, cv::Point(5,40), cv::Point(100, 40), cv::Scalar(0,0,255), regressionGraph_lineWidth*2, 8, 0); // red test
+
+    putText(legendFrame,"Avg. stereo disparity",cv::Point(120, 15),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,0,0));
+    putText(legendFrame,"Mono estimate train",cv::Point(120, 30),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,0,0));
+    putText(legendFrame,"Mono estimate test",cv::Point(120, 45),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,0,0));
+
+    cv::rectangle(legendFrame,cv::Point(0,51),cv::Point(160,115),cv::Scalar(128,128,128), CV_FILLED ,8 );
+
+    cv::rectangle(legendFrame,cv::Point(10, 55),cv::Point(20, 55+regressionGraph_barSize),cv::Scalar(255,255,255), CV_FILLED, 8); //white
+    cv::rectangle(legendFrame,cv::Point(10, 70),cv::Point(20, 70+regressionGraph_barSize),cv::Scalar(0,0,0), CV_FILLED, 8); //black
+    cv::rectangle(legendFrame,cv::Point(10, 85),cv::Point(20, 85+regressionGraph_barSize),cv::Scalar(0,0,255), CV_FILLED, 8); //red
+    cv::rectangle(legendFrame,cv::Point(10, 100),cv::Point(20, 100+regressionGraph_barSize),cv::Scalar(0,255,0),CV_FILLED, 8); //green
+
+    putText(legendFrame,"False negative",cv::Point(40, 65),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,0,0));
+    putText(legendFrame,"False positive",cv::Point(40, 80),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,0,0));
+    putText(legendFrame,"True positive",cv::Point(40, 95),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,0,0));
+    putText(legendFrame,"True negative",cv::Point(40, 110),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(0,0,0));
 }
 
 /*
@@ -343,7 +374,7 @@ void Textons::drawRegressionGraph(std::string msg) {
 	cv::Scalar color_est= cv::Scalar(0,0,255); // red
     cv::Scalar color_vert= cv::Scalar(0,255,255); // orange
     cv::Scalar color_invert= cv::Scalar(255,255,0); // light blue
-    int line_width = 1;
+
 
 
 
@@ -412,29 +443,29 @@ void Textons::drawRegressionGraph(std::string msg) {
 				//false negative; drone should stop according to stereo, but didn't if textons were used
 				//white
 				if (j > learnborder ) {negative_false++;}
-				cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX , barsize),cv::Scalar(255,255,255), line_width, 8, 0);
+                cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX , barsize),cv::Scalar(255,255,255), regressionGraph_lineWidth, 8, 0);
 			} else if (est > threshold_est && gt < threshold_gt) {
 				//false positive; drone could have proceeded according to stereo, but stopped if textons were used
 				//black
 				if (j > learnborder ) {positive_false++;}
-				cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX  , barsize),cv::Scalar(0,0,0), line_width, 8, 0);
+                cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX  , barsize),cv::Scalar(0,0,0), regressionGraph_lineWidth, 8, 0);
 			} else if (est > threshold_est && gt > threshold_gt) {
 				//true positive; both stereo and textons agree, drone should stop
 				//red
 				if (j > learnborder ) {negative_true++;}
-				cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX , barsize),cv::Scalar(0,0,255), line_width, 8, 0);
+                cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX , barsize),cv::Scalar(0,0,255), regressionGraph_lineWidth, 8, 0);
 			} else {
 				//both stereo and textons agree, drone may proceed
 				//green
 				if (j > learnborder ) {positive_true++;}
-				cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX , barsize),cv::Scalar(0,255,0), line_width, 8, 0);
+                cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX , barsize),cv::Scalar(0,255,0), regressionGraph_lineWidth, 8, 0);
 			}
 
 			//draw knn est result:
-			cv::line(graphFrame, cv::Point(j*scaleX , rows- prev_est*scaleY), cv::Point((j+1)*scaleX , rows -  est*scaleY), color_est, line_width, CV_AA, 0);
+            cv::line(graphFrame, cv::Point(j*scaleX , rows- prev_est*scaleY), cv::Point((j+1)*scaleX , rows -  est*scaleY), color_est, regressionGraph_lineWidth*2, CV_AA, 0);
 			//draw stereo vision groundtruth:
             //if (gt>5) { // ignore instances with unknown groundtruth (minDisparity >5). TODO: make minDispairty a const
-				cv::line(graphFrame, cv::Point(j*scaleX , rows- prev_gt*scaleY), cv::Point((j+1)*scaleX , rows -  gt*scaleY),color_gt, line_width, CV_AA, 0);
+                cv::line(graphFrame, cv::Point(j*scaleX , rows- prev_gt*scaleY), cv::Point((j+1)*scaleX , rows -  gt*scaleY),color_gt, regressionGraph_lineWidth*2, CV_AA, 0);
 				prev_gt = gt;
             //}
 			prev_est = est;
@@ -451,10 +482,10 @@ void Textons::drawRegressionGraph(std::string msg) {
 
 
 	//draw est vision threshold:
-	cv::line(graphFrame, cv::Point(0, rows- threshold_est*scaleY), cv::Point(frame_regressGraph.cols, rows -  threshold_est*scaleY),color_invert, line_width, 8, 0);
+    cv::line(graphFrame, cv::Point(0, rows- threshold_est*scaleY), cv::Point(frame_regressGraph.cols, rows -  threshold_est*scaleY),color_invert, regressionGraph_lineWidth, 8, 0);
 	putText(frame_regressGraph,"est",cv::Point(0, rows- threshold_est*scaleY+10+barsize),cv::FONT_HERSHEY_SIMPLEX,0.4,color_invert);
 	//draw gt vision threshold:
-	cv::line(graphFrame, cv::Point(0, rows- threshold_gt*scaleY), cv::Point(frame_regressGraph.cols, rows -  threshold_gt*scaleY),color_vert, line_width, 8, 0);
+    cv::line(graphFrame, cv::Point(0, rows- threshold_gt*scaleY), cv::Point(frame_regressGraph.cols, rows -  threshold_gt*scaleY),color_vert, regressionGraph_lineWidth, 8, 0);
 	putText(frame_regressGraph,"gt.",cv::Point(0, rows- threshold_gt*scaleY-10+barsize),cv::FONT_HERSHEY_SIMPLEX,0.4,color_vert);
 
 
@@ -472,6 +503,12 @@ void Textons::drawRegressionGraph(std::string msg) {
     //draw text to inform about the mode and ratios or to notify user a key press was handled
     putText(frame_regressGraph,s.str(),cv::Point(0, rows+barsize-2),cv::FONT_HERSHEY_SIMPLEX,0.5,color_vert);
 
+    // draw legend
+    double alpha = 0.8;
+     cv::Mat roic = cv::Mat(graphFrame, cv::Rect(0,0,290,115));
+     cv::addWeighted(legendFrame, alpha, roic, 1.0 - alpha , 0.0, roic);
+
+
 }
 
 void Textons::setAutoThreshold() {
@@ -479,7 +516,7 @@ void Textons::setAutoThreshold() {
 #ifdef DRAWVIZS
 	int imsize = 400;
 	cv::Mat graphframe;
-	if (*result_input2Mode == VIZ_ROC ) {
+    if (*result_input2Mode == VIZ_ROC || *result_input2Mode == VIZ_MEGA) {
 
 		int border = 20;
 
@@ -532,16 +569,16 @@ void Textons::setAutoThreshold() {
 
 	for (int i = threshold_gt; i > 0; i-- ) {
 
-		int positive_true_trn=0;
-		int positive_false_trn=0;
-		int negative_true_trn=0;
-		int negative_false_trn=0;
+        int TPs_trn=0;
+        int FPs_trn=0;
+        int TNs_trn=0;
+        int FNs_trn=0;
 
 
-		int positive_true_tst=0;
-		int positive_false_tst=0;
-		int negative_true_tst=0;
-		int negative_false_tst=0;
+        int TPs_tst=0;
+        int FPs_tst=0;
+        int TNs_tst=0;
+        int FNs_tst=0;
 
 		for (int j = filterwidth; j < distribution_buf_size ; j++) {
 			float est,gt;
@@ -553,42 +590,42 @@ void Textons::setAutoThreshold() {
 
 			if (!(groundtruth_buffer.at<float>(jj) < 6.201 && groundtruth_buffer.at<float>(jj) > 6.199) && gt > 5) {
 				if (j > learnborder ) { //tst/trn
-					if (est < i && gt > threshold_gt) {
+                    if (est <= i && gt > threshold_gt) { // FNs = sum(est <= thresh_est & gt >  thresh_gt);
 						//false negative; drone should stop according to stereo, but didn't if textons were used (miss)
-						negative_false_tst++;
-					} else if (est > i && gt < threshold_gt) {
+                        FNs_tst++;
+                    } else if (est > i && gt <= threshold_gt) { // FPs = sum(est >  thresh_est & gt <= thresh_gt);
 						//false positive; drone could have proceeded according to stereo, but stopped if textons were used (false alarm)
-						positive_false_tst++;
-					} else if (est > i && gt > threshold_gt) {
+                        FPs_tst++;
+                    } else if (est > i && gt > threshold_gt) { // TPs = sum(est >  thresh_est & gt >  thresh_gt);
 						//true positive; both stereo and textons agree, drone should stop
-						negative_true_tst++;
-					} else {
+                        TNs_tst++;
+                    } else { // TNs = sum(est <= thresh_est & gt <= thresh_gt);
 						//both stereo and textons agree, drone may proceed
-						positive_true_tst++;
+                        TPs_tst++;
 					}
 				} else {
-					if (est < i && gt > threshold_gt) {
+                    if (est <= i && gt > threshold_gt) {
 						//false negative; drone should stop according to stereo, but didn't if textons were used (miss)
-						negative_false_trn++;
-					} else if (est > i && gt < threshold_gt) {
+                        FNs_trn++;
+                    } else if (est > i && gt <= threshold_gt) {
 						//false positive; drone could have proceeded according to stereo, but stopped if textons were used (false alarm)
-						positive_false_trn++;
-					} else if (est > i && gt > threshold_gt) {
+                        FPs_trn++;
+                    } else if (est > i && gt > threshold_gt) {
 						//true positive; both stereo and textons agree, drone should stop
-						negative_true_trn++;
+                        TNs_trn++;
 					} else {
 						//both stereo and textons agree, drone may proceed
-						positive_true_trn++;
+                        TPs_trn++;
 					}
 				}
 			}
 		}
 
 		//calculate fp/fn ratio
-		float tpr_trn = (float)positive_true_trn /(float)(positive_true_trn+negative_false_trn);
-		float fpr_trn = (float)positive_false_trn /(float)(negative_true_trn+positive_false_trn);
-		float tpr_tst = (float)positive_true_tst /(float)(positive_true_tst+negative_false_tst);
-		float fpr_tst = (float)positive_false_tst /(float)(negative_true_tst+positive_false_tst);
+        float tpr_trn = (float)TPs_trn /(float)(TPs_trn+FNs_trn);
+        float fpr_trn = (float)FPs_trn /(float)(TNs_trn+FPs_trn);
+        float tpr_tst = (float)TPs_tst /(float)(TPs_tst+FNs_tst);
+        float fpr_tst = (float)FPs_tst /(float)(TNs_tst+FPs_tst);
 
 		tprs_trn.at<float>(i) = tpr_trn;
 		fprs_trn.at<float>(i) = fpr_trn;
@@ -603,7 +640,7 @@ void Textons::setAutoThreshold() {
 
 
 #ifdef DRAWVIZS
-		if (*result_input2Mode == VIZ_ROC ) {
+        if (*result_input2Mode == VIZ_ROC || *result_input2Mode == VIZ_MEGA) {
 			cv::line(graphframe,cv::Point(fpr_trn*imsize,imsize- tpr_trn*imsize),cv::Point(fpr_trn*imsize, imsize-tpr_trn*imsize),cv::Scalar(0,255,0), line_width, 8, 0);
 			cv::line(graphframe,cv::Point(fpr_tst*imsize,imsize- tpr_tst*imsize),cv::Point(fpr_tst*imsize, imsize-tpr_tst*imsize),cv::Scalar(0,0,255), line_width, 8, 0);
 		}
@@ -612,14 +649,14 @@ void Textons::setAutoThreshold() {
 
 	}
 
-    threshold_est = round(((float)best)*0.8);
+    threshold_est = best;
 
 	_tpr_trn = tprs_trn.at<float>(best);
 	_fpr_trn = fprs_trn.at<float>(best);
 	_tpr_tst = tprs_tst.at<float>(best);
 	_fpr_tst = fprs_tst.at<float>(best);
 #ifdef DRAWVIZS
-	if (*result_input2Mode == VIZ_ROC ) {
+    if (*result_input2Mode == VIZ_ROC || *result_input2Mode == VIZ_MEGA) {
 		std::stringstream s;
 		s << "est.thresh. = " << best;
 		putText(graphframe,s.str(),cv::Point(fpr_trn_best_tmp*imsize+5, imsize/2),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(127,127,255));
@@ -730,8 +767,8 @@ void Textons::getTextonDistributionFromImage(cv::Mat grayframe, float gt, bool a
 						sample_dx[yy*patch_size+xx] = (int)(0x00ff &grayframe.at<uint8_t>(y+yy,x+xx+1)) - (int)(0x00ff & grayframe.at<uint8_t>(y+yy,x+xx-1));
 					}
 #ifdef DRAWVIZS
-					if (*result_input2Mode == VIZ_histogram) {
-						grayframe.at<uint8_t>(y+yy,x+xx) = 255; // visualize sampling
+                    if (*result_input2Mode == VIZ_histogram) {
+                    //	grayframe.at<uint8_t>(y+yy,x+xx) = 255; // visualize sampling
 					}
 #endif					
 				}
@@ -858,11 +895,11 @@ void Textons::getTextonDistributionFromImage(cv::Mat grayframe, float gt, bool a
 	}
 currentHist = hist; // for exporting
 #ifdef DRAWVIZS
-	if (*result_input2Mode == VIZ_histogram || *result_input2Mode == VIZ_texton_intensity_color_encoding || *result_input2Mode == VIZ_texton_gradient_color_encoding ) {
+    if (*result_input2Mode == VIZ_histogram || *result_input2Mode == VIZ_texton_intensity_color_encoding || *result_input2Mode == VIZ_texton_gradient_color_encoding || *result_input2Mode == VIZ_MEGA) {
 		frame_currentHist = drawHistogram(hist,n_textons,200);
 	}
 	//drawMeanHists(frame_currentHist);
-	if (*result_input2Mode == VIZ_texton_intensity_color_encoding || *result_input2Mode == VIZ_texton_gradient_color_encoding || *result_input2Mode == VIZ_texton_intensity_texton_encoding || *result_input2Mode == VIZ_texton_gradient_texton_encoding) {
+    if (*result_input2Mode == VIZ_texton_intensity_color_encoding || *result_input2Mode == VIZ_texton_gradient_color_encoding || *result_input2Mode == VIZ_texton_intensity_texton_encoding || *result_input2Mode == VIZ_texton_gradient_texton_encoding || *result_input2Mode == VIZ_MEGA) {
 		drawTextonAnotatedImage(grayframe);
 	}
 #endif
@@ -885,8 +922,14 @@ int Textons::initTextons() {
 
 	std::string path = "../";
 
+#ifdef LONGSEC
     std::string text_gr = "textons10_gradient_flightarena.dat";
     std::string text_i = "textons10_intensity_flightarena.dat";
+#else
+    std::string text_gr = "textons10_gradient_cubicle.dat";
+    std::string text_i = "textons10_intensity_cubicle.dat";
+#endif
+
     std::cout <<  path + text_gr << std::endl;
     std::cout <<  path + text_i << std::endl;
     if (!checkFileExist(path + text_gr)) {std::cerr << "Error: gradient textons not available\n";return 1;}

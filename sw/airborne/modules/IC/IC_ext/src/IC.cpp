@@ -63,7 +63,7 @@ Exporter exporter;
 #endif
 int countmsgclear=0;
 int pauseVideo=0;
-int result_input2Mode = VIZ_right_input_image;
+int result_input2Mode = VIZ_MEGA;
 
 #ifdef FILECAM
 FileCam svcam;
@@ -143,7 +143,31 @@ void combineAllImages(cv::Mat DisparityMat, cv::Mat frameL_mat, cv::Mat frameR_m
 		combineImage(resFrame,textonizer.frame_ROC,sub_width,0,sub_width,sub_height,false);
 		if (!pauseVideo) {cv::applyColorMap(DisparityMat,DisparityMat,2);}
 		combineImage(resFrame,DisparityMat,sub_width*2,0,sub_width,sub_height,false);
-	}
+    } else if (result_input2Mode == VIZ_MEGA) {// go all out and show many things
+        //[left | tex I, c | tex GR c | hist ]
+        //[disp | tex I    | tex GR   | ROC  ]
+        //[              graph               ]
+
+        //set frame to 4x3 rows:
+        sub_width = im_width/4;
+        sub_height = im_height/3;
+
+        //first row:
+        combineImage(resFrame,frameL_mat,0,0,sub_width,sub_height,true);
+        combineImage(resFrame,textonizer.frame_Itextoncolor,sub_width,0,sub_width,sub_height,false);
+        combineImage(resFrame,textonizer.frame_Gtextoncolor,sub_width*2,0,sub_width,sub_height,false);
+        combineImage(resFrame,textonizer.frame_currentHist,sub_width*3,0,sub_width,sub_height,false);
+
+        //second row:
+        if (!pauseVideo) {cv::applyColorMap(DisparityMat,DisparityMat,2);}
+        combineImage(resFrame,DisparityMat,0,sub_height,sub_width,sub_height,false);
+        combineImage(resFrame,textonizer.frame_Itextontexton,sub_width,sub_height,sub_width,sub_height,true);
+        combineImage(resFrame,textonizer.frame_Gtextontexton,sub_width*2,sub_height,sub_width,sub_height,false);
+        combineImage(resFrame,textonizer.frame_ROC,sub_width*3,sub_height,sub_width,sub_height,false);
+
+        combineImage(resFrame,textonizer.frame_regressGraph,0,sub_height*2,im_width,sub_height,false);
+        return;
+    }
 
 	combineImage(resFrame,textonizer.frame_regressGraph,0,sub_height,im_width,sub_height,false);
 
@@ -266,8 +290,11 @@ void process_video() {
 		tcp.Unlock();
 #endif
 #ifdef EXPORT
-        exporter.write(tcp.commdata_frameID,textonizer.last_gt,textonizer.last_estf, textonizer.threshold_est,textonizer.currentHist);
-        //exporter.saveStereoPair(svcam.frameL_mat,svcam.frameR_mat,stereo.DisparityMat);
+        if (stereoOK) {
+            exporter.write(tcp.commdata_frameID,textonizer.last_gt,textonizer.last_estf, textonizer.threshold_est,textonizer.currentHist);
+            //exporter.saveStereoPair(svcam.frameL_mat,svcam.frameR_mat,stereo.DisparityMat);
+        }
+
 #endif
 
 	} // main while loop
@@ -369,6 +396,9 @@ void handleKey() {
 	case 42: // [*]: show ROC curve
 		result_input2Mode=VIZ_ROC;
 		break;
+    case 40: // [(]: show everything
+        result_input2Mode=VIZ_MEGA;
+        break;
 #ifdef FILECAM
 	case '>': // fast forward filecam
 		svcam.fastforward=1;
@@ -501,8 +531,8 @@ int init(int argc, char **argv) {
 
 	/*****init the (G)UI*****/
 #ifdef HASSCREEN
-	cv::namedWindow("Results", CV_WINDOW_AUTOSIZE);
-	//cv::resizeWindow("Results", 1100, 550); //makes it slower
+    cv::namedWindow("Results", CV_WINDOW_NORMAL);
+    cv::resizeWindow("Results", 1280, 720); //makes it slower
 #endif
 #ifdef USE_TERMINAL_INPUT
 	thread_TerminalInput = std::thread(TerminalInputThread);
@@ -517,7 +547,7 @@ int init(int argc, char **argv) {
 #ifdef DUOWEBCAM
 	resFrame = cv::Mat::zeros(svcam.getImHeight(), svcam.getImWidth()*1.5,CV_8UC3);
 #else
-	resFrame = cv::Mat::zeros(500, 1100,CV_8UC3);
+    resFrame = cv::Mat::zeros(1080, 1920,CV_8UC3);
 #endif
 #endif
 
