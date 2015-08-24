@@ -396,10 +396,10 @@ void Textons::drawRegressionGraph(std::string msg) {
 	cv::Mat graphFrame = cv::Mat(frame_regressGraph, cv::Rect(p1, p2));
 
 	float prev_est = 0, prev_gt = 0;
-    int positive_true=0;
-    int positive_false=0;
-    int negative_true=0;
-    int negative_false=0;
+    int TPs=0;
+    int FPs=0;
+    int TNs=0;
+    int FNs=0;
 
 	_mse_tst = 0;
 	_mse_tst_cnt = 0;
@@ -439,25 +439,25 @@ void Textons::drawRegressionGraph(std::string msg) {
 
 
 			//draw a small colored line above to indicate what the drone will do:
-			if (est < threshold_est && gt > threshold_gt) {
+            if (est <= threshold_est && gt > threshold_gt) {
 				//false negative; drone should stop according to stereo, but didn't if textons were used
 				//white
-				if (j > learnborder ) {negative_false++;}
+                if (j > learnborder ) {FNs++;}
                 cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX , barsize),cv::Scalar(255,255,255), regressionGraph_lineWidth, 8, 0);
-			} else if (est > threshold_est && gt < threshold_gt) {
+            } else if (est > threshold_est && gt <= threshold_gt) {
 				//false positive; drone could have proceeded according to stereo, but stopped if textons were used
 				//black
-				if (j > learnborder ) {positive_false++;}
+                if (j > learnborder ) {FPs++;}
                 cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX  , barsize),cv::Scalar(0,0,0), regressionGraph_lineWidth, 8, 0);
 			} else if (est > threshold_est && gt > threshold_gt) {
 				//true positive; both stereo and textons agree, drone should stop
 				//red
-				if (j > learnborder ) {negative_true++;}
+                if (j > learnborder ) {TNs++;}
                 cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX , barsize),cv::Scalar(0,0,255), regressionGraph_lineWidth, 8, 0);
 			} else {
 				//both stereo and textons agree, drone may proceed
 				//green
-				if (j > learnborder ) {positive_true++;}
+                if (j > learnborder ) {TPs++;}
                 cv::line(frame_regressGraph,cv::Point(j*scaleX , 0),cv::Point(j*scaleX , barsize),cv::Scalar(0,255,0), regressionGraph_lineWidth, 8, 0);
 			}
 
@@ -491,8 +491,8 @@ void Textons::drawRegressionGraph(std::string msg) {
 
 
     //calculate fp/fn ratio
-    float tpr = (float)positive_true /(float)(positive_true+negative_false);
-	float fpr = (float)positive_false /(float)(negative_true+positive_false);
+    float tpr = (float)TPs /(float)(TPs+FNs);
+    float fpr = (float)FPs /(float)(TNs+FPs);
 
     std::stringstream s;
     s << std::fixed << std::showpoint;
