@@ -25,15 +25,15 @@
 #define FILECAM // use a video as source instead of the camera. The file name is defined in filecam.cpp
 
 //#define FILESTEREO
-#define GEIGER // use libelas Geiger stereo algorithm
+//#define GEIGER // use libelas Geiger stereo algorithm
 //#define SGM  //use OpenCV Semi Global Matching stereo algorithm
 //#define BM currently not completely implemented
-//#define LONGSEC // use Sjoerds improved sparse stereo algorithm
+#define LONGSEC // use Sjoerds improved sparse stereo algorithm
 
-//#ifdef DEBUG_FLAG
+#ifdef DEBUG_FLAG
 #define VIDEORESULTS // show the main results window
 #define DRAWVIZS    //show secundairy results (histograms and texton visulaisations
-//#endif
+#endif
 #define EXPORT //create export.txt and seperate stereo pair png images
 
 #ifdef DEBUG_FLAG

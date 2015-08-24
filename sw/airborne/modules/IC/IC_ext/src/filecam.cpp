@@ -18,21 +18,30 @@ bool FileCam::init () {
     //video = cv::VideoCapture("/home/houjebek/shares/JetserKetser/AfstudeerData/synced/paddestoel/cublice_walk/video/LeftRight.avi");
     skipstart = 200;
     videoLength = 6900;
-#else
-    //make sure: stereo = longseq
-    //    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/secondgt/data/video/drone/build/video_dsp.avi");
-    //    skipstart = 200;
-    //    videoLength = 6900;
+#else   
+//    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/secondgt/data/video/drone/build/video_dsp.avi");
+//#ifndef LONGSEC
+// #error!
+//#endif
+//    skipstart = 200;
+//    videoLength = 6900;
 
-    //flight10:
-    //    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/secondgt/data/video/drone/build/video_dsp.avi");
-    //    skipstart = 540;
-    //    videoLength = 6900;
-
-    //make sure: stereo = Geiger
-    video = cv::VideoCapture("/home/houjebek/shares/JetserKetser/AfstudeerData/synced/paddestoel/cublice_walk/video/LeftRight.avi");
+//    flight10:
+    video = cv::VideoCapture("/home/houjebek/Desktop/turnlogs/allinone-early_gt4m_uneventfull/data/video/drone/build/video_dsp.avi");
+#ifndef LONGSEC
+ #error!
+#endif
+    skipstart = 540;
+    videoLength = 6900;
     skipstart = 0;
-    videoLength = 9999;
+    videoLength = 300;
+
+//    video = cv::VideoCapture("/home/houjebek/shares/JetserKetser/AfstudeerData/synced/paddestoel/cublice_walk/video/LeftRight.avi");
+//#ifndef GEIGER
+// #error!
+//#endif
+//    skipstart = 0;
+//    videoLength = 9999;
 #endif
 
     if (!video.isOpened()) {

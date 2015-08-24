@@ -38,17 +38,19 @@ void Exporter::close() {
 /*
  * Saves the current stereo image to png files
  */
-void Exporter::saveStereoPair(cv::Mat frameL_mat,cv::Mat frameR_mat,cv::Mat DisparityMat) {
+void Exporter::saveStereoPair(cv::Mat frameL_mat,cv::Mat frameR_mat,cv::Mat DisparityMat, std::string folder) {
     char str[64];
     cv::Point size(256, 256);
     cv::Mat tmpF;
 
-    sprintf(str,"left%d.png", saveid);
+    sprintf(str,"%s/left%d.png", folder.c_str(),saveid);
 
 
-    cv::resize(frameL_mat, tmpF, size);
-    cvtColor(tmpF,tmpF,CV_GRAY2RGB,0);
-    cv::imwrite( str, tmpF );
+//    cv::resize(frameL_mat, tmpF, size);
+//    cvtColor(tmpF,tmpF,CV_GRAY2RGB,0);
+    if (saveid > 3622) {
+    cv::imwrite( str, frameL_mat );
+    }
 //    sprintf(str,"right%d.png", saveid);
 //    cv::resize(frameR_mat, tmpF, size);
 //    cv::imwrite( str, tmpF );

@@ -292,7 +292,21 @@ void process_video() {
 #ifdef EXPORT
         if (stereoOK) {
             exporter.write(tcp.commdata_frameID,textonizer.last_gt,textonizer.last_estf, textonizer.threshold_est,textonizer.currentHist);
-            //exporter.saveStereoPair(svcam.frameL_mat,svcam.frameR_mat,stereo.DisparityMat);
+
+//            if (textonizer.last_estf <= textonizer.threshold_est && textonizer.last_gt > textonizer.threshold_gt) {
+//                //false negative;
+//                exporter.saveStereoPair(svcam.frameL_mat,svcam.frameR_mat,stereo.DisparityMat, "FNs");
+//            } else if (textonizer.last_estf > textonizer.threshold_est && textonizer.last_gt <= textonizer.threshold_gt) {
+//                //false positive
+//                exporter.saveStereoPair(svcam.frameL_mat,svcam.frameR_mat,stereo.DisparityMat, "FPs");
+//            } else if (textonizer.last_estf > textonizer.threshold_est && textonizer.last_gt > textonizer.threshold_gt) {
+//                //true positive
+//                exporter.saveStereoPair(svcam.frameL_mat,svcam.frameR_mat,stereo.DisparityMat, "TPs");
+//            } else {
+//                //true negative
+//                exporter.saveStereoPair(svcam.frameL_mat,svcam.frameR_mat,stereo.DisparityMat, "TNs");
+//            }
+
         }
 
 #endif

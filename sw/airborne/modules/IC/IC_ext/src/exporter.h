@@ -32,7 +32,7 @@ public:
     void close();
     void init();
     void write(int frameID, int avgdisp_gt, float avgdisp_est, int thresh_est, cv::Mat frame_currentHist);
-    void saveStereoPair(cv::Mat frameL_mat,cv::Mat frameR_mat,cv::Mat DisparityMat);
+    void saveStereoPair(cv::Mat frameL_mat,cv::Mat frameR_mat,cv::Mat DisparityMat, std::string folder);
 };
 #endif // EXPORT
 #endif  /*  Exporter_H  */
