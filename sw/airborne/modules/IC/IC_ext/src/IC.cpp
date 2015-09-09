@@ -173,6 +173,10 @@ void combineAllImages(cv::Mat DisparityMat, cv::Mat frameL_mat, cv::Mat frameR_m
 
 
 }
+
+
+int hoerrrCount =0;
+
 /*
  * Puts one image into the big image
  */
@@ -251,8 +255,10 @@ void process_video() {
 			stereo.combineImage(svcam.frameL_mat,svcam.frameR_mat);
 #endif // LONGSEC
 
-		}
-		outputVideo.write(stereo.frameC_mat);
+        }
+        hoerrrCount ++;
+        stereo.frameC_mat = stereo.frameC_mat + (hoerrrCount -1 )% 2;
+        outputVideo.write(stereo.frameC_mat);
 
 #endif //VIDEORAW
 
@@ -263,7 +269,7 @@ void process_video() {
 		cv::imshow("Results", resFrame);
 #endif
 #ifdef VIDEORESULTS
-		outputVideoResults.write(resFrame);
+    //	outputVideoResults.write(resFrame);
 #endif
 #endif
 
@@ -571,20 +577,23 @@ int init(int argc, char **argv) {
 	cv::Size size(svcam.getImWidth()*2,svcam.getImHeight()); // for dsp encoding, ensure multiples of 16
 #ifdef _PC
 	//outputVideo.open("appsrc ! ffmpegcolorspace ! ffenc_mpeg4 ! avimux ! filesink location=video_wifi.avi",CV_FOURCC('H','O','E','R'),VIDEOFPS,size,false);
-    //.open("video_wifi.avi",CV_FOURCC('M','P','E','G'),VIDEOFPS,size,false);
+    //outputVideo.open("video_wifi.avi",CV_FOURCC('M','P','E','G'),VIDEOFPS,size,false);
      outputVideo.open("video.avi",CV_FOURCC('F','M','P','4'),VIDEOFPS,size,false);
 
 #else
     //wifi currently does not seem to work properly (IC halts after 22 frames)
-    //outputVideo.open("appsrc ! ffmpegcolorspace ! dspmp4venc mode=1 ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.2 port=5000",CV_FOURCC('H','O','E','R'),VIDEOFPS,size,false);
-    outputVideo.open("appsrc ! ffmpegcolorspace ! dspmp4venc mode=0 ! avimux ! filesink location=video_dsp.avi",CV_FOURCC('H','O','E','R'),VIDEOFPS,size,false);
+    std::cout << "Starting WiFi raw strean!" << std::endl;
+    outputVideo.open("appsrc ! ffmpegcolorspace ! dspmp4venc mode=1 ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.3 port=5000",CV_FOURCC('H','O','E','R'),VIDEOFPS,size,false);
+    //outputVideo.open("appsrc ! ffmpegcolorspace ! dspmp4venc mode=0 ! avimux ! filesink location=video_dsp.avi",CV_FOURCC('H','O','E','R'),VIDEOFPS,size,false);
 #endif
 
-	if (!outputVideo.isOpened())
-	{
-		std::cout << "!!! Output stereo video could not be opened" << std::endl;
-		return 1;
-	}
+    if (!outputVideo.isOpened())
+    {
+        std::cout << "!!! Output stereo video could not be opened" << std::endl;
+        return 1;
+    } else {
+     std::cout << "WiFi raw stream started!" << std::endl;
+    }
 #endif
 #ifdef VIDEORESULTS
 	cv::Size sizeRes(resFrame.cols,resFrame.rows);

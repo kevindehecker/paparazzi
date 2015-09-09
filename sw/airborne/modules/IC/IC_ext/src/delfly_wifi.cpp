@@ -8,6 +8,7 @@ bool Delfly_WiFi::init () {
 	darksize = 0;
 	extracaliboffset = 0;
       cam = cv::VideoCapture ("udpsrc uri=udp://0.0.0.0:5000 caps=\"application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)MP4V-ES, payload=(int)96, clock-base=(uint)2693349430\" ! gstrtpjitterbuffer drop-on-latency=false latency=0 ! rtpmp4vdepay ! ffdec_mpeg4 ! ffmpegcolorspace ! appsink");
+      //cam = cv::VideoCapture ("videotestsrc ! appsink");
       if(!cam.isOpened())
       {
           std::cerr << "ERROR: Could not open WiFi camera\n";
