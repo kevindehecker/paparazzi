@@ -46,8 +46,8 @@ enum learnModus_t {learn_none, learn_stereo_only, learn_textons_only, learn_ster
 enum exploreModus_t {explore_on_stereo, explore_on_mono, explore_on_ROC};
 
 extern int32_t IC_threshold_gt;
-extern int32_t IC_threshold_gt_msg;
-extern int32_t IC_threshold_gtstd;
+extern int32_t IC_threshold_OverrideMsg;
+extern int32_t IC_threshold_est_ROCMsg;
 extern int32_t IC_threshold_est;
 extern bool IC_turnbutton;
 extern int8_t IC_flymode;
@@ -76,7 +76,7 @@ extern void IC_start(void);
 extern void IC_stop(void);
 extern void IC_periodic(void);
 
-extern void IC_slave_FlyModeButton(int8_t value);
+extern void IC_slave_ExploreModeButton(int8_t value);
 extern void IC_slave_LearnModeButton(int8_t value);
 extern void IC_slave_ActionButton(int8_t value);
 

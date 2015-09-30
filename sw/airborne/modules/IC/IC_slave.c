@@ -82,10 +82,11 @@ float alpha;
 
 int32_t IC_threshold_est; // unused!
 int32_t IC_threshold_gt;
-int32_t IC_threshold_gtstd;
 
 int32_t overrideWarning_switcher =0;
-int32_t IC_threshold_gt_msg;
+int32_t ROCchoice_switcher =0;
+int32_t IC_threshold_OverrideMsg;
+int32_t IC_threshold_est_ROCMsg;
 
 bool IC_turnbutton;
 
@@ -187,7 +188,7 @@ bool Write_socket(char * c, size_t n) {
     return false;
 }
 
-extern void IC_slave_FlyModeButton(int8_t value) {
+extern void IC_slave_ExploreModeButton(int8_t value) {
     IC_flymode = value;
 
     char str[2];
@@ -241,8 +242,6 @@ extern void IC_slave_ActionButton(int8_t value) {
 extern void IC_start(void){
 
     IC_threshold_gt = 8;
-    // IC_threshold_est = 1;
-    // IC_threshold_gtstd = 55;
 
     IC_turnbutton=true;
     noDataCounter=0;
@@ -271,8 +270,9 @@ extern void IC_periodic(void) {
     // tmp++;
     // if (tmp == 10) {
     //     tmp=0;
-    IC_threshold_gt_msg = IC_threshold_gt + overrideWarning_switcher;
-    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.frameID),&(tcp_data.avgdisp_est), &IC_threshold_gt,&IC_threshold_gt_msg,&(tcp_data.ROCchoice),&(tcp_data.avgdisp_est_thresh), &navHeading,&(tcp_data.fps));
+    IC_threshold_OverrideMsg = IC_threshold_gt + overrideWarning_switcher;
+    IC_threshold_est_ROCMsg = IC_threshold_est + ROCchoice_switcher;
+    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.frameID),&(tcp_data.avgdisp_est), &IC_threshold_gt,&IC_threshold_OverrideMsg,&(tcp_data.ROCchoice),&(tcp_data.avgdisp_est_thresh),&IC_threshold_est_ROCMsg, &navHeading,&(tcp_data.fps));
     // }
 
 	if (!Read_socket()) {
@@ -291,6 +291,10 @@ extern void IC_periodic(void) {
 
     printf("IC; gt: %d, frameID: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f, yaw: %f, fly_mode: %d \n",tcp_data.avgdisp_gt,tcp_data.frameID,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps,navHeading,IC_flymode);
     printf("GPS; %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n" , gps.lla_pos.lat,gps.lla_pos.lon, gps.lla_pos.alt,  gps.hmsl, gps.ecef_pos.x, gps.ecef_pos.y, gps.ecef_pos.z, gps.course,gps.num_sv, gps.tow , gps.fix);
+
+    if (tcp_data.ROCchoice == 0) {
+        ROCchoice_switcher = !ROCchoice_switcher;
+    }
 
     if (IC_flymode==explore_on_stereo) {
         if (tcp_data.avgdisp_gt > IC_threshold_gt) {
