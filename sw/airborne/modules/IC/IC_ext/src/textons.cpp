@@ -623,17 +623,28 @@ void Textons::setAutoThreshold() {
 
 		//calculate fp/fn ratio
         float tpr_trn = (float)TPs_trn /(float)(TPs_trn+FNs_trn);
+        if (TPs_trn==0 || TPs_trn+FNs_trn == 0 ) {
+            tpr_trn=0;
+        }
         float fpr_trn = (float)FPs_trn /(float)(TNs_trn+FPs_trn);
+        if (FPs_trn==0 || TNs_trn+FPs_trn == 0 ) {
+            fpr_trn=1;
+        }
         float tpr_tst = (float)TPs_tst /(float)(TPs_tst+FNs_tst);
+        if (TPs_tst==0 || TPs_tst+FNs_tst == 0 ) {
+            tpr_tst=0;
+        }
         float fpr_tst = (float)FPs_tst /(float)(TNs_tst+FPs_tst);
-
+        if (FPs_tst==0 || TNs_tst+FPs_tst == 0 ) {
+            fpr_tst=1;
+        }
 		tprs_trn.at<float>(i) = tpr_trn;
 		fprs_trn.at<float>(i) = fpr_trn;
 		tprs_tst.at<float>(i) = tpr_tst;
 		fprs_tst.at<float>(i) = fpr_tst;
 
 
-		if (tpr_trn > tpr_threshold && fpr_trn < fpr_trn_best_tmp) {
+        if (tpr_tst > tpr_threshold && fpr_tst < fpr_trn_best_tmp) {
 			best = i;
 			fpr_trn_best_tmp = fprs_trn.at<float>(best);			
 		}
@@ -649,8 +660,11 @@ void Textons::setAutoThreshold() {
 
 	}
 
-    threshold_est = best;
-
+    if (best==0 && threshold_est>0) {
+     //probably not enough variation in the data to make up a good estimate, use the previous threshold
+    } else {
+        threshold_est = best;
+    }
 	_tpr_trn = tprs_trn.at<float>(best);
 	_fpr_trn = fprs_trn.at<float>(best);
 	_tpr_tst = tprs_tst.at<float>(best);
@@ -682,7 +696,7 @@ void Textons::setAutoThreshold() {
 #endif
     std::cout << std::fixed << std::showpoint;
     std::cout << std::setprecision(2);
-    std::cout << "AUTOTHRESH: " << _fpr_trn << ", " << _fpr_tst << ", " << _tpr_trn << ", " << _tpr_tst << ", " << _mse_trn
+    std::cout << "AUTOTHRESH: " << threshold_est << ", " << _fpr_trn << ", " << _fpr_tst << ", " << _tpr_trn << ", " << _tpr_tst << ", " << _mse_trn
               << ", " << _mse_tst << ", " << _mse_trn_cnt  << ", " << _mse_tst_cnt  << std::endl;
 
 }
@@ -690,38 +704,42 @@ void Textons::setAutoThreshold() {
 void Textons::checkToLearn(int imgCount) {
     static bool delayed =false;
 
-    if ((imgCount % 500) == 499 && last_gt > threshold_gt-1) {
+    if ((imgCount % 660) == 659 && last_gt > threshold_gt-1) {
         delayed=true;
     }
 
-    if (((imgCount % 500) == 499 || delayed) && last_gt < threshold_gt) {
+    if (((imgCount % 660) == 659 || delayed) && last_gt < threshold_gt) {
         delayed=false;
         static int learnID =1;
         setAutoThreshold();
-        if (_tpr_tst < tpr_threshold || _fpr_trn > fpr_threshold) {
-            saveRegression(learnID++);
-            std::cout << "Learned at: " << imgCount % 200 << "\n" ;
-        }
+        //if (_tpr_tst < tpr_threshold || _fpr_trn > fpr_threshold) { // this does not work anymore, since threshold is determined using tst
+            //saveRegression(learnID++);
+            saveRegression(2);
+            std::cout << "Learned at: " << imgCount % 660 << "\n" ;
+        //}
     }
 }
 
+void Textons::getDisparity(int mode,float *disparity, float *threshold, int *ROCchoice) {
 
-void Textons::getDisparity(int mode,float *disparity, float *threshold) {
-
-	if (mode == ROC_BASED_RESULT) {
-		if (_tpr_trn > tpr_threshold && _fpr_trn < fpr_threshold ) {
+    if (mode == explore_on_ROC) {
+        if (_tpr_tst > tpr_threshold && _fpr_tst < fpr_threshold ) {
             *disparity = last_est;
-			 *threshold=threshold_est;
+            *threshold=threshold_est;
+            *ROCchoice = 1;
 		} else {
             *disparity = last_gt;
 			*threshold=threshold_gt;
+            *ROCchoice = 0;
 		}
-	} else if (mode == ESTIMATE_BASED_RESULT) {
+    } else if (mode == explore_on_mono) {
         *disparity = last_est;
 		*threshold=threshold_est;
-	} else if (mode == STEREO_BASED_RESULT) {
+        *ROCchoice = 1;
+    } else if (mode == explore_on_stereo) {
         *disparity = last_gt;
 		*threshold=threshold_gt;
+        *ROCchoice = 0;
 	}
 }
 

@@ -94,7 +94,7 @@ void Socket::Unlock() {
     g_lockComm.unlock();
 }
 
-void Socket::Init(char *keyp, bool *cams_are_running) {
+void Socket::Init(unsigned char *keyp, bool *cams_are_running) {
     std::cout << "Initting socket\n";
     closeThreads = false;
     thread_comm  = std::thread(&Socket::commOutThread,this);
@@ -162,7 +162,8 @@ void Socket::commOutThread() {
         out.frameID = commdata_frameID;
         out.avgdisp_est = commdata_est;
         out.fps = commdata_fps;
-        out.avgdisp_est_thresh = 6; //commdata_est_thresh;
+        out.avgdisp_est_thresh = commdata_est_thresh;
+        out.ROCchoice = commdata_Choice;
         out.endl = 0;
 
         //tmp test!

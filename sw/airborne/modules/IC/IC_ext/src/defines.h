@@ -13,11 +13,11 @@
 #ifdef _PC /*************************     PC     **************************************************************************/
 #define SSE2
 
-#ifndef DEBUG_FLAG
-#define RUNMODE stereo_textons // start with this mode (enum defined in IC.cpp)
-#else
-#define RUNMODE stereo_textons // start with this mode (enum defined in IC.cpp)
-#endif
+//#ifndef DEBUG_FLAG
+//#define RUNMODE learn_stereo_textons // start with this mode (enum defined in IC.cpp)
+//#else
+//#define RUNMODE learn_stereo_textons // start with this mode (enum defined in IC.cpp)
+//#endif
 #define DELFLY //use the Delfly stereo cam over usb2serial
 //#define DUOWEBCAM // use the double webcam stereo set up
 
@@ -55,6 +55,7 @@
 #define NEON
 
 #define VIDEORAW
+#define RAWVIDEOWIFISTREAM // for wifi streaming
 
 //#define VIDEORESULTS
 //#define EXPORT
@@ -65,7 +66,7 @@
 #define VIDEOFPS 10.0f // setting this lower than 5 will crash the drone...
 
 //#define USE_TERMINAL_INPUT // using this disables running in background
-//#define USE_SOCKET
+#define USE_SOCKET
 #endif // pc/drone
 
 #endif //DEFINES_H

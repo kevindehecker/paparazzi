@@ -15,6 +15,7 @@ struct ICDataPackage {
     int frameID;
     int avgdisp_est;
     int avgdisp_est_thresh;
+    int ROCchoice; // 0 for stereo, 1 for estimator. ROC choice
     float fps;
     char endl;             // endl fix, makes it worker nicer in terminal for debugging :)
 };
@@ -35,7 +36,7 @@ private:
     std::thread thread_comm;
     std::mutex g_lockComm;
     bool connectionAccepted;
-    char *key;
+    unsigned char *key;
     bool *cams_are_running;
     bool closeThreads;
 
@@ -54,12 +55,13 @@ public:
     int commdata_frameID;
     int commdata_gt;
     int commdata_est;
-    int commdata_est_thresh;
+    int commdata_est_thresh;    
+    int commdata_Choice;
     float commdata_fps;
 
     /*  Function declarations  */
     void Close();
-    void Init(char *key, bool *cams_are_running);
+    void Init(unsigned char *key, bool *cams_are_running);
     void Unlock();
 
 

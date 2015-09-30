@@ -40,17 +40,19 @@ using caffe::vector;
 */
 
 /***********Enums****************/
-enum modus_t {none, stereo_only, textons_only, stereo_textons, stereo_textons_active};
+enum learnModus_t {learn_none, learn_stereo_only, learn_textons_only, learn_stereo_textons, learn_stereo_textons_active};
+//enum exploreModus_t {explore_on_stereo, explore_on_mono, explore_on_ROC};
 
 
 /***********Variables****************/
-char key = 0;
+unsigned char key = 0;
 std::string msg;
 cv::Mat resFrame;
 cv::VideoWriter outputVideo;
 cv::VideoWriter outputVideoResults;
 stopwatch_c stopWatch;
-modus_t mode;
+learnModus_t learnMode;
+exploreModus_t exploreMode;
 int imgcount = 0;
 
 #ifdef USE_TERMINAL_INPUT
@@ -228,27 +230,27 @@ void process_video() {
 
 		bool stereoOK=false;
 
-		if ((mode==stereo_only || mode==stereo_textons || mode==stereo_textons_active) && !pauseVideo) {
+        if ((learnMode==learn_stereo_only || learnMode==learn_stereo_textons || learnMode==learn_stereo_textons_active) && !pauseVideo) {
 			//stereo is turned on
 			stereoOK = stereo.calcDisparityMap(svcam.frameL_mat,svcam.frameR_mat); // calc the stereo groundtruth
 		}
-		if ((mode==stereo_textons_active || mode==stereo_textons ) || mode==textons_only) {
-			textonizer.getTextonDistributionFromImage(svcam.frameL_mat,stereo.avgDisparity,mode==stereo_textons_active,pauseVideo,stereoOK);  //perform the texton stuff
+        if ((learnMode==learn_stereo_textons_active || learnMode==learn_stereo_textons ) || learnMode==learn_textons_only) {
+            textonizer.getTextonDistributionFromImage(svcam.frameL_mat,stereo.avgDisparity,learnMode==learn_stereo_textons_active,pauseVideo,stereoOK);  //perform the texton stuff
             tcp.commdata_est = textonizer.last_est;
             tcp.commdata_est_thresh =  textonizer.threshold_est;
 		}
-		if (mode==stereo_only || mode==stereo_textons || stereo_textons_active) {
+        if (learnMode==learn_stereo_only || learnMode==learn_stereo_textons || learn_stereo_textons_active) {
             tcp.commdata_gt = stereo.avgDisparity;                                
 		}
 
-		if (stereoOK && (mode==stereo_textons || mode==stereo_textons_active)) {
+        if (stereoOK && (learnMode==learn_stereo_textons || learnMode==learn_stereo_textons_active)) {
         //	textonizer.setAutoThreshold(); // done from learning command
             textonizer.checkToLearn(imgcount);
 		}
 
 #ifdef VIDEORAW
 		//combine stereo pair if needed
-		if (mode==none  || mode==textons_only) {
+        if (learnMode==learn_none  || learnMode==learn_textons_only) {
 			stereo.combineImage(svcam.frameL_mat,svcam.frameR_mat);
 		} else {
 #ifndef LONGSEC
@@ -286,11 +288,16 @@ void process_video() {
 //            textonizer.saveRegression(1);
 //            std::cout << "Learned at: " << imgcount % 200 << "\n" ;
 //        }
+        float disparity;
+        float threshold;
+        int ROCchoice;
+        textonizer.getDisparity(exploreMode,&disparity,&threshold,&ROCchoice);
+        tcp.commdata_Choice = ROCchoice;
 
 		float time = stopWatch.Read()/1000;
 		tcp.commdata_fps = imgcount /(time);
         tcp.commdata_frameID = imgcount;
-        std::cout << "ICLOG " << time << " #" << imgcount << "(" << textonizer.distribution_buf_pointer << "), fps: " << tcp.commdata_fps << ", GT: " << tcp.commdata_gt <<  ", Est: " << tcp.commdata_est << "@" << textonizer.threshold_est << std::endl;
+        std::cout << "ICLOG " << time << " #" << imgcount << "(" << textonizer.distribution_buf_pointer << "), fps: " << tcp.commdata_fps << ", GT: " << tcp.commdata_gt <<  ", Est: " << tcp.commdata_est << "@" << textonizer.threshold_est << ", ROCchoice: " << ROCchoice << std::endl;
 
 #ifdef USE_SOCKET
 		tcp.Unlock();
@@ -361,19 +368,19 @@ void handleKey() {
 		msg="Reload";
 		break;
 	case 48: // [0]: switch stereo and texton calculation off
-		mode=none;
+        learnMode=learn_none;
 		break;
 	case 49: // [1]: switch stereo mode off, textons on
-		mode=textons_only;
+        learnMode=learn_textons_only;
 		break;
 	case 50: // [2]: switch stereo mode on, textons off
-		mode=stereo_only;
+        learnMode=learn_stereo_only;
 		break;
 	case 51: // [3]: switch both stereo and textons calucation on
-		mode=stereo_textons;
+        learnMode=learn_stereo_textons;
 		break;
 	case 52: // [4]: switch both stereo and textons calucation on, use active learning
-		mode=stereo_textons_active;
+        learnMode=learn_stereo_textons_active;
 		break;
 		//    case 92: // [\]: save stereo image to bmp
 		//	  exporter.saveStereoPair();
@@ -419,6 +426,15 @@ void handleKey() {
     case 40: // [(]: show everything
         result_input2Mode=VIZ_MEGA;
         break;
+    case 253: // [(]: manual switch stereo explore mode
+        exploreMode = explore_on_stereo;
+        break;
+    case 254: // [(]: manual switch mono est explore mode
+        exploreMode = explore_on_mono;
+        break;
+    case 255: // [(]: auto switch ROC explore mode
+        exploreMode = explore_on_ROC;
+        break;
 #ifdef FILECAM
 	case '>': // fast forward filecam
 		svcam.fastforward=1;
@@ -447,20 +463,20 @@ void handleKey() {
 	if (countmsgclear>10) {
 		countmsgclear=0;
 
-		switch ( mode) {
-		case none:
+        switch ( learnMode) {
+        case learn_none:
 			msg= "None";
 			break;
-		case textons_only:
+        case learn_textons_only:
 			msg= "Textons";
 			break;
-		case stereo_only:
+        case learn_stereo_only:
 			msg= "Stereo";
 			break;
-		case stereo_textons:
+        case learn_stereo_textons:
 			msg= "Textons+stereo";
 			break;
-		case stereo_textons_active:
+        case learn_stereo_textons_active:
 			msg= "Stereo+textons active learning";
 			break;
 		}
@@ -581,10 +597,13 @@ int init(int argc, char **argv) {
      outputVideo.open("video.avi",CV_FOURCC('F','M','P','4'),VIDEOFPS,size,false);
 
 #else
-    //wifi currently does not seem to work properly (IC halts after 22 frames)
+#ifdef RAWVIDEOWIFISTREAM
     std::cout << "Starting WiFi raw strean!" << std::endl;
     outputVideo.open("appsrc ! ffmpegcolorspace ! dspmp4venc mode=1 ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.3 port=5000",CV_FOURCC('H','O','E','R'),VIDEOFPS,size,false);
-    //outputVideo.open("appsrc ! ffmpegcolorspace ! dspmp4venc mode=0 ! avimux ! filesink location=video_dsp.avi",CV_FOURCC('H','O','E','R'),VIDEOFPS,size,false);
+#else
+    std::cout << "Opening videowriter!" << std::endl;
+    outputVideo.open("appsrc ! ffmpegcolorspace ! dspmp4venc mode=0 ! avimux ! filesink location=video_dsp.avi",CV_FOURCC('H','O','E','R'),VIDEOFPS,size,false);
+#endif
 #endif
 
     if (!outputVideo.isOpened())
@@ -610,9 +629,9 @@ int init(int argc, char **argv) {
 	}
 #endif
 
-	mode = RUNMODE;	
+    learnMode = learn_stereo_textons;
 	msg="";
-
+    exploreMode = explore_on_ROC;
 
 	//    caffe::Caffe::set_mode(caffe::Caffe::CPU);
 	//

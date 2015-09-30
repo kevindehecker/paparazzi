@@ -8,9 +8,8 @@
 #include "defines.h"
 #include "smoother.h"
 
-#define ROC_BASED_RESULT 1
-#define ESTIMATE_BASED_RESULT 2
-#define STEREO_BASED_RESULT 3
+
+enum exploreModus_t {explore_on_stereo, explore_on_mono, explore_on_ROC};
 
 class Textons{
 
@@ -122,8 +121,8 @@ public:
         threshold_gt = 150;
 #endif
 
-		tpr_threshold = 0.95f;
-		fpr_threshold = 0.4f;
+        tpr_threshold = 0.7f;
+        fpr_threshold = 0.7f;
 
         currentModusMsg = "";
         regressionGraph_colorGT= cv::Scalar(255,0,0); // blue
@@ -145,7 +144,7 @@ public:
     void saveRegression(int id);
     void retrainAll();
 	void printReport(float fps);
-	void getDisparity(int mode, float *disparity, float *threshold);
+    void getDisparity(int mode, float *disparity, float *threshold, int *ROCchoice);
 
 	int initLearner(bool nulltrain);
     int loadPreviousRegression();

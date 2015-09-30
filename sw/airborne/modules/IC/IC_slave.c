@@ -189,6 +189,20 @@ bool Write_socket(char * c, size_t n) {
 
 extern void IC_slave_FlyModeButton(int8_t value) {
     IC_flymode = value;
+
+    char str[2];
+    if (IC_flymode == explore_on_ROC) {
+        str[0]=255;
+    } else if (IC_flymode == explore_on_stereo) {
+        str[0]=253;
+    } else if (IC_flymode == explore_on_mono) {
+        str[0]=254;
+    }
+
+    str[1]=0;
+    Write_socket(str,2);
+    printf("Send to IC %s\n", str);
+
 }
 extern void IC_slave_LearnModeButton(int8_t value) {
     IC_learnmode = value;
@@ -197,7 +211,6 @@ extern void IC_slave_LearnModeButton(int8_t value) {
     str[1]=0;
     Write_socket(str,2);
     printf("Send to IC %s\n", str);
-   // IC_slave_setThreshold(IC_threshold_gt); //tmp solution...
 }
 
 extern void IC_slave_ActionButton(int8_t value) {
@@ -217,13 +230,13 @@ extern void IC_slave_ActionButton(int8_t value) {
     printf("Send to IC %s\n", str);
 }
 
-extern void IC_slave_setThreshold(int8_t value) {
-    char str[2];
-    str[0]=value;
-    str[1]=0;
-    Write_socket(str,2);
-    printf("Send to IC %s\n", str);
-}
+// extern void IC_slave_setThreshold(int8_t value) {
+//     char str[2];
+//     str[0]=value;
+//     str[1]=0;
+//     Write_socket(str,2);
+//     printf("Send to IC %s\n", str);
+// }
 
 extern void IC_start(void){
 
@@ -236,8 +249,8 @@ extern void IC_start(void){
     nav_heading=0;
     rh=0;
 
-    IC_learnmode = stereo_textons; // current default in IC
-    IC_flymode = textons;
+    IC_learnmode = learn_stereo_textons; // current default in IC
+    IC_flymode = explore_on_mono;
 
     if (initSocket()) {
         printf("Could not connect to IC\n"); // hmm, this does not work
@@ -259,7 +272,7 @@ extern void IC_periodic(void) {
     // if (tmp == 10) {
     //     tmp=0;
     IC_threshold_gt_msg = IC_threshold_gt + overrideWarning_switcher;
-    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.frameID),&(tcp_data.avgdisp_est), &IC_threshold_gt,&IC_threshold_gt_msg,&(tcp_data.avgdisp_est_thresh), &navHeading,&(tcp_data.fps));
+    DOWNLINK_SEND_STEREO(DefaultChannel, DefaultDevice, &(tcp_data.avgdisp_gt),&(tcp_data.frameID),&(tcp_data.avgdisp_est), &IC_threshold_gt,&IC_threshold_gt_msg,&(tcp_data.ROCchoice),&(tcp_data.avgdisp_est_thresh), &navHeading,&(tcp_data.fps));
     // }
 
 	if (!Read_socket()) {
@@ -279,7 +292,7 @@ extern void IC_periodic(void) {
     printf("IC; gt: %d, frameID: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f, yaw: %f, fly_mode: %d \n",tcp_data.avgdisp_gt,tcp_data.frameID,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps,navHeading,IC_flymode);
     printf("GPS; %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n" , gps.lla_pos.lat,gps.lla_pos.lon, gps.lla_pos.alt,  gps.hmsl, gps.ecef_pos.x, gps.ecef_pos.y, gps.ecef_pos.z, gps.course,gps.num_sv, gps.tow , gps.fix);
 
-    if (IC_flymode==stereo) {
+    if (IC_flymode==explore_on_stereo) {
         if (tcp_data.avgdisp_gt > IC_threshold_gt) {
                 obstacle_detected = true;
         }
@@ -346,7 +359,7 @@ bool set_rand_heading() {
 }
 bool increase_nav_heading_till_r(float increment) {
 printf("increase_nav_heading_till_r %f\n" , increment);
-if (IC_flymode==stereo) { // TODO: make also fps dependents
+if (IC_flymode==explore_on_stereo) { // TODO: make also fps dependents
 
 } else {
     increment = increment/4;
@@ -390,7 +403,7 @@ if (IC_flymode==stereo) { // TODO: make also fps dependents
 */
  bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, float distance) {
 
-if (IC_flymode==stereo) { // TODO: make also fps dependents
+if (IC_flymode==explore_on_stereo) { // TODO: make also fps dependents
     distance = distance/2;
 } else {
     distance = distance/6;

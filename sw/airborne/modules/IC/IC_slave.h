@@ -31,19 +31,19 @@
 #include "std.h"
 
 struct ICDataPackage {
-  int avgdisp_gt;
-  int frameID;
-  int avgdisp_est;
-  int avgdisp_est_thresh;
-  float fps;
-
-  char endl;             // endl fix :)
+    int avgdisp_gt;
+    int frameID;
+    int avgdisp_est;
+    int avgdisp_est_thresh;
+    int ROCchoice; // 0 for stereo, 1 for estimator. ROC choice
+    float fps;
+    char endl;             // endl fix, makes it worker nicer in terminal for debugging :)
 };
 extern struct ICDataPackage video_impl;
 
-enum flymode{ stereo, textons};
-
-enum learnmode{none,stereo_only,textons_only,stereo_textons};
+/***********Enums****************/
+enum learnModus_t {learn_none, learn_stereo_only, learn_textons_only, learn_stereo_textons, learn_stereo_textons_active};
+enum exploreModus_t {explore_on_stereo, explore_on_mono, explore_on_ROC};
 
 extern int32_t IC_threshold_gt;
 extern int32_t IC_threshold_gt_msg;

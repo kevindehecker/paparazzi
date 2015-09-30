@@ -1885,6 +1885,7 @@
     <field name="avgdisp_est" type="int32"/>
     <field name="IC_threshold_gt" type="int32"/>
     <field name="IC_threshold_gt_msg" type="int32"/>
+    <field name="IC_ROC_choice" type="int32"/>
     <field name="IC_threshold_est" type="int32"/>
     <field name="nav_heading" type="float"/>
     <field name="fps" type="float"/>

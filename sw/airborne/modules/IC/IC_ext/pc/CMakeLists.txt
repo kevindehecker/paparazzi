@@ -6,9 +6,10 @@ set (LIBELAS_SRC_DIR ../src/Geiger_src)
 set (PROJECT_SRC_DIR ../src)
 
 # add packages
-#SET(CMAKE_INCLUDE_PATH /home/local/include/)
+#SET(CMAKE_INCLUDE_PATH /opt/x86/gst/include/)
 #SET(CMAKE_MODULE_PATH ~/home/local/)
-#set ( CMAKE_PREFIX_PATH /home/local/) #can be done from command line, but is not entirely the same
+#set ( CMAKE_PREFIX_PATH /opt/x86/gst/bin/) #can be done from command line, but is not entirely the same
+set( ENV{PATH} /opt/x86/gst/bin/ )
 find_package( Boost REQUIRED)
 find_package( OpenCV REQUIRED )
 #MESSAGE( STATUS "OpenCV_DIR: " ${OpenCV_DIR} )
