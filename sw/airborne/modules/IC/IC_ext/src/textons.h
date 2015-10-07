@@ -90,8 +90,11 @@ public:
     int distribution_buf_pointer; //for active learning printout
     cv::Mat currentHist;
 
-	float tpr_threshold;
-	float fpr_threshold; //only used to determine when to switch est/gt
+    float tpr_threshold_autothresh;
+    float fpr_threshold_autothresh;
+//    float tpr_threshold_relearn;
+//    float fpr_threshold_relearn;
+    float mse_thresh_relearn;
     //float avgdisp_smoothed;
 
     cv::Mat frame_Itextoncolor;
@@ -114,15 +117,19 @@ public:
         distribution_buf_size = 4500;
 		distribution_buf_pointer =0;
 #ifdef LONGSEC
-        threshold_est = 8;
-        threshold_gt = 8;
+        threshold_est = 7;
+        threshold_gt = 7;
 #else
         threshold_est = 150;
         threshold_gt = 150;
 #endif
 
-        tpr_threshold = 0.7f;
-        fpr_threshold = 0.7f;
+        tpr_threshold_autothresh = 0.75f;
+        fpr_threshold_autothresh = 0.8f;
+
+        //tpr_threshold_relearn = 0.6f;
+        //fpr_threshold_relearn = 0.7f;
+        mse_thresh_relearn = 3;
 
         currentModusMsg = "";
         regressionGraph_colorGT= cv::Scalar(255,0,0); // blue

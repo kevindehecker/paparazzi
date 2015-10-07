@@ -535,7 +535,7 @@ void Textons::setAutoThreshold() {
 		putText(frame_ROC,"R",cv::Point(4, 30+imsize/2),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar(255,255,255));
 		cv::line(graphframe,cv::Point(0, 0),cv::Point(0, imsize),cv::Scalar(255,255,255), 1, 8, 0);
 		//draw tpr threshold (which is fixed)
-		cv::line(graphframe,cv::Point(0,imsize- tpr_threshold*imsize),cv::Point(imsize,imsize - tpr_threshold*imsize),cv::Scalar(127,127,255), 1, 8, 0);
+        cv::line(graphframe,cv::Point(0,imsize- tpr_threshold_autothresh*imsize),cv::Point(imsize,imsize - tpr_threshold_autothresh*imsize),cv::Scalar(127,127,255), 1, 8, 0);
 
 		//X
 		std::string xlabel = "FPR";
@@ -561,6 +561,7 @@ void Textons::setAutoThreshold() {
 
 	int best = 0;	
 	float fpr_trn_best_tmp = 99999999; //smaller is better, so start the search extremely high
+    float fpr_tst_best_tmp = 99999999; //smaller is better, so start the search extremely high
 
 	int learnborder =  (lastLearnedPosition+(distribution_buf_size-distribution_buf_pointer)) % distribution_buf_size; // make a sliding graph
 	if ( countsincelearn > distribution_buf_size) {
@@ -644,10 +645,16 @@ void Textons::setAutoThreshold() {
 		fprs_tst.at<float>(i) = fpr_tst;
 
 
-        if (tpr_tst > tpr_threshold && fpr_tst < fpr_trn_best_tmp) {
-			best = i;
+        if (tpr_trn > tpr_threshold_autothresh && fpr_trn < fpr_trn_best_tmp) {
+            //best = i; // not use train, but tst for threshold
 			fpr_trn_best_tmp = fprs_trn.at<float>(best);			
 		}
+
+
+        if (tpr_tst > tpr_threshold_autothresh && fpr_tst < fpr_tst_best_tmp) {
+            best = i; // use test data for threshold determination
+            fpr_tst_best_tmp = fprs_tst.at<float>(best);
+        }
 
 
 #ifdef DRAWVIZS
@@ -683,7 +690,7 @@ void Textons::setAutoThreshold() {
 		if (fpr_trn_best_tmp <= 1) {
 			s_trn << "TPR: " << tprs_trn.at<float>(best) << " -> FPR: " << fprs_trn.at<float>(best);
 		} else {
-			s_trn << "TPR: " << tpr_threshold << " -> FPR: -";
+            s_trn << "TPR: " << tpr_threshold_autothresh << " -> FPR: -";
 		}
 		std::stringstream s_tst;
 		s_tst << std::fixed << std::showpoint;
@@ -701,6 +708,7 @@ void Textons::setAutoThreshold() {
 
 }
 
+int learnAttemptsCount=0;
 void Textons::checkToLearn(int imgCount) {
     static bool delayed =false;
 
@@ -715,6 +723,7 @@ void Textons::checkToLearn(int imgCount) {
         //if (_tpr_tst < tpr_threshold || _fpr_trn > fpr_threshold) { // this does not work anymore, since threshold is determined using tst
             //saveRegression(learnID++);
             saveRegression(2);
+            learnAttemptsCount+=1;
             std::cout << "Learned at: " << imgCount % 660 << "\n" ;
         //}
     }
@@ -723,7 +732,8 @@ void Textons::checkToLearn(int imgCount) {
 void Textons::getDisparity(int mode,float *disparity, float *threshold, int *ROCchoice) {
 
     if (mode == explore_on_ROC) {
-        if (_tpr_tst > tpr_threshold && _fpr_tst < fpr_threshold ) {
+      //  if (_tpr_tst > tpr_threshold_relearn && _fpr_tst < fpr_threshold_relearn ) {
+        if ((_mse_tst < mse_thresh_relearn) & learnAttemptsCount>0) {
             *disparity = last_est;
             *threshold=threshold_est;
             *ROCchoice = 1;

@@ -8,6 +8,8 @@ cd tmp
 
 telnet 192.168.1.1 <<script2
 
+killall program.elf.respawner.sh
+killall program.elf
 
 killall ap.elf
 killall IC

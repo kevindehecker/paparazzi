@@ -90,7 +90,7 @@ int32_t IC_threshold_est_ROCMsg;
 
 bool IC_turnbutton;
 
-int8_t IC_flymode;
+int8_t IC_exploreMode;
 int8_t IC_learnmode;
 int8_t IC_actionDummy;
 
@@ -189,14 +189,14 @@ bool Write_socket(char * c, size_t n) {
 }
 
 extern void IC_slave_ExploreModeButton(int8_t value) {
-    IC_flymode = value;
+    IC_exploreMode = value;
 
     char str[2];
-    if (IC_flymode == explore_on_ROC) {
+    if (IC_exploreMode == explore_on_ROC) {
         str[0]=255;
-    } else if (IC_flymode == explore_on_stereo) {
+    } else if (IC_exploreMode == explore_on_stereo) {
         str[0]=253;
-    } else if (IC_flymode == explore_on_mono) {
+    } else if (IC_exploreMode == explore_on_mono) {
         str[0]=254;
     }
 
@@ -241,7 +241,7 @@ extern void IC_slave_ActionButton(int8_t value) {
 
 extern void IC_start(void){
 
-    IC_threshold_gt = 8;
+    IC_threshold_gt = 7;
 
     IC_turnbutton=true;
     noDataCounter=0;
@@ -249,7 +249,7 @@ extern void IC_start(void){
     rh=0;
 
     IC_learnmode = learn_stereo_textons; // current default in IC
-    IC_flymode = explore_on_mono;
+    IC_exploreMode = explore_on_ROC;
 
     if (initSocket()) {
         printf("Could not connect to IC\n"); // hmm, this does not work
@@ -289,14 +289,16 @@ extern void IC_periodic(void) {
     noDataCounter=0; // reset time out counter
     IC_threshold_est= tcp_data.avgdisp_est_thresh;
 
-    printf("IC; gt: %d, frameID: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f, yaw: %f, fly_mode: %d \n",tcp_data.avgdisp_gt,tcp_data.frameID,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps,navHeading,IC_flymode);
+    printf("IC; gt: %d, frameID: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f, yaw: %f, fly_mode: %d \n",tcp_data.avgdisp_gt,tcp_data.frameID,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps,navHeading,IC_exploreMode);
     printf("GPS; %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n" , gps.lla_pos.lat,gps.lla_pos.lon, gps.lla_pos.alt,  gps.hmsl, gps.ecef_pos.x, gps.ecef_pos.y, gps.ecef_pos.z, gps.course,gps.num_sv, gps.tow , gps.fix);
 
     if (tcp_data.ROCchoice == 0) {
         ROCchoice_switcher = !ROCchoice_switcher;
+    } else {
+        ROCchoice_switcher=0;
     }
 
-    if (IC_flymode==explore_on_stereo) {
+    if (IC_exploreMode==explore_on_stereo) {
         if (tcp_data.avgdisp_gt > IC_threshold_gt) {
                 obstacle_detected = true;
         }
@@ -357,18 +359,22 @@ bool increase_nav_heading( float increment) {
 bool set_rand_heading() {
     printf("set_rand_heading\n");
     rh=(float)rand()/(float)(RAND_MAX);
+    rh+=0.5;
     rh*=2;
     rh_reached=false;
     return false;
 }
 bool increase_nav_heading_till_r(float increment) {
-printf("increase_nav_heading_till_r %f\n" , increment);
-if (IC_flymode==explore_on_stereo) { // TODO: make also fps dependents
+    printf("increase_nav_heading_till_r %f\n" , increment);
 
-} else {
-    increment = increment/4;
-}
 
+    if ((IC_exploreMode==explore_on_ROC) & tcp_data.ROCchoice) {
+        increment = increment/2;
+    } else if (IC_exploreMode==explore_on_mono){
+            increment = increment/2;
+    } else {
+
+    }
     rh-=increment;
     if (rh>0) {
         navHeading = navHeading + increment;
@@ -407,10 +413,12 @@ if (IC_flymode==explore_on_stereo) { // TODO: make also fps dependents
 */
  bool increase_nav_waypoint(int wp_id_current,int wp_id_goal, float distance) {
 
-if (IC_flymode==explore_on_stereo) { // TODO: make also fps dependents
-    distance = distance/2;
+if ((IC_exploreMode==explore_on_ROC) & tcp_data.ROCchoice) {
+    distance = distance/4;
+} else if (IC_exploreMode==explore_on_mono){
+    distance = distance/4;
 } else {
-    distance = distance/6;
+    distance = distance/2;
 }
 
 

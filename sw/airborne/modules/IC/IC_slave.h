@@ -50,7 +50,7 @@ extern int32_t IC_threshold_OverrideMsg;
 extern int32_t IC_threshold_est_ROCMsg;
 extern int32_t IC_threshold_est;
 extern bool IC_turnbutton;
-extern int8_t IC_flymode;
+extern int8_t IC_exploreMode;
 extern int8_t IC_learnmode;
 extern int8_t IC_actionDummy;
 

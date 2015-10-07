@@ -23,6 +23,8 @@ from __future__ import print_function
 import re
 import argparse
 import os
+import datetime
+import time
 from time import sleep
 
 import parrot_utils
@@ -404,6 +406,8 @@ elif args.command == 'upload_file_and_run':
     parrot_utils.execute_command(tn,"killall -9 program.elf.respawner.sh")
     parrot_utils.execute_command(tn,"killall -9 " + f[1])
     sleep(1)
+    print("Set time: " + "date -s \"" + time.strftime('20%y-%m-%d %X') + "\"")
+    parrot_utils.execute_command(tn,"date -s \"" + time.strftime('20%y-%m-%d %X') + "\"")
     parrot_utils.execute_command(tn, "mkdir -p /data/video/" + args.folder)
     print('Uploading \'' + f[1] + "\' from " + f[0] + " to " + args.folder)
     parrot_utils.uploadfile(ftp, args.folder + "/" + f[1], file(args.file, "rb"))
@@ -415,14 +419,14 @@ elif args.command == 'upload_file_and_run':
     parrot_utils.uploadfile(ftp, "drone/build/IC", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/drone/build/IC", "rb"))
 
     print("Cleaning IC related data")
-    parrot_utils.execute_command(tn,"rm -f /data/video/drone/*.xml")
+    # parrot_utils.execute_command(tn,"rm -f /data/video/drone/*.xml")
     print("Uploading IC related data")
-    parrot_utils.uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/graph_buffer.xml", "rb"))
-    parrot_utils.uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/groundtruth_buffer.xml", "rb"))
-    parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buffer.xml", "rb"))
-    parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buffer.xml", "rb"))
-    parrot_utils.uploadfile(ftp, "drone/distribution_buf_pointer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buf_pointer.xml", "rb"))
-    parrot_utils.uploadfile(ftp, "drone/distribution_buf_size.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buf_size.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/graph_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/graph_buffer.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/groundtruth_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/groundtruth_buffer.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buffer.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buffer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buffer.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buf_pointer.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buf_pointer.xml", "rb"))
+    #parrot_utils.uploadfile(ftp, "drone/distribution_buf_size.xml", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/distribution_buf_size.xml", "rb"))
     parrot_utils.uploadfile(ftp, "drone/textons10_intensity_flightarena.dat", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/textons10_intensity_flightarena.dat", "rb"))
     parrot_utils.uploadfile(ftp, "drone/textons10_gradient_flightarena.dat", file("/home/houjebek/paparazzi/sw/airborne/modules/IC/IC_ext/pc/textons10_gradient_flightarena.dat", "rb"))
 

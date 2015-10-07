@@ -10,7 +10,7 @@
     <dl_settings name="control">
         <dl_settings name="IC">
           <dl_setting var="IC_threshold_gt"  min="0" step="1"    max="255" module="IC/IC_slave" shortname="Treshold gt" param="IC_THRESHOLD_GT"/>
-          <dl_setting var="IC_flymode" min="0" step="1"    max="2"   module="IC/IC_slave" shortname="ExploreMode" values="Stereo|Textons|Auto" handler="ExploreModeButton"/>
+          <dl_setting var="IC_exploreMode" min="0" step="1"    max="2"   module="IC/IC_slave" shortname="ExploreMode" values="Stereo|Textons|Auto" handler="ExploreModeButton"/>
           <dl_setting var="IC_learnmode" min="0" step="1"    max="4"   module="IC/IC_slave" shortname="LearnMode" values="none|textons|stereo|both|active learning" handler="LearnModeButton"/>
           <dl_setting var="IC_actionDummy" min="0" step="1"    max="3"   module="IC/IC_slave" shortname="Action" values="Clear|Learn|Save|Reload" handler="ActionButton"/>
         </dl_settings>

@@ -271,7 +271,7 @@ void process_video() {
 		cv::imshow("Results", resFrame);
 #endif
 #ifdef VIDEORESULTS
-    //	outputVideoResults.write(resFrame);
+        outputVideoResults.write(resFrame);
 #endif
 #endif
 
@@ -670,7 +670,8 @@ int main( int argc, char **argv )
 #ifdef _PC
    textonizer.initLearner(true);
 #endif
-#endif
+#endif   
+
 	process_video();	
 	textonizer.printReport(tcp.commdata_fps);
 	close();
@@ -682,7 +683,7 @@ int main( int argc, char **argv )
 #endif
 #endif
 #ifdef DRONE
-     textonizer.saveRegression(2);
+     textonizer.saveRegression(0);
 #endif
 	return 0;
 }

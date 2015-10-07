@@ -17,11 +17,11 @@
     <waypoint lat="51.9906456" lon="4.3767026" height="2." name="FA3"/>   
     <waypoint lat="51.9906852" lon="4.3767952" height="2." name="FA4"/>
     <waypoint name="GOAL" x="0.0" y="0.5"/>    
-    <waypoint name="PREVGOAL" x="0.0" y="0.5"/>    
-    <waypoint lat="51.9906437" lon="4.3767306" height="2." name="R1"/>   
-    <waypoint lat="51.9906147" lon="4.3767592" height="2." name="R2"/>  	
-    <waypoint lat="51.9906340" lon="4.3768108" height="2." name="R3"/>	
-    <waypoint lat="51.9906640" lon="4.3767818" height="2." name="R4"/>  	 
+    <waypoint name="PREVGOAL" x="0.0" y="0.5"/>  
+	<waypoint lat="51.9906391" lon="4.3767221" height="2." name="R1"/>
+	<waypoint lat="51.9906083" lon="4.3767591" height="2." name="R2"/>
+	<waypoint lat="51.9906286" lon="4.3768101" height="2." name="R3"/>
+	<waypoint lat="51.9906595" lon="4.3767724" height="2." name="R4"/>
   </waypoints>
   <sectors>
     <sector color="red" name="Flight_Area">
@@ -109,7 +109,7 @@
       <exception cond="obstacle_detected==0" deroute="TurnaBitMore"/>
       <exception cond="GpsIsLost()" deroute="gps_lost"/>
        	<exception cond="electrical.bat_low" deroute="bat_low"/> 
-      <exception cond="noDataCounter>50" deroute="no_IC_data"/>           
+        <exception cond="noDataCounter>50" deroute="no_IC_data"/>           
       <stay wp="PREVGOAL"/>
     </block>
 
