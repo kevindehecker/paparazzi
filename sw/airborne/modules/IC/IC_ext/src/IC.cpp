@@ -631,7 +631,7 @@ int init(int argc, char **argv) {
 
     learnMode = learn_stereo_textons;
 	msg="";
-    exploreMode = explore_on_ROC;
+    exploreMode = explore_on_stereo;
 
 	//    caffe::Caffe::set_mode(caffe::Caffe::CPU);
 	//

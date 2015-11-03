@@ -80,7 +80,7 @@ float navHeading;
 
 float alpha;
 
-int32_t IC_threshold_est; // unused!
+int32_t IC_threshold_est;
 int32_t IC_threshold_gt;
 
 int32_t overrideWarning_switcher =0;
@@ -242,6 +242,7 @@ extern void IC_slave_ActionButton(int8_t value) {
 extern void IC_start(void){
 
     IC_threshold_gt = 7;
+    IC_threshold_est =6;
 
     IC_turnbutton=true;
     noDataCounter=0;
@@ -249,7 +250,7 @@ extern void IC_start(void){
     rh=0;
 
     IC_learnmode = learn_stereo_textons; // current default in IC
-    IC_exploreMode = explore_on_ROC;
+    IC_exploreMode = explore_on_stereo;
 
     if (initSocket()) {
         printf("Could not connect to IC\n"); // hmm, this does not work
@@ -287,7 +288,7 @@ extern void IC_periodic(void) {
         return; // no new data, so exit the function
     }
     noDataCounter=0; // reset time out counter
-    IC_threshold_est= tcp_data.avgdisp_est_thresh;
+    //IC_threshold_est= tcp_data.avgdisp_est_thresh;
 
     printf("IC; gt: %d, frameID: %d, thresh_gt: %d, est: %d, thresh_est: %d fps: %f, yaw: %f, fly_mode: %d \n",tcp_data.avgdisp_gt,tcp_data.frameID,IC_threshold_gt,tcp_data.avgdisp_est,tcp_data.avgdisp_est_thresh, tcp_data.fps,navHeading,IC_exploreMode);
     printf("GPS; %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n" , gps.lla_pos.lat,gps.lla_pos.lon, gps.lla_pos.alt,  gps.hmsl, gps.ecef_pos.x, gps.ecef_pos.y, gps.ecef_pos.z, gps.course,gps.num_sv, gps.tow , gps.fix);
@@ -307,7 +308,7 @@ extern void IC_periodic(void) {
         }
 
     } else {
-        obstacle_detected = (tcp_data.avgdisp_est > tcp_data.avgdisp_est_thresh);
+        obstacle_detected = (tcp_data.avgdisp_est > IC_threshold_est);
 
         static int override_counter =0;
         if (tcp_data.avgdisp_gt > IC_threshold_gt+1 && !obstacle_detected) {
