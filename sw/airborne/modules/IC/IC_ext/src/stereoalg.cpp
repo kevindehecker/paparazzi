@@ -114,11 +114,11 @@ void stereoAlg::initGeigerParam() {
 	param.disp_max = 255;
     darksize = 40; // TODO: find out this value
 #endif
-	GeigerHeatScaling = 256/param.disp_max;
+    GeigerHeatScaling = 4096/param.disp_max;
 
 	if (param.subsampling) {
 		GeigerSubSampling = 2;
-	}
+    }
 	else {
 		GeigerSubSampling =1;
 	}
