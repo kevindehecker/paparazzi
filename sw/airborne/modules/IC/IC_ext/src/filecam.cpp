@@ -14,7 +14,7 @@ bool FileCam::init () {
     //video = cv::VideoCapture("/home/houjebek/AfstudeerData/DroneCam/AutonomousFlightGroundtruth1/video_dsp.avi");
     //video = cv::VideoCapture("/home/houjebek/Desktop/video_walk_house.avi");    
 #ifdef DEBUG_FLAG
-    video = cv::VideoCapture("/home/houjebek/Desktop/experiments/trial6_2/data/video/drone/build/video_dsp.avi");
+    video = cv::VideoCapture("/mnt/SecondBase/Data/HD/AfstudeerData/paper/ROCFlightOK4_morerotation/data/video/drone/build/video_dsp.avi");
     //video = cv::VideoCapture("/mnt/SecondBase/AfstudeerData/turnlogs/secondgt/data/video/drone/build/video_dsp.avi");
     //video = cv::VideoCapture("/home/houjebek/shares/JetserKetser/AfstudeerData/synced/paddestoel/cublice_walk/video/LeftRight.avi");
     skipstart = 0;
