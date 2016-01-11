@@ -253,11 +253,11 @@
 /* The line that is pulled low at power up to initiate the bind process */
 /* GPIO_EXT1 on PX4FMU */
 
-/*
+
 #define SPEKTRUM_BIND_PIN GPIO4
 #define SPEKTRUM_BIND_PIN_PORT GPIOC
-*/
-/*
+
+
 #define SPEKTRUM_UART2_RCC RCC_USART2
 #define SPEKTRUM_UART2_BANK GPIOA
 #define SPEKTRUM_UART2_PIN GPIO3
@@ -265,7 +265,7 @@
 #define SPEKTRUM_UART2_IRQ NVIC_USART2_IRQ
 #define SPEKTRUM_UART2_ISR usart2_isr
 #define SPEKTRUM_UART2_DEV USART2
-*/
+
 
 
 /* Activate onboard baro by default */
