@@ -35,6 +35,7 @@
 #include "mcu_periph/sys_time.h"
 #include "led.h"
 
+
 #include "subsystems/datalink/telemetry.h"
 #include "subsystems/datalink/datalink.h"
 #include "subsystems/datalink/downlink.h"
@@ -122,6 +123,15 @@ tid_t baro_tid;          ///< id for baro_periodic() timer
 #ifndef SITL
 int main(void)
 {
+
+  led_init();
+  //LED_TOGGLE();
+  //LED_OFF(1);
+
+//while (1) {
+  LED_OFF(1);
+//}
+
   main_init();
 
 #if LIMIT_EVENT_POLLING

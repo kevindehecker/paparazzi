@@ -88,12 +88,19 @@ const clock_scale_t hse_24mhz_3v3[CLOCK_3V3_END] = {
 
 void mcu_arch_init(void)
 {
+  //already done in pixhawk bootloader
+ #if defined PIXHAWK
+   #if defined STM32F4
+     SCB_VTOR = 0x08004000;
+   #endif
+ #endif
+
 #if LUFTBOOT
   PRINT_CONFIG_MSG("We are running luftboot, the interrupt vector is being relocated.")
 #if defined STM32F4
-  SCB_VTOR = 0x00004000;
+  //SCB_VTOR = 0x00004000;
 #else
-  SCB_VTOR = 0x00002000;
+  //SCB_VTOR = 0x00002000;
 #endif
 #endif
 #if EXT_CLK == 8000000
