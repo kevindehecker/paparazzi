@@ -23,7 +23,7 @@ HARD_FLOAT=yes
 # possibilities: DFU, SWD, pixhawk bootloader
 #FLASH_MODE ?= SWD
 $(TARGET).MAKEFILE = pixhawk
-$(TARGET).CFLAGS+=-DPIXHAWK
+#$(TARGET).CFLAGS+=-DPIXHAWK
 #$(TARGET).LDFLAGS+=-Wl,-Ttext=0x8004000
 
 #

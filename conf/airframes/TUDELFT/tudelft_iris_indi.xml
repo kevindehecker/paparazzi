@@ -46,7 +46,11 @@
   </firmware>
 
   <firmware name="test_progs">
-    <target name="test_telemetry"           board="pixhawk_2.4"/>
+    <target name="test_telemetry" board="pixhawk_2.4"/>
+  </firmware>
+
+  <firmware name="test_progs">
+    <target name="test_baro_board" board="pixhawk_2.4"/>
   </firmware>
 
   <modules main_freq="512">

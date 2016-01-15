@@ -40,9 +40,9 @@ MEMORY
     ccsram (rwx) : ORIGIN = 0x10000000, LENGTH = 64K
 }
 
-/* OUTPUT_ARCH(arm) */
+OUTPUT_ARCH(arm)
 
-/* ENTRY(main) */		/* treat __start as the anchor for dead code stripping */
+ENTRY(main) 		/* treat __start as the anchor for dead code stripping */
 EXTERN(vector_table)	 /* force the vectors to be included in the output */
 
 /*
