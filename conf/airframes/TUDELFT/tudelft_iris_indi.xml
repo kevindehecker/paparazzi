@@ -11,7 +11,7 @@
 <airframe name="iris_indi">
 
   <firmware name="rotorcraft">
-    <target name="ap" board="px4fmu_2.4"/>
+    <target name="ap" board="pixhawk_2.4"/>
 
     <target name="nps" board="pc">
       <subsystem name="fdm" type="jsbsim"/>
@@ -46,7 +46,7 @@
   </firmware>
 
   <firmware name="test_progs">
-    <target name="test_telemetry"           board="px4fmu_2.4"/>
+    <target name="test_telemetry"           board="pixhawk_2.4"/>
   </firmware>
 
   <modules main_freq="512">

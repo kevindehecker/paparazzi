@@ -24,8 +24,6 @@
 #
 include $(PAPARAZZI_SRC)/conf/Makefile.stm32
 
-#DRONE = $(PAPARAZZI_SRC)/sw/tools/px4/pixhawk.py
-
 # Program the device and start it.
 upload program: $(OBJDIR)/$(TARGET).bin
 	$(PAPARAZZI_SRC)/sw/tools/pixhawk/px_mkfw.py --prototype /home/houjebek/px4/Firmware/Images/px4fmu-v2.prototype --image $(OBJDIR)/$(TARGET).bin > $(OBJDIR)/$(TARGET).px4
