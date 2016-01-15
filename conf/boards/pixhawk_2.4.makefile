@@ -21,10 +21,8 @@ HARD_FLOAT=yes
 
 # default flash mode is the pixhawk bootloader
 # possibilities: DFU, SWD, pixhawk bootloader
-#FLASH_MODE ?= SWD
+FLASH_MODE ?= PIXHAWK_BOOTLOADER
 $(TARGET).MAKEFILE = pixhawk
-#$(TARGET).CFLAGS+=-DPIXHAWK
-#$(TARGET).LDFLAGS+=-Wl,-Ttext=0x8004000
 
 #
 # default LED configuration

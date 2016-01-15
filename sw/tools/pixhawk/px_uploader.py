@@ -521,7 +521,6 @@ class uploader(object):
                 except:
                     return
 
-
 # Detect python version
 if sys.version_info[0] < 3:
     runningPython3 = False
@@ -608,7 +607,6 @@ try:
                             continue
 
                     try:
-                            print("5555555555555555555555555555555555555555555555555555555555555")
                             # ok, we have a bootloader, try flashing it
                             up.upload(fw)
 

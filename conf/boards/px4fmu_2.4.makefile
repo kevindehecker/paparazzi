@@ -21,10 +21,7 @@ HARD_FLOAT=yes
 
 # default flash mode is via usb dfu bootloader
 # possibilities: DFU, SWD
-#FLASH_MODE ?= SWD
-$(TARGET).MAKEFILE = pixhawk
-$(TARGET).CFLAGS+=-DPIXHAWK
-#$(TARGET).LDFLAGS+=-Wl,-Ttext=0x8004000
+FLASH_MODE ?= SWD
 
 #
 # default LED configuration
