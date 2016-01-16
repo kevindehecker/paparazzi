@@ -124,15 +124,20 @@ tid_t baro_tid;          ///< id for baro_periodic() timer
 int main(void)
 {
 
-  led_init();
+  //led_init();
   //LED_TOGGLE();
   //LED_OFF(1);
 
-//while (1) {
-  LED_OFF(1);
-//}
 
   main_init();
+
+
+//   while (1) {
+//   LED_OFF(1);
+//   LED_ON(1);
+// }
+
+
 
 #if LIMIT_EVENT_POLLING
   /* Limit main loop frequency to 1kHz.
@@ -159,6 +164,7 @@ int main(void)
   while (1) {
     handle_periodic_tasks();
     main_event();
+    //LED_OFF(1);
   }
 #endif
 
@@ -306,6 +312,8 @@ STATIC_INLINE void main_periodic(void)
 #endif
 
   RunOnceEvery(10, LED_PERIODIC());
+
+  RunOnceEvery(100, {DOWNLINK_SEND_ALIVE(DefaultChannel, DefaultDevice,  16, MD5SUM);});
 }
 
 STATIC_INLINE void telemetry_periodic(void)
