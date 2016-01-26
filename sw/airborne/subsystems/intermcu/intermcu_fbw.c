@@ -30,7 +30,11 @@
 #include "mcu_periph/uart.h"
 #include "subsystems/datalink/pprz_transport.h"
 
+#ifdef BOARD_PIXHAWKIO
 #include "libopencm3/cm3/scb.h"
+static uint8_t rebootSequence[] = {0x41, 0xd7, 0x32,0x0a,0x46,0x39};
+static uint8_t rebootSequenceCount = 0;
+#endif
 
 #if RADIO_CONTROL_NB_CHANNEL > 8
 #undef RADIO_CONTROL_NB_CHANNEL
@@ -101,8 +105,6 @@ static inline void intermcu_parse_msg(struct transport_rx *trans, void (*command
   trans->msg_received = FALSE;
 }
 
-static uint8_t rebootSequence[] = {0x41, 0xd7, 0x32,0x0a,0x46,0x39};
-static uint8_t hoer = 0;
 void InterMcuEvent(void (*frame_handler)(void))
 {
   /* Parse incoming bytes */
@@ -110,18 +112,18 @@ void InterMcuEvent(void (*frame_handler)(void))
     while (intermcu_device->char_available(intermcu_device->periph) && !intermcu_transport.trans_rx.msg_received) {
       unsigned char b = intermcu_device->get_byte(intermcu_device->periph);
 
-      //
-      if(b == rebootSequence[hoer]) {
-        hoer++;
+#ifdef BOARD_PIXHAWKIO
+      if(b == rebootSequence[rebootSequenceCount]) {
+        rebootSequenceCount++;
       }
       else {
-        hoer = 0;
+        rebootSequenceCount = 0;
       }
 
-      if (hoer >= 6) { // 6 = length of rebootSequence + 1
+      if (rebootSequenceCount >= 6) { // 6 = length of rebootSequence + 1
         scb_reset_system();
       }
-
+#endif
       parse_pprz(&intermcu_transport, b);
     }
 
