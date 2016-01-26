@@ -21,215 +21,153 @@
  * @file "modules/pxio_flash/pxio_flash.c"
  * @author Kevin van Hecke
  * Flashes the px4io f1 through the px4 bootloader.
+ * Assumes the telem2 port on the Pixhawk is connected to a ttyACM device (blackmagic probe)
  */
 
 #include "modules/pxio_flash/pxio_flash.h"
 //#include "subsystems/datalink/downlink.h"
 #include "modules/pxio_flash/protocol.h"
- #include "mcu_periph/sys_time_arch.h"
+#include "mcu_periph/sys_time_arch.h"
 
- // Serial Port
+// Serial Port
 #include "mcu_periph/uart.h"
- PRINT_CONFIG_VAR(PXIO_UART)
+PRINT_CONFIG_VAR(PXIO_UART)
 
 // define coms link for px4io f1
 #define PXIO_PORT   (&((PXIO_UART).device))
 #define TELEM2_PORT   (&((TELEM2_UART).device))
 
- bool_t setToBootloaderMode;
+// weird that these below are not in protocol.h, which is from the firmware px4 repo
+//below is copied from qgroundcontrol:
+#define PROTO_INSYNC            0x12   ///< 'in sync' byte sent before status
+#define PROTO_EOC               0x20   ///< end of command
+// Reply bytes
+#define PROTO_OK                0x10   ///< INSYNC/OK      - 'ok' response
+#define PROTO_FAILED            0x11   ///< INSYNC/FAILED  - 'fail' response
+#define PROTO_INVALID           0x13 ///< INSYNC/INVALID - 'invalid' response for bad commands
+// Command bytes
+#define PROTO_GET_SYNC          0x21   ///< NOP for re-establishing sync
+#define PROTO_GET_DEVICE        0x22   ///< get device ID bytes
+#define PROTO_CHIP_ERASE        0x23   ///< erase program area and reset program address
+#define PROTO_LOAD_ADDRESS      0x24 ///< set next programming address
+#define PROTO_PROG_MULTI        0x27   ///< write bytes at program address and increment
+#define PROTO_GET_CRC           0x29 ///< compute & return a CRC
+#define PROTO_BOOT              0x30   ///< boot the application
 
- void px4ioflash_init(void) {
-  setToBootloaderMode = FALSE;
+bool_t setToBootloaderMode;
+
+void px4ioflash_init(void) {
+    setToBootloaderMode = FALSE;
 }
 
 void px4ioflash_event(void) {
+    if (PXIO_PORT->char_available(PXIO_PORT->periph)) {
+        if (!setToBootloaderMode) {
+            //ignore anything coming from IO if not in bootloader mode (which should be nothing)
+        } else {
+            //relay everything from IO to the laptop
+            unsigned char b = PXIO_PORT->get_byte(PXIO_PORT->periph);
+            TELEM2_PORT->put_byte(TELEM2_PORT->periph,b);
+        }
+    }
 
-  if (PXIO_PORT->char_available(PXIO_PORT->periph)) {
-    if (!setToBootloaderMode) {
-      unsigned char hoer = PXIO_PORT->get_byte(PXIO_PORT->periph);
+    if (TELEM2_PORT->char_available(TELEM2_PORT->periph) && !setToBootloaderMode) {
+        //data was received on the pc uart, so
+        //send the reboot to bootloader command:
+        static struct IOPacket  dma_packet;
+        dma_packet.count_code = 0x40 + 0x01;
+        dma_packet.crc = 0;
+        dma_packet.page = PX4IO_PAGE_SETUP;
+        dma_packet.offset = PX4IO_P_SETUP_REBOOT_BL;
+        dma_packet.regs[0] = PX4IO_REBOOT_BL_MAGIC;
+        dma_packet.crc = crc_packet(&dma_packet);
+        struct IOPacket *pkt = &dma_packet;
+        uint8_t *p = (uint8_t *)pkt;
+        PXIO_PORT->put_byte(PXIO_PORT->periph,p[0]);
+        PXIO_PORT->put_byte(PXIO_PORT->periph,p[1]);
+        PXIO_PORT->put_byte(PXIO_PORT->periph,p[2]);
+        PXIO_PORT->put_byte(PXIO_PORT->periph,p[3]);
+        PXIO_PORT->put_byte(PXIO_PORT->periph,p[4]);
+        PXIO_PORT->put_byte(PXIO_PORT->periph,p[5]);
 
-      if (hoer == PKT_CODE_SUCCESS) {
+        sys_time_usleep(5000); // this seems to be close to the minimum delay necessary to process this packet at the IO side
+        //the pixhawk IO chip should respond with:
+        // 0x00 ( PKT_CODE_SUCCESS )
+        // 0xe5
+        // 0x32
+        // 0x0a
+        //After that, the IO chips reboots into bootloader mode, in which it will stay for a short period
+        //The baudrate in bootloader mode ic changed to 115200 (normal operating baud is 1500000, at least for original pixhawk fmu firmware)
 
-        sys_time_usleep(50000);
-        PXIO_PORT->put_byte(PXIO_PORT->periph,0x21);
-        PXIO_PORT->put_byte(PXIO_PORT->periph,0x20);
+        //state machine
+        int state =0;
+        while (state<4 && PXIO_PORT->char_available(PXIO_PORT->periph)) {
 
-        unsigned char count = 48;
-        while (PXIO_PORT->char_available(PXIO_PORT->periph)) {
-          hoer = PXIO_PORT->get_byte(PXIO_PORT->periph);
-          char tmp[3];
-          itoa(hoer,tmp,16);
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,count++);
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,':');
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,' ');
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,tmp[0]);
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,tmp[1]);
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
+            unsigned char b = PXIO_PORT->get_byte(PXIO_PORT->periph);
+            switch (state) {
+            case (0) :
+                if (b == PKT_CODE_SUCCESS) state++; else  state=0;
+                break;
+            case (1) :
+                if (b == 0xe5) state++; else  state=0;
+                break;
+            case (2) :
+                if (b == 0x32) state++; else  state=0;
+                break;
+            case (3) :
+                if (b == 0x0a) state++; else  state=0;
+                break;
+            default :
+                TELEM2_PORT->put_byte(TELEM2_PORT->periph,'b');
+                break;
+            }
         }
 
+        if (state == 4) {
+            uart_periph_set_baudrate(PXIO_PORT->periph,B115200);
+            /* look for the bootloader for 150 ms */
+            int ret = 0;
+            for (int i = 0; i < 15 && !ret ; i++) {
+                //unsigned char count = 48;
+                sys_time_usleep(10000);
 
 
+                //send a get_sync command in order to keep the io in bootloader mode
+                PXIO_PORT->put_byte(PXIO_PORT->periph,PROTO_GET_SYNC);
+                PXIO_PORT->put_byte(PXIO_PORT->periph,PROTO_EOC);
 
+                //get_sync should be replied with, so check if that happens and
+                //all other bytes are discarded, hopefully those were not important
+                //(they may be caused by sending multiple syncs)
+                while (PXIO_PORT->char_available(PXIO_PORT->periph)) {
+                    unsigned char b = PXIO_PORT->get_byte(PXIO_PORT->periph);
+                    if (b == PROTO_INSYNC) {
+                        ret = 1;
+                        setToBootloaderMode= true;
+                        break;
+                    }
+                }
+            }
 
-        sys_time_usleep(50000);
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
-        count = 48;
-        while (PXIO_PORT->char_available(PXIO_PORT->periph)) {
-          hoer = PXIO_PORT->get_byte(PXIO_PORT->periph);
-          char tmp[3];
-          itoa(hoer,tmp,16);
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,count++);
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,':');
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,' ');
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,tmp[0]);
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,tmp[1]);
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
-          TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
+            if (setToBootloaderMode) {
+                //if successfully entered bootloader mode, clear any remaining bytes (which may have a function, but I did not check)
+                while (PXIO_PORT->char_available(PXIO_PORT->periph)) {PXIO_PORT->get_byte(PXIO_PORT->periph);}
+            }
+
+        } else {
+            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'E');
+            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
+            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
+            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'o');
+            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
+            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
+            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
         }
-
-
-
-
-        setToBootloaderMode = true;
-      }
-    } else {
-     unsigned char hoer = PXIO_PORT->get_byte(PXIO_PORT->periph);
-     TELEM2_PORT->put_byte(TELEM2_PORT->periph,hoer);
-   }
- }
-
- if (TELEM2_PORT->char_available(TELEM2_PORT->periph) && !setToBootloaderMode) {
-//setToBootloaderMode = true; // tmp
-  static struct IOPacket  dma_packet;
-
-  dma_packet.count_code = 0x40 + 0x01;
-  dma_packet.crc = 0;
-  dma_packet.page = PX4IO_PAGE_SETUP;
-  dma_packet.offset = PX4IO_P_SETUP_REBOOT_BL;
-  dma_packet.regs[0] = PX4IO_REBOOT_BL_MAGIC;
-
-  dma_packet.crc = crc_packet(&dma_packet);
-
-  struct IOPacket *pkt = &dma_packet;
-
-  uint8_t *p = (uint8_t *)pkt;
-
-  PXIO_PORT->put_byte(PXIO_PORT->periph,p[0]);
-  PXIO_PORT->put_byte(PXIO_PORT->periph,p[1]);
-  PXIO_PORT->put_byte(PXIO_PORT->periph,p[2]);
-  PXIO_PORT->put_byte(PXIO_PORT->periph,p[3]);
-  PXIO_PORT->put_byte(PXIO_PORT->periph,p[4]);
-  PXIO_PORT->put_byte(PXIO_PORT->periph,p[5]);
-
-  sys_time_usleep(5000); // this seems to be close to the minimum delay necessary to handle this packet
-  //the pixhawk IO chip should respond with:
-  // 0x00 ( PKT_CODE_SUCCESS )
-  // 0xe5
-  // 0x32
-  // 0x0a
-  //After that, the IO chips reboots into bootloader mode, in which it will stay for a short period
-  //The baudrate in bootloader mode ic changed to 115200 (normal operating baud is 1500000)
-
-
-
-
-
-
-  unsigned char hoer;
-  while (PXIO_PORT->char_available(PXIO_PORT->periph)) {
-    hoer = PXIO_PORT->get_byte(PXIO_PORT->periph);
-    if (hoer == PKT_CODE_SUCCESS) {
-
-      while (PXIO_PORT->char_available(PXIO_PORT->periph)) {
-        hoer = PXIO_PORT->get_byte(PXIO_PORT->periph);
-        char tmp[3];
-        itoa(hoer,tmp,16);
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'S');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'u');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'c');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'c');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'e');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'s');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'s');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,':');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,tmp[0]);
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,tmp[1]);
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
-      }
-    } else{
-      TELEM2_PORT->put_byte(TELEM2_PORT->periph,'E');
-      TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
-      TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
-      TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
-      TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
+    } else if(TELEM2_PORT->char_available(TELEM2_PORT->periph)) {
+        //already in bootloader mode, just directly relay data
+        unsigned char b = TELEM2_PORT->get_byte(TELEM2_PORT->periph);
+        PXIO_PORT->put_byte(PXIO_PORT->periph,b);
     }
-
-  }
-
-  uart_periph_set_baudrate(PXIO_PORT->periph,B115200);
-
-
-  int ret = 1;
-  /* look for the bootloader for 150 ms */
-  for (int i = 0; i < 15; i++) {
-
-    unsigned char count = 48;
-    //while (PXIO_PORT->char_available(PXIO_PORT->periph)) {
-    for (int j = 0 ; j<10; j++) {
-      if (PXIO_PORT->char_available(PXIO_PORT->periph)) {
-        hoer = PXIO_PORT->get_byte(PXIO_PORT->periph);
-        char tmp[3];
-        itoa(hoer,tmp,16);
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,i+48);
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'-');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,count++);
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,':');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,' ');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,tmp[0]);
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,tmp[1]);
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
-        TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
-      }
-    }
-
-
-    PXIO_PORT->put_byte(PXIO_PORT->periph,0x21);
-    PXIO_PORT->put_byte(PXIO_PORT->periph,0x20);
-
-    if (ret==0) {
-      setToBootloaderMode= true;
-      break;
-
-    } else {
-      sys_time_usleep(10000);
-    }
-  }
-
-  TELEM2_PORT->get_byte(TELEM2_PORT->periph); // tmp ignore input keyboard!
-
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'S');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'e');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'n');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'t');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,' ');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'e');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'b');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'o');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'o');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'t');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
-  TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
-
-
-} else if(TELEM2_PORT->char_available(TELEM2_PORT->periph)) {
- unsigned char hoer = TELEM2_PORT->get_byte(TELEM2_PORT->periph);
- PXIO_PORT->put_byte(PXIO_PORT->periph,hoer);
- TELEM2_PORT->put_byte(TELEM2_PORT->periph,hoer);
-}
 
 }
 
