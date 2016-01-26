@@ -38,7 +38,7 @@ PRINT_CONFIG_VAR(PXIO_UART)
 #define TELEM2_PORT   (&((TELEM2_UART).device))
 
 // weird that these below are not in protocol.h, which is from the firmware px4 repo
-//below is copied from qgroundcontrol:
+// below is copied from qgroundcontrol:
 #define PROTO_INSYNC            0x12   ///< 'in sync' byte sent before status
 #define PROTO_EOC               0x20   ///< end of command
 // Reply bytes
@@ -89,6 +89,16 @@ void px4ioflash_event(void) {
         PXIO_PORT->put_byte(PXIO_PORT->periph,p[3]);
         PXIO_PORT->put_byte(PXIO_PORT->periph,p[4]);
         PXIO_PORT->put_byte(PXIO_PORT->periph,p[5]);
+
+		// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'E');
+		// for (int i=0;i<6;i++) {
+		// 	unsigned char tmp[3];
+		// 	itoa(p[i],tmp,16);
+		// 	TELEM2_PORT->put_byte(TELEM2_PORT->periph,tmp[0]);
+		// 	TELEM2_PORT->put_byte(TELEM2_PORT->periph,tmp[1]);
+		// 	TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
+		// 	TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
+		// }
 
         sys_time_usleep(5000); // this seems to be close to the minimum delay necessary to process this packet at the IO side
         //the pixhawk IO chip should respond with:

@@ -195,16 +195,16 @@ class uploader(object):
                         self.port.close()
 
         def __send(self, c):
-                print("send " + binascii.hexlify(c))
+                #print("send " + binascii.hexlify(c))
                 self.port.write(c)
 
 
         def __recv(self, count=1):
                 c = self.port.read(count)
                 if len(c) < 1:
-                        print("Timeout")
+                        #print("Timeout")
                         raise RuntimeError("timeout waiting for data (%u bytes)" % count)
-                print("recv " + binascii.hexlify(c))
+                #print("recv " + binascii.hexlify(c))
                 return c
 
         def __recv_int(self):

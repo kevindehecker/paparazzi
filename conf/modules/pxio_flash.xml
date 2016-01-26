@@ -9,7 +9,7 @@
   </header>
   <init fun="px4ioflash_init()"/>
   <event fun="px4ioflash_event()"/>
-  <makefile>
+  <makefile target="ap">
     <raw>
         PXIO_UART ?= UART6
         PXIO_BAUD ?= 1500000

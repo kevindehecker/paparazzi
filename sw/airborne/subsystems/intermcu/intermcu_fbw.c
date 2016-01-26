@@ -30,6 +30,8 @@
 #include "mcu_periph/uart.h"
 #include "subsystems/datalink/pprz_transport.h"
 
+#include "libopencm3/cm3/scb.h"
+
 #if RADIO_CONTROL_NB_CHANNEL > 8
 #undef RADIO_CONTROL_NB_CHANNEL
 #define RADIO_CONTROL_NB_CHANNEL 8
@@ -99,12 +101,28 @@ static inline void intermcu_parse_msg(struct transport_rx *trans, void (*command
   trans->msg_received = FALSE;
 }
 
+static uint8_t rebootSequence[] = {0x41, 0xd7, 0x32,0x0a,0x46,0x39};
+static uint8_t hoer = 0;
 void InterMcuEvent(void (*frame_handler)(void))
 {
   /* Parse incoming bytes */
   if (intermcu_device->char_available(intermcu_device->periph)) {
     while (intermcu_device->char_available(intermcu_device->periph) && !intermcu_transport.trans_rx.msg_received) {
-      parse_pprz(&intermcu_transport, intermcu_device->get_byte(intermcu_device->periph));
+      unsigned char b = intermcu_device->get_byte(intermcu_device->periph);
+
+      //
+      if(b == rebootSequence[hoer]) {
+        hoer++;
+      }
+      else {
+        hoer = 0;
+      }
+
+      if (hoer >= 6) { // 6 = length of rebootSequence + 1
+        scb_reset_system();
+      }
+
+      parse_pprz(&intermcu_transport, b);
     }
 
     if (intermcu_transport.trans_rx.msg_received) {
