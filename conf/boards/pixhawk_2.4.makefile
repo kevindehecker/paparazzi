@@ -22,6 +22,7 @@ HARD_FLOAT=yes
 # default flash mode is the pixhawk bootloader
 # possibilities: DFU, SWD, pixhawk bootloader
 FLASH_MODE ?= PIXHAWK_BOOTLOADER
+PIXHAWK_BL_PORT ?= "/dev/serial/by-id/usb-3D_Robotics*,/dev/serial/by-id/pci-3D_Robotics*"
 $(TARGET).MAKEFILE = pixhawk
 
 #

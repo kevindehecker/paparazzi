@@ -195,14 +195,16 @@ class uploader(object):
                         self.port.close()
 
         def __send(self, c):
-#               print("send " + binascii.hexlify(c))
+                print("send " + binascii.hexlify(c))
                 self.port.write(c)
+
 
         def __recv(self, count=1):
                 c = self.port.read(count)
                 if len(c) < 1:
+                        print("Timeout")
                         raise RuntimeError("timeout waiting for data (%u bytes)" % count)
-#               print("recv " + binascii.hexlify(c))
+                print("recv " + binascii.hexlify(c))
                 return c
 
         def __recv_int(self):
@@ -213,6 +215,7 @@ class uploader(object):
         def __getSync(self):
                 self.port.flush()
                 c = bytes(self.__recv())
+
                 if c != self.INSYNC:
                         raise RuntimeError("unexpected %s instead of INSYNC" % c)
                 c = self.__recv()
@@ -237,13 +240,13 @@ class uploader(object):
                 try:
                     self.port.flush()
                     if (self.__recv() != self.INSYNC):
-                            #print("unexpected 0x%x instead of INSYNC" % ord(c))
+                            print("unexpected 0x%x instead of INSYNC" % ord(c))
                             return False;
                     c = self.__recv()
                     if (c == self.BAD_SILICON_REV):
                         raise NotImplementedError()
                     if (c != self.OK):
-                            #print("unexpected 0x%x instead of OK" % ord(c))
+                            print("unexpected 0x%x instead of OK" % ord(c))
                             return False
                     return True
 
@@ -586,7 +589,6 @@ try:
 
                             # and loop to the next port
                             continue
-
                     # port is open, try talking to it
                     try:
                             # identify the bootloader

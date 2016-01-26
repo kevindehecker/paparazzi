@@ -105,6 +105,7 @@
     <boards>
       <board name="px4fmu_.*"/>
       <board name="pixhawk_*"/>
+      <board name="pixhawkio_*"/>
     </boards>
   </mode>
   <mode name="JTAG (OpenOCD)">

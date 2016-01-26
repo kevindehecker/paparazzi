@@ -20,8 +20,9 @@ $(TARGET).LDSCRIPT=$(SRC_ARCH)/px4fmu_2.4.ld
 HARD_FLOAT=yes
 
 # default flash mode is via usb dfu bootloader
-# possibilities: DFU, SWD
-FLASH_MODE ?= SWD
+# possibilities: DFU, SWD, PIXHAWK_BOOTLOADER
+PIXHAWK_BL_PORT ?= "/dev/serial/by-id/usb-3D_Robotics*,/dev/serial/by-id/pci-3D_Robotics*"
+FLASH_MODE ?= PIXHAWK_BOOTLOADER
 
 #
 # default LED configuration
