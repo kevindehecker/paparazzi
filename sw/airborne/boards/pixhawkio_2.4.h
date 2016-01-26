@@ -3,9 +3,9 @@
 
 #define BOARD_PIXHAWKIO
 
-/* Pixhawk board (PX4FMUv2 has a 24MHz external clock and 168MHz internal. */
+/* Pixhawk board (PX4FIOv2 has a 24MHz external clock and 24MHz internal. */
 #define EXT_CLK 24000000
-#define AHB_CLK 168000000
+#define AHB_CLK 24000000
 
 
 /*

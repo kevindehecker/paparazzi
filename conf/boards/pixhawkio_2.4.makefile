@@ -16,7 +16,12 @@ $(TARGET).LDSCRIPT=$(SRC_ARCH)/pixhawkio_2.4.ld
 
 # default flash mode is via usb dfu bootloader
 # possibilities: DFU, SWD, PIXHAWK_BOOTLOADER
-PIXHAWK_BL_PORT ?= "/dev/serial/by-id/usb-Black_Sphere_Technologies_Black_Magic_Probe*02"
+#PIXHAWK_BL_PORT ?= "/dev/serial/by-id/usb-Black_Sphere_Technologies_Black_Magic_Probe*02"
+PIXHAWK_BL_PORT ?= "/dev/serial/by-id/usb-FTDI_TTL232R-3V3_FT906KBO-if00-port0"
+PIXHAWK_PROTOTYPE ?= "/home/houjebek/px4/Firmware/Images/px4io-v2.prototype"
+
+
+
 FLASH_MODE ?= PIXHAWK_BOOTLOADER
 $(TARGET).MAKEFILE = pixhawk
 
