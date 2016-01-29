@@ -33,6 +33,7 @@
 
     <subsystem name="intermcu"      type="uart">
       <configure name="INTERMCU_PORT" value="UART7"/>
+      <configure name="INTERMCU_BAUD" value="B230400"/>
     </subsystem>
   </firmware>
 
@@ -45,9 +46,10 @@
       <define name="RADIO_MODE" value="RADIO_GEAR"/>
     </subsystem> -->
 
-    <subsystem name="radio_control" type="spektrum">
+    <!-- <subsystem name="radio_control" type="spektrum">
       <define name="RADIO_CONTROL_SPEKTRUM_NO_SIGN" value="1"/>
-    </subsystem>
+    </subsystem> -->
+     <subsystem name="radio_control" type="datalink"/>
 
     <subsystem name="actuators"     type="pwm"/>
     <define name="RC_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe or to Autopilot on RC loss? -->
@@ -56,6 +58,7 @@
 
     <subsystem name="intermcu"     type="uart">
       <configure name="INTERMCU_PORT" value="UART2"/>
+      <configure name="INTERMCU_BAUD" value="B230400"/>
     </subsystem>
   </firmware>
 

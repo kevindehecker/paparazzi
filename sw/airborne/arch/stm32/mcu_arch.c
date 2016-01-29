@@ -88,7 +88,7 @@ const clock_scale_t hse_24mhz_3v3[CLOCK_3V3_END] = {
 
 void mcu_arch_init(void)
 {
-  //already done in pixhawk bootloader
+  //already done in pixhawk bootloader (so, is this really needed then?)
  #if defined PIXHAWK
    #if defined STM32F4
      SCB_VTOR = 0x08004000;
@@ -128,6 +128,9 @@ void mcu_arch_init(void)
 #if defined(STM32F4)
   PRINT_CONFIG_MSG("Using 24MHz external clock to PLL it to 168MHz.")
   rcc_clock_setup_hse_3v3(&hse_24mhz_3v3[CLOCK_3V3_168MHZ]);
+#elif defined(STM32F1)
+  rcc_clock_setup_in_hse_24mhz_out_24mhz();
+  //rcc_clock_setup_in_hse_24mhz_out_72mhz(); // This won't work..., since max ext crystal speed is 16MHz
 #endif
 #elif EXT_CLK == 25000000
 #if defined(STM32F4)
@@ -145,6 +148,11 @@ void mcu_arch_init(void)
 #ifndef RTOS_IS_CHIBIOS
   scb_set_priority_grouping(SCB_AIRCR_PRIGROUP_NOGROUP_SUB16);
 #endif
+
+
+//rcc_clock_setup_in_hsi_out_24mhz();
+//rcc_clock_setup_in_hse_8mhz_out_24mhz();
+//rcc_clock_setup_in_hse_24mhz_out_24mhz();
 
 }
 

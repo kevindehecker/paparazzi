@@ -12,7 +12,7 @@
   <makefile target="ap">
     <raw>
         PXIO_UART ?= UART6
-        PXIO_BAUD ?= 1500000
+        PXIO_BAUD ?= B230400
         PXIO_UART_LOWER=$(shell echo $(PXIO_UART) | tr A-Z a-z)
 
         TELEM2_UART ?= UART3

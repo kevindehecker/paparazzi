@@ -61,6 +61,7 @@ void px4ioflash_init(void) {
 }
 
 void px4ioflash_event(void) {
+	// setToBootloaderMode=true;
     if (PXIO_PORT->char_available(PXIO_PORT->periph)) {
         if (!setToBootloaderMode) {
             //ignore anything coming from IO if not in bootloader mode (which should be nothing)
@@ -74,6 +75,10 @@ void px4ioflash_event(void) {
     if (TELEM2_PORT->char_available(TELEM2_PORT->periph) && !setToBootloaderMode) {
         //data was received on the pc uart, so
         //send the reboot to bootloader command:
+
+        //#define progdieshit
+
+        #ifndef progdieshit
         static struct IOPacket  dma_packet;
         dma_packet.count_code = 0x40 + 0x01;
         dma_packet.crc = 0;
@@ -131,9 +136,21 @@ void px4ioflash_event(void) {
                 TELEM2_PORT->put_byte(TELEM2_PORT->periph,'b');
                 break;
             }
+	        // TELEM2_PORT->put_byte(TELEM2_PORT->periph,'S');
+	        // TELEM2_PORT->put_byte(TELEM2_PORT->periph,state+48);
+	        // TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
+	        // TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
         }
-
+        #else
+		int state = 4;
+		#endif
         if (state == 4) {
+        	#ifndef progdieshit
+        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'S');
+        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'6');
+        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
+        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
+        	#endif
             uart_periph_set_baudrate(PXIO_PORT->periph,B115200);
             /* look for the bootloader for 150 ms */
             int ret = 0;
@@ -154,11 +171,18 @@ void px4ioflash_event(void) {
                     if (b == PROTO_INSYNC) {
                         ret = 1;
                         setToBootloaderMode= true;
+
+						#ifndef progdieshit
+        				// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'S');
+			        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'7');
+			        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
+			        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
+			        	#endif
+
                         break;
                     }
                 }
             }
-
             if (setToBootloaderMode) {
                 //if successfully entered bootloader mode, clear any remaining bytes (which may have a function, but I did not check)
                 while (PXIO_PORT->char_available(PXIO_PORT->periph)) {PXIO_PORT->get_byte(PXIO_PORT->periph);}
@@ -166,17 +190,18 @@ void px4ioflash_event(void) {
 
         } else {
             TELEM2_PORT->put_byte(TELEM2_PORT->periph,'E');
-            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
-            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
-            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'o');
-            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
-            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
-            TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
+            // TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
+            // TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
+            // TELEM2_PORT->put_byte(TELEM2_PORT->periph,'o');
+            // TELEM2_PORT->put_byte(TELEM2_PORT->periph,'r');
+            // TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
+            // TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
         }
     } else if(TELEM2_PORT->char_available(TELEM2_PORT->periph)) {
         //already in bootloader mode, just directly relay data
         unsigned char b = TELEM2_PORT->get_byte(TELEM2_PORT->periph);
         PXIO_PORT->put_byte(PXIO_PORT->periph,b);
+        // TELEM2_PORT->put_byte(TELEM2_PORT->periph,b);
     }
 
 }

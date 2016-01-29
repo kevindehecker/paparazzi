@@ -30,11 +30,18 @@
 #include "mcu_periph/uart.h"
 #include "subsystems/datalink/pprz_transport.h"
 
+
 #ifdef BOARD_PIXHAWKIO
 #include "libopencm3/cm3/scb.h"
 static uint8_t rebootSequence[] = {0x41, 0xd7, 0x32,0x0a,0x46,0x39};
 static uint8_t rebootSequenceCount = 0;
+#include "led.h"
 #endif
+
+PRINT_CONFIG_VAR ( INTERMCU_PORT)
+PRINT_CONFIG_VAR ( UART2_BAUD)
+
+
 
 #if RADIO_CONTROL_NB_CHANNEL > 8
 #undef RADIO_CONTROL_NB_CHANNEL
@@ -107,12 +114,15 @@ static inline void intermcu_parse_msg(struct transport_rx *trans, void (*command
 
 void InterMcuEvent(void (*frame_handler)(void))
 {
+
   /* Parse incoming bytes */
   if (intermcu_device->char_available(intermcu_device->periph)) {
     while (intermcu_device->char_available(intermcu_device->periph) && !intermcu_transport.trans_rx.msg_received) {
       unsigned char b = intermcu_device->get_byte(intermcu_device->periph);
 
 #ifdef BOARD_PIXHAWKIO
+        // LED_OFF(1);
+
       if(b == rebootSequence[rebootSequenceCount]) {
         rebootSequenceCount++;
       }
@@ -121,7 +131,19 @@ void InterMcuEvent(void (*frame_handler)(void))
       }
 
       if (rebootSequenceCount >= 6) { // 6 = length of rebootSequence + 1
-        scb_reset_system();
+        rebootSequenceCount=0; // should not be necessary...
+
+        //send some magic back
+        //this is the same as the Pixhawk IO code would sends
+        intermcu_device->put_byte(intermcu_device->periph,0x00);
+        intermcu_device->put_byte(intermcu_device->periph,0xe5);
+        intermcu_device->put_byte(intermcu_device->periph,0x32);
+        intermcu_device->put_byte(intermcu_device->periph,0x0a);
+        intermcu_device->put_byte(intermcu_device->periph,0x66); // dummy byte, seems to be necessary otherwise one byte is missing at the fmu side...
+
+        while (((struct uart_periph *) (intermcu_device->periph))->tx_running) {}
+
+         scb_reset_system();
       }
 #endif
       parse_pprz(&intermcu_transport, b);
