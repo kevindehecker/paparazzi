@@ -121,7 +121,7 @@ void InterMcuEvent(void (*frame_handler)(void))
       unsigned char b = intermcu_device->get_byte(intermcu_device->periph);
 
 #ifdef BOARD_PIXHAWKIO
-        // LED_OFF(1);
+      LED_ON(1);
 
       if(b == rebootSequence[rebootSequenceCount]) {
         rebootSequenceCount++;
@@ -141,8 +141,9 @@ void InterMcuEvent(void (*frame_handler)(void))
         intermcu_device->put_byte(intermcu_device->periph,0x0a);
         intermcu_device->put_byte(intermcu_device->periph,0x66); // dummy byte, seems to be necessary otherwise one byte is missing at the fmu side...
 
-        while (((struct uart_periph *) (intermcu_device->periph))->tx_running) {}
+        while (((struct uart_periph *) (intermcu_device->periph))->tx_running) {LED_TOGGLE(1);} // do NOT remove the led toggle, as it will break stuff
 
+        LED_OFF(1);
          scb_reset_system();
       }
 #endif

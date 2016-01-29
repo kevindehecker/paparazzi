@@ -76,6 +76,20 @@ void px4ioflash_event(void) {
         //data was received on the pc uart, so
         //send the reboot to bootloader command:
 
+		/*
+    	* The progdieshit define is very usefull, if for whatever reason the (normal, not bootloader) firmware on the IO chip became disfunct.
+    	* In that case:
+    	* 1. enable this define
+    	* 2. build and upload  the fmu f4 chip (ap target in pprz center)
+    	* 3. build the io code, and convert the firmware using the following command:
+    	*       /home/houjebek/paparazzi/sw/tools/pixhawk/px_mkfw.py --prototype "/home/houjebek/px4/Firmware/Images/px4io-v2.prototype" --image /home/houjebek/paparazzi/var/aircrafts/Iris/fbw/fbw.bin > /home/houjebek/paparazzi/var/aircrafts/Iris/fbw/fbw.px4
+    	* 4. Start the following command:
+    	*		 /home/houjebek/paparazzi/sw/tools/pixhawk/px_uploader.py --port "/dev/serial/by-id/usb-FTDI_TTL232R-3V3_FT906KBO-if00-port0" /home/houjebek/paparazzi/var/aircrafts/Iris/fbw/fbw.px4
+    	* 5a. Either, boot the Pixhawk (reconnect usb) holding the IO reset button until the FMU led stops blinking fast (i.e. exits its own bootloader)
+    	* 5b  Or, press the IO reset button on the pixhawk
+    	* 6. Watch the output of the command of step 4, it should recognize the IO bootloader and start flashing. If not try repeating step 5a.
+    	* 7. Don forget to disable the define again :)
+    	*/
         //#define progdieshit
 
         #ifndef progdieshit
@@ -155,7 +169,6 @@ void px4ioflash_event(void) {
             /* look for the bootloader for 150 ms */
             int ret = 0;
             for (int i = 0; i < 15 && !ret ; i++) {
-                //unsigned char count = 48;
                 sys_time_usleep(10000);
 
 
@@ -163,15 +176,30 @@ void px4ioflash_event(void) {
                 PXIO_PORT->put_byte(PXIO_PORT->periph,PROTO_GET_SYNC);
                 PXIO_PORT->put_byte(PXIO_PORT->periph,PROTO_EOC);
 
+
+			#ifndef progdieshit
+    				// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'S');
+		      //   	TELEM2_PORT->put_byte(TELEM2_PORT->periph,'6');
+		      //   	TELEM2_PORT->put_byte(TELEM2_PORT->periph,'a');
+		      //   	TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
+		      //   	TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
+		        	#endif
+
                 //get_sync should be replied with, so check if that happens and
                 //all other bytes are discarded, hopefully those were not important
                 //(they may be caused by sending multiple syncs)
                 while (PXIO_PORT->char_available(PXIO_PORT->periph)) {
                     unsigned char b = PXIO_PORT->get_byte(PXIO_PORT->periph);
-                    if (b == PROTO_INSYNC) {
-                        ret = 1;
-                        setToBootloaderMode= true;
 
+					#ifndef progdieshit
+    				// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'S');
+		      //   	TELEM2_PORT->put_byte(TELEM2_PORT->periph,'6');
+		      //   	TELEM2_PORT->put_byte(TELEM2_PORT->periph,'b');
+		      //   	TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
+		      //   	TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
+		        	#endif
+
+                    if (b == PROTO_INSYNC) {
 						#ifndef progdieshit
         				// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'S');
 			        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'7');
@@ -179,14 +207,31 @@ void px4ioflash_event(void) {
 			        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
 			        	#endif
 
+						setToBootloaderMode= true;
+						ret = 1;
                         break;
                     }
                 }
             }
             if (setToBootloaderMode) {
+
+						#ifndef progdieshit
+        				// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'S');
+			        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'8');
+			        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
+			        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
+			        	#endif
+
                 //if successfully entered bootloader mode, clear any remaining bytes (which may have a function, but I did not check)
                 while (PXIO_PORT->char_available(PXIO_PORT->periph)) {PXIO_PORT->get_byte(PXIO_PORT->periph);}
             }
+
+            						#ifndef progdieshit
+        				// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'S');
+			        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'9');
+			        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
+			        	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
+			        	#endif
 
         } else {
             TELEM2_PORT->put_byte(TELEM2_PORT->periph,'E');
