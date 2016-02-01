@@ -30,18 +30,15 @@
 #include "mcu_periph/uart.h"
 #include "subsystems/datalink/pprz_transport.h"
 
-
 #ifdef BOARD_PIXHAWKIO
 #include "libopencm3/cm3/scb.h"
-static uint8_t rebootSequence[] = {0x41, 0xd7, 0x32,0x0a,0x46,0x39};
-static uint8_t rebootSequenceCount = 0;
 #include "led.h"
+#include "mcu_periph/sys_time.h"
+static uint8_t px4RebootSequence[] = {0x41, 0xd7, 0x32,0x0a,0x46,0x39};
+static uint8_t px4RebootSequenceCount = 0;
+static bool_t px4RebootTimeout = false;
+tid_t px4bl_tid; ///< id for time out of the px4 bootloader reset
 #endif
-
-PRINT_CONFIG_VAR ( INTERMCU_PORT)
-PRINT_CONFIG_VAR ( UART2_BAUD)
-
-
 
 #if RADIO_CONTROL_NB_CHANNEL > 8
 #undef RADIO_CONTROL_NB_CHANNEL
@@ -56,10 +53,15 @@ static struct pprz_transport intermcu_transport;
 struct intermcu_t inter_mcu;
 pprz_t intermcu_commands[COMMANDS_NB];
 static inline void intermcu_parse_msg(struct transport_rx *trans, void (*commands_frame_handler)(void));
+static inline void checkPx4RebootCommand (unsigned char b);
 
 void intermcu_init(void)
 {
   pprz_transport_init(&intermcu_transport);
+  #ifdef BOARD_PIXHAWKIO
+  px4bl_tid = sys_time_register_timer( 20.0, NULL);
+  #endif
+
 }
 
 void intermcu_periodic(void)
@@ -119,33 +121,8 @@ void InterMcuEvent(void (*frame_handler)(void))
   if (intermcu_device->char_available(intermcu_device->periph)) {
     while (intermcu_device->char_available(intermcu_device->periph) && !intermcu_transport.trans_rx.msg_received) {
       unsigned char b = intermcu_device->get_byte(intermcu_device->periph);
-
 #ifdef BOARD_PIXHAWKIO
-      LED_ON(1);
-
-      if(b == rebootSequence[rebootSequenceCount]) {
-        rebootSequenceCount++;
-      }
-      else {
-        rebootSequenceCount = 0;
-      }
-
-      if (rebootSequenceCount >= 6) { // 6 = length of rebootSequence + 1
-        rebootSequenceCount=0; // should not be necessary...
-
-        //send some magic back
-        //this is the same as the Pixhawk IO code would sends
-        intermcu_device->put_byte(intermcu_device->periph,0x00);
-        intermcu_device->put_byte(intermcu_device->periph,0xe5);
-        intermcu_device->put_byte(intermcu_device->periph,0x32);
-        intermcu_device->put_byte(intermcu_device->periph,0x0a);
-        intermcu_device->put_byte(intermcu_device->periph,0x66); // dummy byte, seems to be necessary otherwise one byte is missing at the fmu side...
-
-        while (((struct uart_periph *) (intermcu_device->periph))->tx_running) {LED_TOGGLE(1);} // do NOT remove the led toggle, as it will break stuff
-
-        LED_OFF(1);
-         scb_reset_system();
-      }
+    checkPx4RebootCommand(b);
 #endif
       parse_pprz(&intermcu_transport, b);
     }
@@ -155,3 +132,42 @@ void InterMcuEvent(void (*frame_handler)(void))
     }
   }
 }
+
+static inline void checkPx4RebootCommand (unsigned char b) {
+  if (!px4RebootTimeout) {
+
+
+    if (sys_time_check_and_ack_timer(px4bl_tid)) {
+      //time out the possibility to reboot to the px4 bootloader, to prevent unwanted restarts during flight
+      px4RebootTimeout = true;
+      sys_time_cancel_timer(px4bl_tid);
+      return;
+    }
+
+    LED_ON(1);
+
+    if(b == px4RebootSequence[px4RebootSequenceCount]) {
+      px4RebootSequenceCount++;
+    }
+    else {
+      px4RebootSequenceCount = 0;
+    }
+
+      if (px4RebootSequenceCount >= 6) { // 6 = length of rebootSequence + 1
+        px4RebootSequenceCount=0; // should not be necessary...
+
+        //send some magic back
+        //this is the same as the Pixhawk IO code would send
+        intermcu_device->put_byte(intermcu_device->periph,0x00);
+        intermcu_device->put_byte(intermcu_device->periph,0xe5);
+        intermcu_device->put_byte(intermcu_device->periph,0x32);
+        intermcu_device->put_byte(intermcu_device->periph,0x0a);
+        intermcu_device->put_byte(intermcu_device->periph,0x66); // dummy byte, seems to be necessary otherwise one byte is missing at the fmu side...
+
+        while (((struct uart_periph *) (intermcu_device->periph))->tx_running) {LED_TOGGLE(1);} // tx_running is volatile now, so LED_TOGGLE not necessary anymore
+
+        LED_OFF(1);
+        scb_reset_system();
+      }
+    }
+  }
