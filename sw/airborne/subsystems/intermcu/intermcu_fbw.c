@@ -25,10 +25,10 @@
  */
 
 #include "intermcu_fbw.h"
-#include "intermcu_msg.h"
+#include "pprzlink/intermcu_msg.h"
 #include "subsystems/radio_control.h"
 #include "mcu_periph/uart.h"
-#include "subsystems/datalink/pprz_transport.h"
+#include "pprzlink/pprz_transport.h"
 
 #ifdef BOARD_PIXHAWKIO
 #include "libopencm3/cm3/scb.h"
