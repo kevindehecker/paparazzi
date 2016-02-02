@@ -47,7 +47,8 @@
 #include "firmwares/rotorcraft/main_fbw.h"
 #include "firmwares/rotorcraft/autopilot_rc_helpers.h"
 
-//#include "generated/modules.h"
+#define MODULES_C
+#include "generated/modules.h"
 
 /** Fly by wire modes */
 typedef enum {FBW_MODE_MANUAL = 0, FBW_MODE_AUTO = 1, FBW_MODE_FAILSAFE = 2} fbw_mode_enum;
@@ -59,7 +60,7 @@ fbw_mode_enum fbw_mode;
 //PRINT_CONFIG_VAR(MODULES_FREQUENCY)
 
 tid_t main_periodic_tid; ///< id for main_periodic() timer
-//tid_t modules_tid;     ///< id for modules_periodic_task() timer
+tid_t modules_tid;     ///< id for modules_periodic_task() timer
 tid_t radio_control_tid; ///< id for radio_control_periodic_task() timer
 tid_t electrical_tid;    ///< id for electrical_periodic() timer
 tid_t telemetry_tid;     ///< id for telemetry_periodic() timer
@@ -109,8 +110,7 @@ STATIC_INLINE void main_init(void)
 
   radio_control_init();
 
-  // TODO
-  //modules_init();
+  modules_init();
 
   mcu_int_enable();
 
@@ -118,7 +118,7 @@ STATIC_INLINE void main_init(void)
 
   // register the timers for the periodic functions
   main_periodic_tid = sys_time_register_timer((1. / PERIODIC_FREQUENCY), NULL);
-//  modules_tid = sys_time_register_timer(1. / MODULES_FREQUENCY, NULL);
+  modules_tid = sys_time_register_timer(1. / MODULES_FREQUENCY, NULL);
   radio_control_tid = sys_time_register_timer((1. / 60.), NULL);
   electrical_tid = sys_time_register_timer(0.1, NULL);
   telemetry_tid = sys_time_register_timer((1. / 20.), NULL);
@@ -133,10 +133,9 @@ STATIC_INLINE void handle_periodic_tasks(void)
   if (sys_time_check_and_ack_timer(main_periodic_tid)) {
     main_periodic();
   }
-  //if (sys_time_check_and_ack_timer(modules_tid)) {
-  // TODO
-  //modules_periodic_task();
-  //}
+  if (sys_time_check_and_ack_timer(modules_tid)) {
+    modules_periodic_task();
+  }
   if (sys_time_check_and_ack_timer(radio_control_tid)) {
     radio_control_periodic_task();
   }
@@ -252,6 +251,6 @@ STATIC_INLINE void main_event(void)
   // InterMCU
   InterMcuEvent(autopilot_on_ap_command);
 
-  // TODO Modules
-  //modules_event_task();
+  //Modules
+  modules_event_task();
 }
