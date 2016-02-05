@@ -45,13 +45,12 @@
  * UART
 */
 
-// fmu debug
+// fmu debug / spektrum receiver (only rx)
 #define UART1_GPIO_AF 0
 #define UART1_GPIO_PORT_RX GPIOA
 #define UART1_GPIO_RX GPIO10
 #define UART1_GPIO_PORT_TX GPIOA
 #define UART1_GPIO_TX GPIO9
-
 // intermcu fmu
 #define UART2_GPIO_AF 0
 #define UART2_GPIO_PORT_RX GPIOA
@@ -59,21 +58,14 @@
 #define UART2_GPIO_PORT_TX GPIOA
 #define UART2_GPIO_TX GPIO2
 
-#if USE_ADC_1
-#define AD1_1_CHANNEL 13
-#define ADC_1 AD1_1
-#define ADC_1_GPIO_PORT GPIOC
-#define ADC_1_GPIO_PIN GPIO3
-#endif
 
 /*
  * Spektrum
  */
 /* The line that is pulled low at power up to initiate the bind process */
-/* GPIO_EXT1 on PX4FMU */
-
-#define SPEKTRUM_BIND_PIN_PORT GPIOC
-#define SPEKTRUM_BIND_PIN GPIO13
+//The stm32f1c8 is a medium density device that only has 4 timers. Warning: pprz does not warn against using timer>4!
+#define SPEKTRUM_POWER_PIN_PORT GPIOC
+#define SPEKTRUM_POWER_PIN GPIO13
 
 #define SPEKTRUM_UART1_RCC RCC_USART1
 #define SPEKTRUM_UART1_BANK GPIOA
@@ -83,52 +75,42 @@
 #define SPEKTRUM_UART1_ISR usart1_isr
 #define SPEKTRUM_UART1_DEV USART1
 
+#if USE_ADC_1
+#define AD1_1_CHANNEL 13
+#define ADC_1 AD1_1
+#define ADC_1_GPIO_PORT GPIOC
+#define ADC_1_GPIO_PIN GPIO3
+#endif
+
+
 /*
  * PWM
  *
  */
+//sevo outputs on px4io f1:
+//chn:           1   2   3   4   5   6   7   8
+//pin:           A0  A1  B8  B9  A6  A7  B0  B1
+//timer/channel: 2/1 2/2 4/3 4/4 3/1 3/2 3/3 3/4
+#define PWM_USE_TIM2 1
 #define PWM_USE_TIM3 1
-#define PWM_USE_TIM5 1
+//#define PWM_USE_TIM4 1 // spektrum also uses tim4
 
 #define USE_PWM1 1
 #define USE_PWM2 1
-#define USE_PWM3 1
-#define USE_PWM4 1
-
-#if DUAL_PWM_ON
-#define DUAL_PWM_USE_TIM5 1
-
-#define USE_DUAL_PWM5 1
-#define USE_DUAL_PWM6 1
-#else
+//#define USE_PWM3 1
+//#define USE_PWM4 1
 #define USE_PWM5 1
 #define USE_PWM6 1
-#endif
-
-
-
-#if USE_SERVOS_7AND8
-#if USE_I2C1
-#error "You cannot USE_SERVOS_7AND8 and USE_I2C1 at the same time"
-#else
-#define ACTUATORS_PWM_NB 8
 #define USE_PWM7 1
 #define USE_PWM8 1
-#define PWM_USE_TIM4 1
-#endif
-#else
-#define ACTUATORS_PWM_NB 6
-#endif
-
-// Servo numbering on LisaM silkscreen/docs starts with 1
 
 // PWM_SERVO_x is the index of the servo in the actuators_pwm_values array
 #if USE_PWM1
 #define PWM_SERVO_1 0
-#define PWM_SERVO_1_TIMER TIM3
-#define PWM_SERVO_1_GPIO GPIOC
-#define PWM_SERVO_1_PIN GPIO6
-#define PWM_SERVO_1_AF AFIO_MAPR_TIM3_REMAP_FULL_REMAP
+#define PWM_SERVO_1_TIMER TIM2
+#define PWM_SERVO_1_GPIO GPIOA
+#define PWM_SERVO_1_PIN GPIO0
+#define PWM_SERVO_1_AF 0
 #define PWM_SERVO_1_OC TIM_OC1
 #define PWM_SERVO_1_OC_BIT (1<<0)
 #else
@@ -137,10 +119,10 @@
 
 #if USE_PWM2
 #define PWM_SERVO_2 1
-#define PWM_SERVO_2_TIMER TIM3
-#define PWM_SERVO_2_GPIO GPIOC
-#define PWM_SERVO_2_PIN GPIO7
-#define PWM_SERVO_2_AF AFIO_MAPR_TIM3_REMAP_FULL_REMAP
+#define PWM_SERVO_2_TIMER TIM2
+#define PWM_SERVO_2_GPIO GPIOA
+#define PWM_SERVO_2_PIN GPIO1
+#define PWM_SERVO_2_AF 0
 #define PWM_SERVO_2_OC TIM_OC2
 #define PWM_SERVO_2_OC_BIT (1<<1)
 #else
@@ -149,10 +131,10 @@
 
 #if USE_PWM3
 #define PWM_SERVO_3 2
-#define PWM_SERVO_3_TIMER TIM3
-#define PWM_SERVO_3_GPIO GPIOC
+#define PWM_SERVO_3_TIMER TIM4
+#define PWM_SERVO_3_GPIO GPIOB
 #define PWM_SERVO_3_PIN GPIO8
-#define PWM_SERVO_3_AF AFIO_MAPR_TIM3_REMAP_FULL_REMAP
+#define PWM_SERVO_3_AF 0
 #define PWM_SERVO_3_OC TIM_OC3
 #define PWM_SERVO_3_OC_BIT (1<<2)
 #else
@@ -161,10 +143,10 @@
 
 #if USE_PWM4
 #define PWM_SERVO_4 3
-#define PWM_SERVO_4_TIMER TIM3
-#define PWM_SERVO_4_GPIO GPIOC
+#define PWM_SERVO_4_TIMER TIM4
+#define PWM_SERVO_4_GPIO GPIOB
 #define PWM_SERVO_4_PIN GPIO9
-#define PWM_SERVO_4_AF AFIO_MAPR_TIM3_REMAP_FULL_REMAP
+#define PWM_SERVO_4_AF 0
 #define PWM_SERVO_4_OC TIM_OC4
 #define PWM_SERVO_4_OC_BIT (1<<3)
 #else
@@ -173,23 +155,11 @@
 
 #if USE_PWM5
 #define PWM_SERVO_5 4
-#define PWM_SERVO_5_TIMER TIM5
+#define PWM_SERVO_5_TIMER TIM3
 #define PWM_SERVO_5_GPIO GPIOA
-#define PWM_SERVO_5_PIN GPIO0
+#define PWM_SERVO_5_PIN GPIO6
 #define PWM_SERVO_5_AF 0
 #define PWM_SERVO_5_OC TIM_OC1
-#define PWM_SERVO_5_OC_BIT (1<<0)
-#elif USE_DUAL_PWM5
-#define DUAL_PWM_SERVO_5 4
-
-#define DUAL_PWM_SERVO_5_P1 0
-#define DUAL_PWM_SERVO_5_P2 1
-
-#define DUAL_PWM_SERVO_5_TIMER TIM5
-#define DUAL_PWM_SERVO_5_GPIO GPIOA
-#define DUAL_PWM_SERVO_5_PIN GPIO0
-#define DUAL_PWM_SERVO_5_AF 0
-#define DUAL_PWM_SERVO_5_OC TIM_OC1
 #define PWM_SERVO_5_OC_BIT (1<<0)
 #else
 #define PWM_SERVO_5_OC_BIT 0
@@ -197,63 +167,46 @@
 
 #if USE_PWM6
 #define PWM_SERVO_6 5
-#define PWM_SERVO_6_TIMER TIM5
+#define PWM_SERVO_6_TIMER TIM3
 #define PWM_SERVO_6_GPIO GPIOA
-#define PWM_SERVO_6_PIN GPIO1
+#define PWM_SERVO_6_PIN GPIO7
 #define PWM_SERVO_6_AF 0
 #define PWM_SERVO_6_OC TIM_OC2
-#define PWM_SERVO_6_OC_BIT (1<<1)
-#elif USE_DUAL_PWM6
-#define DUAL_PWM_SERVO_6 5
-
-#define DUAL_PWM_SERVO_6_P1 0
-#define DUAL_PWM_SERVO_6_P2 1
-
-#define DUAL_PWM_SERVO_6_TIMER TIM5
-#define DUAL_PWM_SERVO_6_GPIO GPIOA
-#define DUAL_PWM_SERVO_6_PIN GPIO1
-#define DUAL_PWM_SERVO_6_AF 0
-#define DUAL_PWM_SERVO_6_OC TIM_OC2
 #define PWM_SERVO_6_OC_BIT (1<<1)
 #else
 #define PWM_SERVO_6_OC_BIT 0
 #endif
 
-
-
-
-
-
 #if USE_PWM7
 #define PWM_SERVO_7 6
-#define PWM_SERVO_7_TIMER TIM4
+#define PWM_SERVO_7_TIMER TIM3
 #define PWM_SERVO_7_GPIO GPIOB
-#define PWM_SERVO_7_PIN GPIO6
+#define PWM_SERVO_7_PIN GPIO0
 #define PWM_SERVO_7_AF 0
-#define PWM_SERVO_7_OC TIM_OC1
-#define PWM_SERVO_7_OC_BIT (1<<0)
+#define PWM_SERVO_7_OC TIM_OC3
+#define PWM_SERVO_7_OC_BIT (1<<2)
 #else
 #define PWM_SERVO_7_OC_BIT 0
 #endif
 
 #if USE_PWM8
 #define PWM_SERVO_8 7
-#define PWM_SERVO_8_TIMER TIM4
+#define PWM_SERVO_8_TIMER TIM3
 #define PWM_SERVO_8_GPIO GPIOB
-#define PWM_SERVO_8_PIN GPIO7
+#define PWM_SERVO_8_PIN GPIO1
 #define PWM_SERVO_8_AF 0
-#define PWM_SERVO_8_OC TIM_OC2
-#define PWM_SERVO_8_OC_BIT (1<<1)
+#define PWM_SERVO_8_OC TIM_OC4
+#define PWM_SERVO_8_OC_BIT (1<<3)
 #else
 #define PWM_SERVO_8_OC_BIT 0
 #endif
 
-/* servos 1-4 on TIM3 */
-#define PWM_TIM3_CHAN_MASK (PWM_SERVO_1_OC_BIT|PWM_SERVO_2_OC_BIT|PWM_SERVO_3_OC_BIT|PWM_SERVO_4_OC_BIT)
-/* servos 5-6 on TIM5 */
-#define PWM_TIM5_CHAN_MASK (PWM_SERVO_5_OC_BIT|PWM_SERVO_6_OC_BIT)
-/* servos 7-8 on TIM4 if USE_SERVOS_7AND8 */
-#define PWM_TIM4_CHAN_MASK (PWM_SERVO_7_OC_BIT|PWM_SERVO_8_OC_BIT)
+/* servos 1-2 on TIM2 */
+#define PWM_TIM2_CHAN_MASK (PWM_SERVO_1_OC_BIT|PWM_SERVO_2_OC_BIT)
+/* servos 3-4 on TIM4 */
+//#define PWM_TIM4_CHAN_MASK (PWM_SERVO_3_OC_BIT|PWM_SERVO_4_OC_BIT)
+/* servos 5-8 on TIM3 */
+#define PWM_TIM3_CHAN_MASK (PWM_SERVO_5_OC_BIT|PWM_SERVO_6_OC_BIT|PWM_SERVO_7_OC_BIT|PWM_SERVO_8_OC_BIT)
 
 /* Default actuators driver */
 #define DEFAULT_ACTUATORS "subsystems/actuators/actuators_pwm.h"

@@ -24,7 +24,34 @@
  */
 
 #include "modules/spektrum_soft_bind/spektrum_soft_bind_fbw.h"
+#include "subsystems/intermcu/intermcu_fbw.h"
+#include "mcu.h"
+#include "subsystems/radio_control.h"
+#include "mcu_periph/sys_time_arch.h"
 
-void spektrum_soft_bind_init() {}
+#include "led.h"
+#include "mcu_periph/gpio.h"
+
+void spektrum_soft_bind_init(void) {
+    gpio_setup_output(SPEKTRUM_POWER_PIN_PORT, SPEKTRUM_POWER_PIN);
+    gpio_set(SPEKTRUM_POWER_PIN_PORT, SPEKTRUM_POWER_PIN);
+    //radio_control_impl_init();
 
 
+}
+
+void received_spektrum_soft_bind(void) {
+
+    //power cycle the spektrum
+    LED_OFF(1);    
+    gpio_clear(SPEKTRUM_POWER_PIN_PORT, SPEKTRUM_POWER_PIN);
+    sys_time_usleep(100000);
+    gpio_set(SPEKTRUM_POWER_PIN_PORT, SPEKTRUM_POWER_PIN);
+    LED_ON(1);
+
+    //put to bind mode
+    RADIO_CONTROL_BIND_IMPL_FUNC();    //basically  = radio_control_spektrum_try_bind()
+
+    SpektrumUartInit();
+
+}

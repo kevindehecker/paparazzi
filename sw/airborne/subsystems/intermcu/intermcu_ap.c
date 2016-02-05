@@ -56,14 +56,26 @@ void intermcu_periodic(void)
   }
 }
 
-void intermcu_set_actuators(pprz_t *command_values, uint8_t ap_mode __attribute__((unused)))
-{
-  pprz_msg_send_IMCU_COMMANDS(&(intermcu_transport.trans_tx), intermcu_device,
-                              INTERMCU_AP, 0, COMMANDS_NB, command_values); //TODO: Fix status
+static bool_t disable_comm;
+void disable_inter_comm(bool_t value) {
+    disable_comm = value;
 }
 
-static inline void intermcu_parse_msg(struct transport_rx *trans, void (*rc_frame_handler)(void))
-{
+void intermcu_set_actuators(pprz_t *command_values, uint8_t ap_mode __attribute__((unused))) {
+    if (!disable_comm) {
+        pprz_msg_send_IMCU_COMMANDS(&(intermcu_transport.trans_tx), intermcu_device,
+                                    INTERMCU_AP, 0, COMMANDS_NB, command_values); //TODO: Fix status
+    }
+}
+
+void intermcu_send_spektrum_bind(void) {
+    if (!disable_comm){
+        pprz_msg_send_IMCU_SPEKTRUM_SOFT_BIND(&(intermcu_transport.trans_tx), intermcu_device, INTERMCU_AP);
+    }
+}
+
+
+static inline void intermcu_parse_msg(struct transport_rx *trans, void (*rc_frame_handler)(void)) {
   /* Parse the Inter MCU message */
   uint8_t msg_id = trans->payload[1];
   switch (msg_id) {
@@ -90,16 +102,17 @@ static inline void intermcu_parse_msg(struct transport_rx *trans, void (*rc_fram
   trans->msg_received = FALSE;
 }
 
-void RadioControlEvent(void (*frame_handler)(void))
-{
-  /* Parse incoming bytes */
-  if (intermcu_device->char_available(intermcu_device->periph)) {
-    while (intermcu_device->char_available(intermcu_device->periph) && !intermcu_transport.trans_rx.msg_received) {
-      parse_pprz(&intermcu_transport, intermcu_device->get_byte(intermcu_device->periph));
-    }
+void RadioControlEvent(void (*frame_handler)(void)) {
+    if (!disable_comm){
+        /* Parse incoming bytes */
+        if (intermcu_device->char_available(intermcu_device->periph)) {
+            while (intermcu_device->char_available(intermcu_device->periph) && !intermcu_transport.trans_rx.msg_received) {
+                parse_pprz(&intermcu_transport, intermcu_device->get_byte(intermcu_device->periph));
+            }
 
-    if (intermcu_transport.trans_rx.msg_received) {
-      intermcu_parse_msg(&(intermcu_transport.trans_rx), frame_handler);
+            if (intermcu_transport.trans_rx.msg_received) {
+                intermcu_parse_msg(&(intermcu_transport.trans_rx), frame_handler);
+            }
+        }
     }
-  }
 }

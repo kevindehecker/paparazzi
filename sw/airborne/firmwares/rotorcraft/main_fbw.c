@@ -68,22 +68,7 @@ tid_t telemetry_tid;     ///< id for telemetry_periodic() timer
 #ifndef SITL
 int main(void)
 {
-
-
-//   led_init();
-//   LED_TOGGLE(1);
-//   LED_OFF(1);
-
-
-
-
-
   main_init();
-
-  //   while (1) {
-  // LED_OFF(1);
- // LED_ON(1);
-// }
 
   while (1) {
     handle_periodic_tasks();

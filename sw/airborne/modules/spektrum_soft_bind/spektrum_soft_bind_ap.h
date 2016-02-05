@@ -28,7 +28,7 @@
 
  #include "std.h"
 
- //extern void spektrum_soft_bind_init();
+ extern void spektrum_soft_bind_init(void);
  extern void spektrum_soft_bind_click(uint8_t val);
 
  extern uint8_t bind_soft_value;

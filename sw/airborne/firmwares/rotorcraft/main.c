@@ -131,14 +131,6 @@ int main(void)
 
   main_init();
 
-
-//   while (1) {
-//   LED_OFF(1);
-//   LED_ON(1);
-// }
-
-
-
 #if LIMIT_EVENT_POLLING
   /* Limit main loop frequency to 1kHz.
    * This is a kludge until we can better leverage threads and have real events.
@@ -164,7 +156,7 @@ int main(void)
   while (1) {
     handle_periodic_tasks();
     main_event();
-    //LED_OFF(1);
+//    LED_ON(1);
   }
 #endif
 

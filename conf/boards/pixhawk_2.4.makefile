@@ -42,11 +42,9 @@ SYS_TIME_LED       ?= 1
 MODEM_PORT ?= UART2
 MODEM_BAUD ?= B57600
 
+#The GPS serial on px4 is called serial 3, but connected to uart4 on the f4
 GPS_PORT ?= UART4
 GPS_BAUD ?= B38400
-
-RADIO_CONTROL_SPEKTRUM_PRIMARY_PORT ?= UART2
-
 
 #
 # default actuator configuration

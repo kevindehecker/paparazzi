@@ -28,10 +28,10 @@
 //#include "subsystems/datalink/downlink.h"
 #include "modules/pxio_flash/protocol.h"
 #include "mcu_periph/sys_time_arch.h"
+#include "subsystems/intermcu/intermcu_ap.h"
 
 // Serial Port
 #include "mcu_periph/uart.h"
-PRINT_CONFIG_VAR(PXIO_UART)
 
 // define coms link for px4io f1
 #define PXIO_PORT   (&((PXIO_UART).device))
@@ -72,8 +72,11 @@ void px4ioflash_event(void) {
         }
     }
 
+    //TODO: check if timeout was surpassed
     if (TELEM2_PORT->char_available(TELEM2_PORT->periph) && !setToBootloaderMode) {
         //data was received on the pc uart, so
+        //stop all intermcu comminication:
+        disable_inter_comm(true);
         //send the reboot to bootloader command:
 
 		/*
@@ -88,7 +91,7 @@ void px4ioflash_event(void) {
     	* 5a. Either, boot the Pixhawk (reconnect usb) holding the IO reset button until the FMU led stops blinking fast (i.e. exits its own bootloader)
     	* 5b  Or, press the IO reset button on the pixhawk
     	* 6. Watch the output of the command of step 4, it should recognize the IO bootloader and start flashing. If not try repeating step 5a.
-    	* 7. Don forget to disable the define again :)
+    	* 7. Don forget to disable the define and upload the ap again :)
     	*/
         //#define progdieshit
 

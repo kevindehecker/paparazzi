@@ -16,12 +16,8 @@ $(TARGET).LDSCRIPT=$(SRC_ARCH)/pixhawkio_2.4.ld
 
 # default flash mode is via usb dfu bootloader
 # possibilities: DFU, SWD, PIXHAWK_BOOTLOADER
-#PIXHAWK_BL_PORT ?= "/dev/serial/by-id/usb-Black_Sphere_Technologies_Black_Magic_Probe*02"
 PIXHAWK_BL_PORT ?= "/dev/serial/by-id/usb-FTDI_*"
-#PIXHAWK_BL_PORT ?= "/dev/ttyUSB1"
 PIXHAWK_PROTOTYPE ?= "/home/houjebek/px4/Firmware/Images/px4io-v2.prototype"
-
-
 
 FLASH_MODE ?= PIXHAWK_BOOTLOADER
 $(TARGET).MAKEFILE = pixhawk
@@ -39,12 +35,6 @@ SYS_TIME_LED       ?= 1
 # default UART configuration (modem, gps, spektrum)
 #
 RADIO_CONTROL_SPEKTRUM_PRIMARY_PORT   ?= UART1
-
-MODEM_PORT ?= UART1
-MODEM_BAUD ?= B57600
-
-GPS_PORT ?= UART4
-GPS_BAUD ?= B38400
 
 #
 # default actuator configuration

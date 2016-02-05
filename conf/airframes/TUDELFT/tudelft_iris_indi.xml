@@ -32,8 +32,8 @@
     <subsystem name="ins" type="extended"/>
 
     <subsystem name="intermcu"      type="uart">
-      <configure name="INTERMCU_PORT" value="UART7"/>
-      <configure name="INTERMCU_BAUD" value="150000"/>
+      <configure name="INTERMCU_PORT" value="UART6"/>
+      <configure name="INTERMCU_BAUD" value="1500000"/>
     </subsystem>
   </firmware>
 

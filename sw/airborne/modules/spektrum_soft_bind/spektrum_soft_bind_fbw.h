@@ -25,8 +25,10 @@
 
 #ifndef SPEKTRUM_FBW_SOFT_BIND_H
 #define SPEKTRUM_FBW_SOFT_BIND_H
+#include "std.h"
 
-// extern void spektrum_soft_bind_init();
+extern void spektrum_soft_bind_init(void);
+extern void received_spektrum_soft_bind(void);
 
 #endif
 

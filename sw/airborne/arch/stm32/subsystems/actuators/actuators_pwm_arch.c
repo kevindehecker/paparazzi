@@ -35,7 +35,6 @@
 
 #include "mcu_periph/gpio_arch.h"
 
-
 int32_t actuators_pwm_values[ACTUATORS_PWM_NB];
 
 
@@ -43,6 +42,7 @@ int32_t actuators_pwm_values[ACTUATORS_PWM_NB];
  */
 void actuators_pwm_arch_init(void)
 {
+
 
   /*-----------------------------------
    * Configure timer peripheral clocks

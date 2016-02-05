@@ -40,7 +40,7 @@
 #include "std.h"
 
 #if defined(STM32F4)
-/* untested, should go into libopencm3 */
+/* untested, should go into libopencm3 */ //old Freek stuff?
 const clock_scale_t hse_24mhz_3v3[CLOCK_3V3_END] = {
 	{ /* 48MHz */
 		.pllm = 24,
@@ -130,7 +130,7 @@ void mcu_arch_init(void)
   rcc_clock_setup_hse_3v3(&hse_24mhz_3v3[CLOCK_3V3_168MHZ]);
 #elif defined(STM32F1)
   rcc_clock_setup_in_hse_24mhz_out_24mhz();
-  //rcc_clock_setup_in_hse_24mhz_out_72mhz(); // This won't work..., since max ext crystal speed is 16MHz
+  //rcc_clock_setup_in_hse_24mhz_out_72mhz(); // This won't work..., maybe since max specified ext crystal speed is 16MHz on pixhawk, while 24mhz is connected?
 #endif
 #elif EXT_CLK == 25000000
 #if defined(STM32F4)
