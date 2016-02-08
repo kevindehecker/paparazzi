@@ -90,15 +90,15 @@ INFO("Radio-Control now follows PPRZ sign convention: this means you might need 
 #endif
 #endif
 
-#if (SPEKTRUM_TIMER == 4)
-#ifndef NVIC_TIM4_IRQ_PRIO
-#define NVIC_TIM4_IRQ_PRIO 2
+#if (SPEKTRUM_TIMER == 3)
+#ifndef NVIC_TIM3_IRQ_PRIO
+#define NVIC_TIM3_IRQ_PRIO 2
 #define NVIC_TIMx_IRQ_PRIO 2
 #else
 #define NVIC_TIMx_IRQ_PRIO NVIC_TIM6_IRQ_PRIO
 #endif
-#ifndef NVIC_TIM4_DAC_IRQ_PRIO
-#define NVIC_TIM4_DAC_IRQ_PRIO 2
+#ifndef NVIC_TIM3_DAC_IRQ_PRIO
+#define NVIC_TIM3_DAC_IRQ_PRIO 2
 #define NVIC_TIMx_DAC_IRQ_PRIO 2
 #else
 #define NVIC_TIMx_DAC_IRQ_PRIO NVIC_TIM6_DAC_IRQ_PRIO

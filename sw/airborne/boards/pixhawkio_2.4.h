@@ -11,7 +11,7 @@
 /*
  * Onboard LEDs
  */
-/* blue led, a.k.a. AC */
+/* blue led, a.k.a. ACT */
 #ifndef USE_LED_1
 #define USE_LED_1 1
 #endif
@@ -21,7 +21,7 @@
 #define LED_1_GPIO_OFF gpio_set
 #define LED_1_AFIO_REMAP ((void)0)
 
-//led Amber a.k.a power led?
+//led Amber a.k.a b/e led
 #ifndef USE_LED_2
 #define USE_LED_2 1
 #endif
@@ -67,7 +67,7 @@
 #define SPEKTRUM_POWER_PIN_PORT GPIOC
 #define SPEKTRUM_POWER_PIN GPIO13
 
-#define SPEKTRUM_TIMER 4
+#define SPEKTRUM_TIMER 3
 
 #define SPEKTRUM_UART1_RCC RCC_USART1
 #define SPEKTRUM_UART1_BANK GPIOA
@@ -77,13 +77,17 @@
 #define SPEKTRUM_UART1_ISR usart1_isr
 #define SPEKTRUM_UART1_DEV USART1
 
-#if USE_ADC_1 // not checked yet!
-#define AD1_1_CHANNEL 13
-#define ADC_1 AD1_1
-#define ADC_1_GPIO_PORT GPIOC
-#define ADC_1_GPIO_PIN GPIO3
+#define USE_AD_TIM1 1
+#ifndef USE_ADC_1
+#define USE_ADC_1 1
 #endif
-
+#if USE_ADC_1 // VDD servo ADC12_IN4, untested
+#define AD1_1_CHANNEL 12
+#define ADC_1 AD1_4
+#define ADC_1_GPIO_PORT GPIOA
+#define ADC_1_GPIO_PIN GPIO4
+#endif
+//#define DefaultVoltageOfAdc(adc) (0.0059*adc) // is this needed?
 
 /*
  * PWM
@@ -94,17 +98,19 @@
 //pin:           A0  A1  B8  B9  A6  A7  B0  B1
 //timer/channel: 2/1 2/2 4/3 4/4 3/1 3/2 3/3 3/4
 #define PWM_USE_TIM2 1
-#define PWM_USE_TIM3 1
-//#define PWM_USE_TIM4 1 // spektrum also uses tim4
+//#define PWM_USE_TIM3 1 // spektrum already uses tim3
+#define PWM_USE_TIM4 1
+
+//#define ACTUATORS_PWM_NB 4
 
 #define USE_PWM1 1
 #define USE_PWM2 1
-//#define USE_PWM3 1
-//#define USE_PWM4 1
-#define USE_PWM5 1
-#define USE_PWM6 1
-#define USE_PWM7 1
-#define USE_PWM8 1
+#define USE_PWM3 1
+#define USE_PWM4 1
+//#define USE_PWM5 1
+//#define USE_PWM6 1
+//#define USE_PWM7 1
+//#define USE_PWM8 1
 
 // PWM_SERVO_x is the index of the servo in the actuators_pwm_values array
 #if USE_PWM1
@@ -206,9 +212,9 @@
 /* servos 1-2 on TIM2 */
 #define PWM_TIM2_CHAN_MASK (PWM_SERVO_1_OC_BIT|PWM_SERVO_2_OC_BIT)
 /* servos 3-4 on TIM4 */
-//#define PWM_TIM4_CHAN_MASK (PWM_SERVO_3_OC_BIT|PWM_SERVO_4_OC_BIT)
+#define PWM_TIM4_CHAN_MASK (PWM_SERVO_3_OC_BIT|PWM_SERVO_4_OC_BIT)
 /* servos 5-8 on TIM3 */
-#define PWM_TIM3_CHAN_MASK (PWM_SERVO_5_OC_BIT|PWM_SERVO_6_OC_BIT|PWM_SERVO_7_OC_BIT|PWM_SERVO_8_OC_BIT)
+//#define PWM_TIM3_CHAN_MASK (PWM_SERVO_5_OC_BIT|PWM_SERVO_6_OC_BIT|PWM_SERVO_7_OC_BIT|PWM_SERVO_8_OC_BIT)
 
 /* Default actuators driver */
 #define DEFAULT_ACTUATORS "subsystems/actuators/actuators_pwm.h"
