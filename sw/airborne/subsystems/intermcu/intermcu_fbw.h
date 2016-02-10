@@ -30,7 +30,7 @@
 #include "subsystems/intermcu.h"
 
 extern pprz_t intermcu_commands[COMMANDS_NB];
-void intermcu_on_rc_frame(void);
+void intermcu_on_rc_frame(uint8_t fbw_mode);
 void intermcu_send_status(uint8_t mode);
 void InterMcuEvent(void (*frame_handler)(void));
 

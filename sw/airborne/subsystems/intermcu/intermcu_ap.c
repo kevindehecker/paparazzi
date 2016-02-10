@@ -82,6 +82,7 @@ static inline void intermcu_parse_msg(struct transport_rx *trans, void (*rc_fram
     case DL_IMCU_RADIO_COMMANDS: {
       uint8_t i;
       uint8_t size = DL_IMCU_RADIO_COMMANDS_values_length(trans->payload);
+      uint8_t status = DL_IMCU_RADIO_COMMANDS_status(trans->payload); // TODO: make message with status
       int16_t *rc_values = DL_IMCU_RADIO_COMMANDS_values(trans->payload);
       for (i = 0; i < size; i++) {
         radio_control.values[i] = rc_values[i];

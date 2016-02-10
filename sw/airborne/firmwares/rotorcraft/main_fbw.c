@@ -174,9 +174,17 @@ STATIC_INLINE void main_periodic(void)
     }
   }
 
+
+  static uint16_t dv = 0;
+  // TODO make module out of this?
   /* set failsafe commands     */
   if (fbw_mode == FBW_MODE_FAILSAFE) {
-    SetCommands(commands_failsafe);
+      SetCommands(commands_failsafe);
+      if (!(dv++ % (PERIODIC_FREQUENCY /20))) { LED_TOGGLE(3);}
+  } else if(fbw_mode == FBW_MODE_MANUAL){
+      if (!(dv++ % (PERIODIC_FREQUENCY ))) { LED_TOGGLE(3);}
+  } else if (fbw_mode == FBW_MODE_AUTO) {
+      LED_TOGGLE(3);
   }
 
   /* set actuators     */
@@ -215,7 +223,7 @@ static void autopilot_on_rc_frame(void)
   }
 
   /* Forward radiocontrol to AP */
-  intermcu_on_rc_frame();
+  intermcu_on_rc_frame(fbw_mode);
 }
 
 static void autopilot_on_ap_command(void)

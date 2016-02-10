@@ -31,7 +31,7 @@
 #define LED_2_GPIO_OFF gpio_set
 #define LED_2_AFIO_REMAP ((void)0)
 
-//safety led, red???
+//safety led in the switch, red
 #ifndef USE_LED_3
 #define USE_LED_3 1
 #endif
@@ -40,6 +40,8 @@
 #define LED_3_GPIO_ON gpio_clear
 #define LED_3_GPIO_OFF gpio_set
 #define LED_3_AFIO_REMAP ((void)0)
+
+//TODO: safety switch is on PB5!
 
 /*
  * UART

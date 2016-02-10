@@ -69,16 +69,16 @@ void intermcu_periodic(void)
 {
     /* Check for interMCU loss */
     if (inter_mcu.time_since_last_frame >= INTERMCU_LOST_CNT) {
-        inter_mcu.status = INTERMCU_LOST;
+        inter_mcu.status = INTERMCU_LOST;        
     } else {
         inter_mcu.time_since_last_frame++;
     }
 }
 
-void intermcu_on_rc_frame(void)
+void intermcu_on_rc_frame(uint8_t fbw_mode)
 {    
     pprz_msg_send_IMCU_RADIO_COMMANDS(&(intermcu_transport.trans_tx), intermcu_device,
-                                      INTERMCU_FBW, 0, RADIO_CONTROL_NB_CHANNEL, radio_control.values); //TODO: Fix status
+                                      INTERMCU_FBW, &fbw_mode, RADIO_CONTROL_NB_CHANNEL, radio_control.values);
 }
 
 void intermcu_send_status(uint8_t mode)
