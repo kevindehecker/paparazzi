@@ -107,9 +107,9 @@ static inline void intermcu_parse_msg(struct transport_rx *trans, void (*command
         break;
     }
         //TODO: make subscribable module parser
-    case DL_IMCU_SPEKTRUM_SOFT_BIND:
-        received_spektrum_soft_bind();
-        break;
+//    case DL_IMCU_SPEKTRUM_SOFT_BIND:
+//        received_spektrum_soft_bind();
+//        break;
     default:
         break;
     }

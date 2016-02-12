@@ -65,7 +65,6 @@
  * Spektrum
  */
 /* The line that is pulled low at power up to initiate the bind process */
-//The stm32f1c8 is a medium density device that only has 4 timers. Warning: pprz does not warn against using timer>4!
 #define SPEKTRUM_POWER_PIN_PORT GPIOC
 #define SPEKTRUM_POWER_PIN GPIO13
 
@@ -79,9 +78,25 @@
 #define SPEKTRUM_UART1_ISR usart1_isr
 #define SPEKTRUM_UART1_DEV USART1
 
-#define USE_AD_TIM1 1
+
+/*
+ * PPM input
+ */
+#define USE_PPM_TIM1 1
+#define PPM_CHANNEL         TIM_IC1
+#define PPM_TIMER_INPUT     TIM_IC_IN_TI1
+#define PPM_IRQ             NVIC_TIM1_UP_IRQ
+#define PPM_IRQ2            NVIC_TIM1_CC_IRQ
+// Capture/Compare InteruptEnable and InterruptFlag
+#define PPM_CC_IE           TIM_DIER_CC1IE
+#define PPM_CC_IF           TIM_SR_CC1IF
+#define PPM_GPIO_PORT       GPIOA
+#define PPM_GPIO_PIN        GPIO8
+#define PPM_GPIO_AF         0
+
+//#define USE_AD_TIM1 1
 #ifndef USE_ADC_1
-#define USE_ADC_1 1
+#define USE_ADC_1 0
 #endif
 #if USE_ADC_1 // VDD servo ADC12_IN4, untested
 #define AD1_1_CHANNEL 12

@@ -47,12 +47,7 @@
     <target name="fbw" board="pixhawkio_2.4"/>
     <subsystem name="motor_mixing"/>
 
-    <subsystem name="radio_control" type="spektrum">
-      <define name="RADIO_CONTROL_SPEKTRUM_NO_SIGN" value="1"/>
-      <define name="RADIO_FBW_MODE" value="RADIO_AUX2"/>
-      <define name="RADIO_KILL_SWITCH" value="RADIO_AUX1"/>
-      <define name="RADIO_MODE" value="RADIO_GEAR"/>
-    </subsystem>
+    <subsystem name="radio_control" type="ppm"/>
 
     <subsystem name="actuators"     type="pwm"/>
     <define name="RC_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe or to Autopilot on RC loss? -->
@@ -84,7 +79,7 @@
     <load name="air_data.xml"/>
     <load name="send_imu_mag_current.xml"/>
     <load name="gps_ubx_ucenter.xml"/>
-    <load name="spektrum_soft_bind.xml"/>
+    <!-- <load name="spektrum_soft_bind.xml"/> -->
   </modules>
 
 
