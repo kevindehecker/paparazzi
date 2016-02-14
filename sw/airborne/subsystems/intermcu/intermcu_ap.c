@@ -30,6 +30,9 @@
 #include "pprzlink/pprz_transport.h"
 #include "mcu_periph/uart.h"
 
+#include "subsystems/datalink/telemetry.h"
+#include "subsystems/electrical.h"
+
 #if COMMANDS_NB > 8
 #error "INTERMCU UART CAN ONLY SEND 8 COMMANDS OR THE UART WILL BE OVERFILLED"
 #endif
@@ -41,9 +44,20 @@ static struct pprz_transport intermcu_transport;
 struct intermcu_t inter_mcu;
 static inline void intermcu_parse_msg(struct transport_rx *trans, void (*rc_frame_handler)(void));
 
+
+
+static void send_status(struct transport_tx *trans, struct link_device *dev)
+{
+  pprz_msg_send_FBW_STATUS(trans, dev, AC_ID,
+                           &(radio_control.status), &(radio_control.frame_rate), &(inter_mcu.status), 0, 0);
+}
+
 void intermcu_init(void)
 {
   pprz_transport_init(&intermcu_transport);
+
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_FBW_STATUS, send_status);
+
 }
 
 void intermcu_periodic(void)
@@ -82,7 +96,7 @@ static inline void intermcu_parse_msg(struct transport_rx *trans, void (*rc_fram
     case DL_IMCU_RADIO_COMMANDS: {
       uint8_t i;
       uint8_t size = DL_IMCU_RADIO_COMMANDS_values_length(trans->payload);
-      uint8_t status = DL_IMCU_RADIO_COMMANDS_status(trans->payload); // TODO: make message with status
+      inter_mcu.status = DL_IMCU_RADIO_COMMANDS_status(trans->payload);
       int16_t *rc_values = DL_IMCU_RADIO_COMMANDS_values(trans->payload);
       for (i = 0; i < size; i++) {
         radio_control.values[i] = rc_values[i];

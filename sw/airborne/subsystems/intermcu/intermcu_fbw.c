@@ -77,8 +77,34 @@ void intermcu_periodic(void)
 
 void intermcu_on_rc_frame(uint8_t fbw_mode)
 {    
+
+    pprz_t  values[8];
+
+    values[INTERMCU_RADIO_THROTTLE] = radio_control.values[RADIO_THROTTLE];
+    values[INTERMCU_RADIO_ROLL] = radio_control.values[RADIO_ROLL];
+    values[INTERMCU_RADIO_PITCH] = radio_control.values[RADIO_PITCH];
+    values[INTERMCU_RADIO_YAW] = radio_control.values[RADIO_YAW];
+#ifdef RADIO_MODE
+    values[INTERMCU_RADIO_MODE] = radio_control.values[RADIO_MODE];
+#endif
+#ifdef RADIO_KILL_SWITCH
+    values[INTERMCU_RADIO_KILL_SWITCH] = radio_control.values[RADIO_KILL_SWITCH];
+#endif
+#ifdef RADIO_AUX1
+    values[INTERMCU_RADIO_AUX1] = radio_control.values[RADIO_AUX1];
+#endif
+#ifdef RADIO_AUX2
+    values[INTERMCU_RADIO_AUX2] = radio_control.values[RADIO_AUX2];
+#endif
+#ifdef RADIO_AUX3
+    values[INTERMCU_RADIO_AUX2] = radio_control.values[RADIO_AUX2];
+#endif
+
+
+
+
     pprz_msg_send_IMCU_RADIO_COMMANDS(&(intermcu_transport.trans_tx), intermcu_device,
-                                      INTERMCU_FBW, &fbw_mode, RADIO_CONTROL_NB_CHANNEL, radio_control.values);
+                                      INTERMCU_FBW, &fbw_mode, RADIO_CONTROL_NB_CHANNEL, values);
 }
 
 void intermcu_send_status(uint8_t mode)

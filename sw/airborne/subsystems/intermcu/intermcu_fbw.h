@@ -34,4 +34,17 @@ void intermcu_on_rc_frame(uint8_t fbw_mode);
 void intermcu_send_status(uint8_t mode);
 void InterMcuEvent(void (*frame_handler)(void));
 
+
+/* We need radio defines for the Autopilot */
+#define INTERMCU_RADIO_THROTTLE   0
+#define INTERMCU_RADIO_ROLL       1
+#define INTERMCU_RADIO_PITCH      2
+#define INTERMCU_RADIO_YAW        3
+#define INTERMCU_RADIO_MODE       4
+#define INTERMCU_RADIO_KILL_SWICH 5
+#define INTERMCU_RADIO_AUX1       5
+#define INTERMCU_RADIO_AUX2       6
+#define INTERMCU_RADIO_AUX3       7
+#define INTERMCU_RADIO_CONTROL_NB_CHANNEL 8
+
 #endif /* INTERMCU_FBW_ROTORCRAFT_H */
