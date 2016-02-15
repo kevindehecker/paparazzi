@@ -86,9 +86,10 @@ STATIC_INLINE void main_init(void)
 
   mcu_init();
 
+  actuators_init();
+
   electrical_init();
 
-  actuators_init();
 #if USE_MOTOR_MIXING
   motor_mixing_init();
 #endif
