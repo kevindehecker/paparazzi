@@ -195,7 +195,7 @@
 #ifndef ADC_CHANNEL_VSUPPLY
 #define ADC_CHANNEL_VSUPPLY ADC_4
 #endif
-#define DefaultVoltageOfAdc(adc) (0.008333*adc)
+#define DefaultVoltageOfAdc(adc) (0.0082f*adc) // value comes from px4 code sensors.cpp _parameters.battery_voltage_scaling = 0.0082f;
 
 
 /*

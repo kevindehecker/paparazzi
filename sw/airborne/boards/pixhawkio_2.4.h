@@ -9,7 +9,7 @@
 
 
 /*
- * Onboard LEDs
+ * LEDs
  */
 /* blue led, a.k.a. ACT */
 #ifndef USE_LED_1
@@ -104,7 +104,6 @@
 #define ADC_1_GPIO_PORT GPIOA
 #define ADC_1_GPIO_PIN GPIO4
 #endif
-//#define DefaultVoltageOfAdc(adc) (0.0059*adc) // is this needed?
 
 /*
  * PWM

@@ -51,9 +51,11 @@
       <define name="RADIO_KILL_SWITCH" value="RADIO_KILL"/>
     </subsystem>
 
-    <subsystem name="actuators"     type="pwm"/>
+    <subsystem name="actuators"     type="pwm">
+      <define name="SERVO_HZ" value="400"/>
+    </subsystem>
     <define name="RC_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe or to Autopilot on RC loss? -->
-    <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe with a working autopilot on RC loss? -->
+    <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_AUTO"/>
     <define name="AP_LOST_FBW_MODE" value="FBW_MODE_MANUAL"/><!-- Switch to Failsafe or to Manual on AP loss? -->
     <define name="INTERMCU_LOST_CNT" value="50"/>
 
@@ -107,7 +109,7 @@
     <axis name="PITCH" failsafe_value="0"/>
     <axis name="ROLL" failsafe_value="0"/>
     <axis name="YAW" failsafe_value="0"/>
-    <axis name="THRUST" failsafe_value="6000"/>
+    <axis name="THRUST" failsafe_value="0"/>
   </commands>
 
   <rc_commands>
@@ -118,10 +120,10 @@
   </rc_commands>
 
   <servos driver="Default">
-    <servo name="TOP_LEFT" no="0" min="1100" neutral="1465" max="1900"/>
-    <servo name="TOP_RIGHT" no="1" min="1100" neutral="1465" max="1900"/>
-    <servo name="BOTTOM_RIGHT" no="2" min="1100" neutral="1465" max="1900"/>
-    <servo name="BOTTOM_LEFT" no="3" min="1100" neutral="1465" max="1900"/>
+    <servo name="TOP_LEFT" no="1" min="1100" neutral="1465" max="1900"/>
+    <servo name="TOP_RIGHT" no="3" min="1100" neutral="1465" max="1900"/>
+    <servo name="BOTTOM_RIGHT" no="0" min="1100" neutral="1465" max="1900"/>
+    <servo name="BOTTOM_LEFT" no="2" min="1100" neutral="1465" max="1900"/>
   </servos>
 
   <section name="MIXING" prefix="MOTOR_MIXING_">
