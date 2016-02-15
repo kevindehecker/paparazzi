@@ -41,7 +41,7 @@ void InterMcuEvent(void (*frame_handler)(void));
 #define INTERMCU_RADIO_PITCH      2
 #define INTERMCU_RADIO_YAW        3
 #define INTERMCU_RADIO_MODE       4
-#define INTERMCU_RADIO_KILL_SWICH 5
+#define INTERMCU_RADIO_KILL_SWITCH 5
 #define INTERMCU_RADIO_AUX1       5
 #define INTERMCU_RADIO_AUX2       6
 #define INTERMCU_RADIO_AUX3       7

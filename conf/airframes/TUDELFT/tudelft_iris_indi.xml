@@ -47,7 +47,9 @@
     <target name="fbw" board="pixhawkio_2.4"/>
     <subsystem name="motor_mixing"/>
 
-    <subsystem name="radio_control" type="ppm"/>
+    <subsystem name="radio_control" type="ppm">
+      <define name="RADIO_KILL_SWITCH" value="RADIO_KILL"/>
+    </subsystem>
 
     <subsystem name="actuators"     type="pwm"/>
     <define name="RC_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe or to Autopilot on RC loss? -->
