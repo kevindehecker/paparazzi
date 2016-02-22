@@ -195,7 +195,7 @@
 #ifndef ADC_CHANNEL_VSUPPLY
 #define ADC_CHANNEL_VSUPPLY ADC_4
 #endif
-#define DefaultVoltageOfAdc(adc) (0.0082f*adc) // value comes from px4 code sensors.cpp _parameters.battery_voltage_scaling = 0.0082f;
+#define DefaultVoltageOfAdc(adc) (0.00975f*adc) // value comes from px4 code sensors.cpp _parameters.battery_voltage_scaling = 0.0082f; Manual calib on iris = 0.0096...
 
 
 /*
