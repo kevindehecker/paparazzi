@@ -49,7 +49,7 @@ static inline void intermcu_parse_msg(struct transport_rx *trans, void (*rc_fram
 static void send_status(struct transport_tx *trans, struct link_device *dev)
 {
   pprz_msg_send_FBW_STATUS(trans, dev, AC_ID,
-                           &(radio_control.status), &(radio_control.frame_rate), &(inter_mcu.status), 0, 0);
+                           &(radio_control.status), &(radio_control.frame_rate), &(inter_mcu.status), &electrical.vsupply, &electrical.current); // due to limitation of GCS, send the electrical from ap as if it comes from fbw...
 }
 
 void intermcu_init(void)
