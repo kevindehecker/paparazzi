@@ -116,10 +116,13 @@ STATIC_INLINE void main_init(void)
 
 STATIC_INLINE void handle_periodic_tasks(void)
 {
+
+
   if (sys_time_check_and_ack_timer(main_periodic_tid)) {
     main_periodic();
   }
   if (sys_time_check_and_ack_timer(modules_tid)) {
+
     modules_periodic_task();
   }
   if (sys_time_check_and_ack_timer(radio_control_tid)) {
@@ -177,7 +180,7 @@ STATIC_INLINE void main_periodic(void)
 
 
   static uint16_t dv = 0;
-  // TODO make module out of this?
+  // TODO make module out of led blink?
   /* set failsafe commands     */
   if (fbw_mode == FBW_MODE_FAILSAFE) {
       SetCommands(commands_failsafe);
@@ -185,7 +188,7 @@ STATIC_INLINE void main_periodic(void)
   } else if(fbw_mode == FBW_MODE_MANUAL){
       if (!(dv++ % (PERIODIC_FREQUENCY ))) { LED_TOGGLE(3);}
   } else if (fbw_mode == FBW_MODE_AUTO) {
-      LED_TOGGLE(3);
+      LED_TOGGLE(3); // toggle instead of on, because then it is still visible when fbw_mode switches very fast
   }
 
   /* set actuators     */
