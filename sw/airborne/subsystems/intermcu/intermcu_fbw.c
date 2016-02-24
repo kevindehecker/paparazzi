@@ -166,7 +166,7 @@ void InterMcuEvent(void (*frame_handler)(void))
         }
     }
 }
-
+#ifdef BOARD_PIXHAWKIO
 static inline void checkPx4RebootCommand (unsigned char b) {
     if (!px4RebootTimeout) {
 
@@ -205,3 +205,4 @@ static inline void checkPx4RebootCommand (unsigned char b) {
         }
     }
 }
+#endif
