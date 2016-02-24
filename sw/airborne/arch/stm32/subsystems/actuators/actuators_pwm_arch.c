@@ -45,23 +45,6 @@ int32_t actuators_pwm_values[ACTUATORS_PWM_NB];
  */
 void actuators_pwm_arch_init(void)
 {
-#if defined(BOARD_PIXHAWKIO) //hacker mode!
-    //for some reason, the pins go high at startup, after few 100 ms pwm starts. This sometimes influences the ESCs badly...
-    gpio_setup_output(PWM_SERVO_1_GPIO, PWM_SERVO_1_PIN);
-    gpio_clear(PWM_SERVO_1_GPIO, PWM_SERVO_1_PIN);
-    gpio_setup_output(PWM_SERVO_2_GPIO, PWM_SERVO_2_PIN);
-    gpio_clear(PWM_SERVO_2_GPIO, PWM_SERVO_2_PIN);
-    gpio_setup_output(PWM_SERVO_3_GPIO, PWM_SERVO_3_PIN);
-    gpio_clear(PWM_SERVO_3_GPIO, PWM_SERVO_3_PIN);
-    gpio_setup_output(PWM_SERVO_4_GPIO, PWM_SERVO_4_PIN);
-    gpio_clear(PWM_SERVO_4_GPIO, PWM_SERVO_4_PIN);
-    for (int i = 0 ; i<16; i++) {
-        LED_TOGGLE(1);
-        sys_time_usleep(100000);
-    }
-#endif
-
-
   /*-----------------------------------
    * Configure timer peripheral clocks
    *-----------------------------------*/
