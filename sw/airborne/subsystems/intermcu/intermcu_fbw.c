@@ -134,10 +134,12 @@ static inline void intermcu_parse_msg(struct transport_rx *trans, void (*command
         commands_frame_handler();
         break;
     }
-        //TODO: make subscribable module parser
-//    case DL_IMCU_SPEKTRUM_SOFT_BIND:
-//        received_spektrum_soft_bind();
-//        break;
+
+#if defined(SPEKTRUM_HAS_SOFT_BIND_PIN) //TODO: make subscribable module parser
+    case DL_IMCU_SPEKTRUM_SOFT_BIND:
+        received_spektrum_soft_bind();
+        break;
+#endif
     default:
         break;
     }

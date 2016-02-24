@@ -35,9 +35,6 @@
 void spektrum_soft_bind_init(void) {
     gpio_setup_output(SPEKTRUM_POWER_PIN_PORT, SPEKTRUM_POWER_PIN);
     gpio_set(SPEKTRUM_POWER_PIN_PORT, SPEKTRUM_POWER_PIN);
-    //radio_control_impl_init();
-
-
 }
 
 void received_spektrum_soft_bind(void) {

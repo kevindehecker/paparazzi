@@ -57,7 +57,7 @@ INFO("Radio-Control now follows PPRZ sign convention: this means you might need 
 #define MAX_BYTE_SPACE  3   // .3ms
 
 
-//not all f1ś have a timer 6, so, some redefines have to happen
+//not all f1's have a timer 6, so, some redefines have to happen
 #define PASTER3(x,y,z) x  ## y ## z
 #define EVALUATOR3(x,y,z)  PASTER3(x,y,z)
 #define NVIC_TIMx_IRQ EVALUATOR3(NVIC_TIM, SPEKTRUM_TIMER,_IRQ)
@@ -70,7 +70,6 @@ INFO("Radio-Control now follows PPRZ sign convention: this means you might need 
 #define TIMx EVALUATOR2(TIM, SPEKTRUM_TIMER)
 #define RCC_TIMx EVALUATOR2(RCC_TIM, SPEKTRUM_TIMER)
 
-//PRINT_CONFIG_MSG_VALUE("NVIC_TIMx_IRQ_PRIO: " , NVIC_TIMx_IRQ_PRIO)
 #ifndef SPEKTRUM_TIMER
 #define SPEKTRUM_TIMER 6
 #endif
@@ -105,9 +104,7 @@ INFO("Radio-Control now follows PPRZ sign convention: this means you might need 
 #endif
 #endif
 
-//PRINT_CONFIG_MSG_VALUE("SPEKTRUM_TIMER: " , SPEKTRUM_TIMER)
-
-
+PRINT_CONFIG_MSG_VALUE("SPEKTRUM_TIMER: " , SPEKTRUM_TIMER)
 
 #ifdef NVIC_UART_IRQ_PRIO
 #define NVIC_PRIMARY_UART_PRIO NVIC_UART_IRQ_PRIO
