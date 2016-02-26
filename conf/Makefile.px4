@@ -20,16 +20,16 @@
 #
 
 #
-# This Makefile uses the generic Makefile.arm-linux and adds upload rules for the PixHawk
+# This Makefile uses the generic Makefile.arm-linux and adds upload rules for the PX4
 #
 include $(PAPARAZZI_SRC)/conf/Makefile.stm32
 
 
-ifeq ($(FLASH_MODE),PIXHAWK_BOOTLOADER)
+ifeq ($(FLASH_MODE),PX4_BOOTLOADER)
 # Program the device and start it.
   upload: $(OBJDIR)/$(TARGET).bin
-	$(PAPARAZZI_SRC)/sw/tools/pixhawk/px_mkfw.py --prototype $(PIXHAWK_PROTOTYPE) --image $(OBJDIR)/$(TARGET).bin > $(OBJDIR)/$(TARGET).px4
-	$(PAPARAZZI_SRC)/sw/tools/pixhawk/px_uploader.py --port $(PIXHAWK_BL_PORT) $(OBJDIR)/$(TARGET).px4
+	$(PAPARAZZI_SRC)/sw/tools/px4/px_mkfw.py --prototype $(PX4_PROTOTYPE) --image $(OBJDIR)/$(TARGET).bin > $(OBJDIR)/$(TARGET).px4
+	$(PAPARAZZI_SRC)/sw/tools/px4/px_uploader.py --port $(PX4_BL_PORT) $(OBJDIR)/$(TARGET).px4
 endif
 
 # Listing of phony targets.

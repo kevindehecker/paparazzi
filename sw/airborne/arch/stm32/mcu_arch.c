@@ -150,8 +150,8 @@ void rcc_clock_setup_in_hse_24mhz_out_24mhz_pprz(void)
 
 void mcu_arch_init(void)
 {
-  //already done in pixhawk bootloader (so, is this really needed then?)
- #if defined PIXHAWK
+  //already done in px4 bootloader (so, is this really needed then?)
+ #if defined PX4FMU
    #if defined STM32F4
      SCB_VTOR = 0x08004000;
    #endif

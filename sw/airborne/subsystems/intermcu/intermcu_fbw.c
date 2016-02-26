@@ -31,7 +31,7 @@
 #include "pprzlink/pprz_transport.h"
 #include "modules/spektrum_soft_bind/spektrum_soft_bind_fbw.h"
 
-#ifdef BOARD_PIXHAWKIO
+#ifdef BOARD_PX4IO
 #include "libopencm3/cm3/scb.h"
 #include "led.h"
 #include "mcu_periph/sys_time.h"
@@ -59,7 +59,7 @@ static inline void checkPx4RebootCommand (unsigned char b);
 void intermcu_init(void)
 {
     pprz_transport_init(&intermcu_transport);
-#ifdef BOARD_PIXHAWKIO
+#ifdef BOARD_PX4IO
     px4bl_tid = sys_time_register_timer( 20.0, NULL);
 #endif
 
@@ -69,14 +69,14 @@ void intermcu_periodic(void)
 {
     /* Check for interMCU loss */
     if (inter_mcu.time_since_last_frame >= INTERMCU_LOST_CNT) {
-        inter_mcu.status = INTERMCU_LOST;        
+        inter_mcu.status = INTERMCU_LOST;
     } else {
         inter_mcu.time_since_last_frame++;
     }
 }
 
 void intermcu_on_rc_frame(uint8_t fbw_mode)
-{    
+{
 
     pprz_t  values[8];
 
@@ -155,7 +155,7 @@ void InterMcuEvent(void (*frame_handler)(void))
     if (intermcu_device->char_available(intermcu_device->periph)) {
         while (intermcu_device->char_available(intermcu_device->periph) && !intermcu_transport.trans_rx.msg_received) {
             unsigned char b = intermcu_device->get_byte(intermcu_device->periph);
-#ifdef BOARD_PIXHAWKIO
+#ifdef BOARD_PX4IO
             checkPx4RebootCommand(b);
 #endif
             parse_pprz(&intermcu_transport, b);
@@ -166,7 +166,7 @@ void InterMcuEvent(void (*frame_handler)(void))
         }
     }
 }
-#ifdef BOARD_PIXHAWKIO
+#ifdef BOARD_PX4IO
 static inline void checkPx4RebootCommand (unsigned char b) {
     if (!px4RebootTimeout) {
 

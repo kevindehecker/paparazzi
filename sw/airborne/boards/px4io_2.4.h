@@ -1,10 +1,11 @@
-#ifndef CONFIG_PIXHAWK_2_4_H
-#define CONFIG_PIXHAWK_2_4_H
+#ifndef CONFIG_PX4IO_2_4_H
+#define CONFIG_PX4IO_2_4_H
 
-#define BOARD_PIXHAWKIO
+#define BOARD_PX4IO
+//STM32F103c8t6 (medium density!)
 
 /* Pixhawk board (PX4FIOv2 has a 24MHz external clock and 24MHz internal. */
-#define EXT_CLK 24000000
+#define EXT_CLK 24000000 //this osc is actually outside of the specs (max 16MHz)
 #define AHB_CLK 24000000
 
 
@@ -239,4 +240,4 @@
 #define ActuatorsDefaultCommit() ActuatorsPwmCommit()
 
 
-#endif /* CONFIG_PIXHAWK_2_4_H */
+#endif /* CONFIG_PX4IO_2_4_H */

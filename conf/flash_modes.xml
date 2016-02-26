@@ -48,7 +48,6 @@
       <board name="li[s]?a_[m]?_.*"/>
       <board name="li[s]?a_mx_.*"/>
       <board name="px4fmu_.*"/>
-      <board name="pixhawk_*"/>
       <board name="elle*"/>
     </boards>
   </mode>
@@ -81,7 +80,6 @@
       <board name="li[s]?a_[ms]?_.*"/>
       <board name="li[s]?a_mx_.*"/>
       <board name="px4fmu_.*"/>
-      <board name="pixhawk_*"/>
       <board name="cc3d"/>
       <board name="elle*"/>
       <board name="naze32*"/>
@@ -96,16 +94,14 @@
       <board name="li[s]?a_[ms]?_.*"/>
       <board name="li[s]?a_mx_.*"/>
       <board name="px4fmu_.*"/>
-      <board name="pixhawk_*"/>
       <board name="elle*"/>
     </boards>
   </mode>
-    <mode name="Pixhawk bootloader">
-    <variable name="FLASH_MODE" value="PIXHAWK_BOOTLOADER"/>
+    <mode name="Px4 bootloader">
+    <variable name="FLASH_MODE" value="PX4_BOOTLOADER"/>
     <boards>
       <board name="px4fmu_.*"/>
-      <board name="pixhawk_*"/>
-      <board name="pixhawkio_*"/>
+      <board name="px4io_.*"/>
     </boards>
   </mode>
   <mode name="JTAG (OpenOCD)">
