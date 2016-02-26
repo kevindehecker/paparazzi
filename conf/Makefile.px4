@@ -20,9 +20,9 @@
 #
 
 #
-# This Makefile uses the generic Makefile.arm-linux and adds upload rules for the PX4
+# This Makefile uses the generic Makefile.arm-linux and adds upload rules for the PixHawk
 #
-include $(PAPARAZZI_SRC)/conf/Makefile.stm32
+include $(PAPARAZZI_SRC)/conf/Makefile.stm32-no_upload
 
 
 ifeq ($(FLASH_MODE),PX4_BOOTLOADER)
