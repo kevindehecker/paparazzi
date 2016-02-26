@@ -18,13 +18,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 /**
- * @file "modules/pxio_flash/pxio_flash.h"
+ * @file "modules/px4io_flash/px4io_flash.h"
  * @author Kevin van Hecke
  * Flashes the px4io f1 through the px4 bootloader.
  */
 
-#ifndef PXIO_FLASH_H
-#define PXIO_FLASH_H
+#ifndef PX4IO_FLASH_H
+#define PX4IO_FLASH_H
 
 extern void px4ioflash_init(void);
 extern void px4ioflash_event(void);

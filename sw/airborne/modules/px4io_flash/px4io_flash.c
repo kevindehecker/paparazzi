@@ -18,15 +18,15 @@
  * <http://www.gnu.org/licenses/>.
  */
 /**
- * @file "modules/pxio_flash/pxio_flash.c"
+ * @file "modules/px4io_flash/px4io_flash.c"
  * @author Kevin van Hecke
  * Flashes the px4io f1 through the px4 bootloader.
  * Assumes the telem2 port on the Pixhawk is connected to a ttyACM device (blackmagic probe)
  */
 
-#include "modules/pxio_flash/pxio_flash.h"
+#include "modules/px4io_flash/px4io_flash.h"
 //#include "subsystems/datalink/downlink.h"
-#include "modules/pxio_flash/protocol.h"
+#include "modules/px4io_flash/protocol.h"
 #include "mcu_periph/sys_time_arch.h"
 #include "subsystems/intermcu/intermcu_ap.h"
 
@@ -34,7 +34,7 @@
 #include "mcu_periph/uart.h"
 
 // define coms link for px4io f1
-#define PXIO_PORT   (&((PXIO_UART).device))
+#define PX4IO_PORT   (&((PX4IO_UART).device))
 #define TELEM2_PORT   (&((TELEM2_UART).device))
 
 // weird that these below are not in protocol.h, which is from the firmware px4 repo
@@ -62,12 +62,12 @@ void px4ioflash_init(void) {
 
 void px4ioflash_event(void) {
 	// setToBootloaderMode=true;
-    if (PXIO_PORT->char_available(PXIO_PORT->periph)) {
+    if (PX4IO_PORT->char_available(PX4IO_PORT->periph)) {
         if (!setToBootloaderMode) {
             //ignore anything coming from IO if not in bootloader mode (which should be nothing)
         } else {
             //relay everything from IO to the laptop
-            unsigned char b = PXIO_PORT->get_byte(PXIO_PORT->periph);
+            unsigned char b = PX4IO_PORT->get_byte(PX4IO_PORT->periph);
             TELEM2_PORT->put_byte(TELEM2_PORT->periph,b);
         }
     }
@@ -105,12 +105,12 @@ void px4ioflash_event(void) {
         dma_packet.crc = crc_packet(&dma_packet);
         struct IOPacket *pkt = &dma_packet;
         uint8_t *p = (uint8_t *)pkt;
-        PXIO_PORT->put_byte(PXIO_PORT->periph,p[0]);
-        PXIO_PORT->put_byte(PXIO_PORT->periph,p[1]);
-        PXIO_PORT->put_byte(PXIO_PORT->periph,p[2]);
-        PXIO_PORT->put_byte(PXIO_PORT->periph,p[3]);
-        PXIO_PORT->put_byte(PXIO_PORT->periph,p[4]);
-        PXIO_PORT->put_byte(PXIO_PORT->periph,p[5]);
+        PX4IO_PORT->put_byte(PX4IO_PORT->periph,p[0]);
+        PX4IO_PORT->put_byte(PX4IO_PORT->periph,p[1]);
+        PX4IO_PORT->put_byte(PX4IO_PORT->periph,p[2]);
+        PX4IO_PORT->put_byte(PX4IO_PORT->periph,p[3]);
+        PX4IO_PORT->put_byte(PX4IO_PORT->periph,p[4]);
+        PX4IO_PORT->put_byte(PX4IO_PORT->periph,p[5]);
 
 		// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'E');
 		// for (int i=0;i<6;i++) {
@@ -133,9 +133,9 @@ void px4ioflash_event(void) {
 
         //state machine
         int state =0;
-        while (state<4 && PXIO_PORT->char_available(PXIO_PORT->periph)) {
+        while (state<4 && PX4IO_PORT->char_available(PX4IO_PORT->periph)) {
 
-            unsigned char b = PXIO_PORT->get_byte(PXIO_PORT->periph);
+            unsigned char b = PX4IO_PORT->get_byte(PX4IO_PORT->periph);
             switch (state) {
             case (0) :
                 if (b == PKT_CODE_SUCCESS) state++; else  state=0;
@@ -168,7 +168,7 @@ void px4ioflash_event(void) {
         	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\n');
         	// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'\r');
         	#endif
-            uart_periph_set_baudrate(PXIO_PORT->periph,B115200);
+            uart_periph_set_baudrate(PX4IO_PORT->periph,B115200);
             /* look for the bootloader for 150 ms */
             int ret = 0;
             for (int i = 0; i < 15 && !ret ; i++) {
@@ -176,8 +176,8 @@ void px4ioflash_event(void) {
 
 
                 //send a get_sync command in order to keep the io in bootloader mode
-                PXIO_PORT->put_byte(PXIO_PORT->periph,PROTO_GET_SYNC);
-                PXIO_PORT->put_byte(PXIO_PORT->periph,PROTO_EOC);
+                PX4IO_PORT->put_byte(PX4IO_PORT->periph,PROTO_GET_SYNC);
+                PX4IO_PORT->put_byte(PX4IO_PORT->periph,PROTO_EOC);
 
 
 			#ifndef progdieshit
@@ -191,8 +191,8 @@ void px4ioflash_event(void) {
                 //get_sync should be replied with, so check if that happens and
                 //all other bytes are discarded, hopefully those were not important
                 //(they may be caused by sending multiple syncs)
-                while (PXIO_PORT->char_available(PXIO_PORT->periph)) {
-                    unsigned char b = PXIO_PORT->get_byte(PXIO_PORT->periph);
+                while (PX4IO_PORT->char_available(PX4IO_PORT->periph)) {
+                    unsigned char b = PX4IO_PORT->get_byte(PX4IO_PORT->periph);
 
 					#ifndef progdieshit
     				// TELEM2_PORT->put_byte(TELEM2_PORT->periph,'S');
@@ -226,7 +226,7 @@ void px4ioflash_event(void) {
 			        	#endif
 
                 //if successfully entered bootloader mode, clear any remaining bytes (which may have a function, but I did not check)
-                while (PXIO_PORT->char_available(PXIO_PORT->periph)) {PXIO_PORT->get_byte(PXIO_PORT->periph);}
+                while (PX4IO_PORT->char_available(PX4IO_PORT->periph)) {PX4IO_PORT->get_byte(PX4IO_PORT->periph);}
             }
 
             						#ifndef progdieshit
@@ -248,7 +248,7 @@ void px4ioflash_event(void) {
     } else if(TELEM2_PORT->char_available(TELEM2_PORT->periph)) {
         //already in bootloader mode, just directly relay data
         unsigned char b = TELEM2_PORT->get_byte(TELEM2_PORT->periph);
-        PXIO_PORT->put_byte(PXIO_PORT->periph,b);
+        PX4IO_PORT->put_byte(PX4IO_PORT->periph,b);
         // TELEM2_PORT->put_byte(TELEM2_PORT->periph,b);
     }
 

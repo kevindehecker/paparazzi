@@ -1,28 +1,28 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="pxio_flash">
+<module name="px4io_flash">
   <doc>
     <description>Flashes the px4io f1 through the px4 bootloader.</description>
   </doc>
   <header>
-    <file name="pxio_flash.h"/>
+    <file name="px4io_flash.h"/>
   </header>
   <init fun="px4ioflash_init()"/>
   <event fun="px4ioflash_event()"/>
   <makefile target="ap">
     <raw>
-        PXIO_UART ?= UART6
-        PXIO_BAUD ?= 1500000
-        PXIO_UART_LOWER=$(shell echo $(PXIO_UART) | tr A-Z a-z)
+        PX4IO_UART ?= UART6
+        PX4IO_BAUD ?= 1500000
+        PX4IO_UART_LOWER=$(shell echo $(PX4IO_UART) | tr A-Z a-z)
 
         TELEM2_UART ?= UART3
         TELEM2_BAUD ?= B115200
         TELEM2_UART_LOWER=$(shell echo $(TELEM2_UART) | tr A-Z a-z)
     </raw>
-    <file name="pxio_flash.c"/>
-    <define name="USE_$(PXIO_UART)"/>
-    <define name="PXIO_UART" value="$(PXIO_UART_LOWER)"/>
-    <define name="$(PXIO_UART)_BAUD" value="$(PXIO_BAUD)"/>
+    <file name="px4io_flash.c"/>
+    <define name="USE_$(PX4IO_UART)"/>
+    <define name="PX4IO_UART" value="$(PX4IO_UART_LOWER)"/>
+    <define name="$(PX4IO_UART)_BAUD" value="$(PX4IO_BAUD)"/>
 
     <define name="USE_$(TELEM2_UART)"/>
     <define name="TELEM2_UART" value="$(TELEM2_UART_LOWER)"/>
