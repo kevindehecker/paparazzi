@@ -17,7 +17,7 @@ $(TARGET).LDSCRIPT=$(SRC_ARCH)/px4io_2.4.ld
 # default flash mode is via usb dfu bootloader
 # possibilities: DFU, SWD, PX4_BOOTLOADER
 PX4_BL_PORT ?= "/dev/serial/by-id/usb-FTDI_*"
-PX4_PROTOTYPE ?= "/home/houjebek/px4/Firmware/Images/px4io-v2.prototype"
+PX4_PROTOTYPE ?= "${PAPARAZZI_HOME}/sw/tools/px4/px4io-v2.prototype"
 
 FLASH_MODE ?= PX4_BOOTLOADER
 $(TARGET).MAKEFILE = px4
