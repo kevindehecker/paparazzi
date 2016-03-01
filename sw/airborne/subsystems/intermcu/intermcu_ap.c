@@ -32,6 +32,7 @@
 
 #include "subsystems/datalink/telemetry.h"
 #include "subsystems/electrical.h"
+#include "autopilot.h"
 
 #if COMMANDS_NB > 8
 #error "INTERMCU UART CAN ONLY SEND 8 COMMANDS OR THE UART WILL BE OVERFILLED"
@@ -77,8 +78,14 @@ void disable_inter_comm(bool_t value) {
 
 void intermcu_set_actuators(pprz_t *command_values, uint8_t ap_mode __attribute__((unused))) {
     if (!disable_comm) {
+//      if( !autopilot_motors_on) {
+//        static pprz_t failsafe_commands[] = COMMANDS_FAILSAFE;
+//        pprz_msg_send_IMCU_COMMANDS(&(intermcu_transport.trans_tx), intermcu_device,
+//                                    INTERMCU_AP, 0, COMMANDS_NB, failsafe_commands);
+//      } else {
         pprz_msg_send_IMCU_COMMANDS(&(intermcu_transport.trans_tx), intermcu_device,
-                                    INTERMCU_AP, 0, COMMANDS_NB, command_values); //TODO: Fix status
+                                    INTERMCU_AP, &autopilot_motors_on, COMMANDS_NB, command_values); //TODO: Append more status
+//      }
     }
 }
 

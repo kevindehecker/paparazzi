@@ -35,7 +35,7 @@
     </subsystem>
     <subsystem name="intermcu" type="uart">
       <configure name="INTERMCU_PORT" value="UART6" />
-      <configure name="INTERMCU_BAUD" value="1500000" />
+      <configure name="INTERMCU_BAUD" value="B230400" />
     </subsystem>
   </firmware>
   <firmware name="rotorcraft">
@@ -60,10 +60,10 @@
     <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_AUTO" />
     <define name="AP_LOST_FBW_MODE" value="FBW_MODE_MANUAL" />
     <!-- Switch to Failsafe or to Manual on AP loss? -->
-    <define name="INTERMCU_LOST_CNT" value="50" />
+    <define name="INTERMCU_LOST_CNT" value="100" />
     <subsystem name="intermcu" type="uart">
       <configure name="INTERMCU_PORT" value="UART2" />
-      <configure name="INTERMCU_BAUD" value="1500000" />
+      <configure name="INTERMCU_BAUD" value="B230400" />
     </subsystem>
   </firmware>
   <firmware name="test_progs">
@@ -112,10 +112,10 @@
     <set command="YAW" value="@YAW" />
   </rc_commands>
   <servos driver="Default">
-    <servo name="TOP_LEFT" no="2" min="1140" neutral="1150" max="1850" />
-    <servo name="TOP_RIGHT" no="0" min="1140" neutral="1150" max="1850" />
-    <servo name="BOTTOM_RIGHT" no="3" min="1140" neutral="1150" max="1850" />
-    <servo name="BOTTOM_LEFT" no="1" min="1140" neutral="1150" max="1850" />
+    <servo name="TOP_LEFT" no="2" min="1140" neutral="1280" max="1850" />
+    <servo name="TOP_RIGHT" no="0" min="1140" neutral="1280" max="1850" />
+    <servo name="BOTTOM_RIGHT" no="3" min="1140" neutral="1280" max="1850" />
+    <servo name="BOTTOM_LEFT" no="1" min="1140" neutral="1280" max="1850" />
   </servos>
   <section name="MIXING" prefix="MOTOR_MIXING_">
     <define name="TRIM_ROLL" value="0" />
@@ -125,7 +125,7 @@
     <define name="TYPE" value="QUAD_X" />
   </section>
   <command_laws>
-    <call fun="motor_mixing_run(TRUE,FALSE,values)" />
+    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)" />
     <set servo="TOP_LEFT" value="motor_mixing.commands[MOTOR_FRONT_LEFT]" />
     <set servo="TOP_RIGHT" value="motor_mixing.commands[MOTOR_FRONT_RIGHT]" />
     <set servo="BOTTOM_RIGHT" value="motor_mixing.commands[MOTOR_BACK_RIGHT]" />
@@ -184,25 +184,25 @@
     <define name="G1_R" value="0.0022" />
     <define name="G2_R" value="0.20" />
     <!-- For the bebop2 we need to filter the roll rate due to the dampers -->
-    <define name="FILTER_ROLL_RATE" value="TRUE" />
+    <define name="FILTER_ROLL_RATE" value="FALSE" />
     <define name="FILTER_PITCH_RATE" value="FALSE" />
     <define name="FILTER_YAW_RATE" value="FALSE" />
     <!-- reference acceleration for attitude control -->
-    <define name="REF_ERR_P" value="170.0" />
-    <define name="REF_ERR_Q" value="600.0" />
-    <define name="REF_ERR_R" value="600.0" />
-    <define name="REF_RATE_P" value="14.3" />
-    <define name="REF_RATE_Q" value="28.0" />
-    <define name="REF_RATE_R" value="28.0" />
+    <define name="REF_ERR_P" value="100.0" />
+    <define name="REF_ERR_Q" value="100.0" />
+    <define name="REF_ERR_R" value="100.0" />
+    <define name="REF_RATE_P" value="14.0" />
+    <define name="REF_RATE_Q" value="14.0" />
+    <define name="REF_RATE_R" value="14.0" />
     <!-- second order filter parameters -->
     <define name="FILT_OMEGA" value="20.0" />
     <define name="FILT_ZETA" value="0.55" />
     <define name="FILT_OMEGA_R" value="20.0" />
     <define name="FILT_ZETA_R" value="0.55" />
     <!-- first order actuator dynamics -->
-    <define name="ACT_DYN_P" value="0.06" />
-    <define name="ACT_DYN_Q" value="0.06" />
-    <define name="ACT_DYN_R" value="0.06" />
+    <define name="ACT_DYN_P" value="0.04" />
+    <define name="ACT_DYN_Q" value="0.04" />
+    <define name="ACT_DYN_R" value="0.04" />
     <!-- Adaptive Learning Rate -->
     <define name="USE_ADAPTIVE" value="FALSE" />
     <define name="ADAPTIVE_MU" value="0.0001" />
@@ -235,7 +235,7 @@
   </section>
   <section name="AUTOPILOT">
     <define name="MODE_STARTUP" value="AP_MODE_RC_DIRECT" />
-    <define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT" />
+    <define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT" /> <!-- changing this mode may not work, since fbw will be in mode manual directly from rc!-->?
     <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_DIRECT" />
     <define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_DIRECT" />
     <define name="NO_RC_THRUST_LIMIT" value="TRUE" />

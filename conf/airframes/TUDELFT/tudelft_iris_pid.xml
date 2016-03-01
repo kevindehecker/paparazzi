@@ -35,7 +35,7 @@
     </subsystem>
     <subsystem name="intermcu" type="uart">
       <configure name="INTERMCU_PORT" value="UART6" />
-      <configure name="INTERMCU_BAUD" value="1500000" />
+      <configure name="INTERMCU_BAUD" value="B230400" />
     </subsystem>
   </firmware>
   <firmware name="rotorcraft">
@@ -60,10 +60,10 @@
     <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_AUTO" />
     <define name="AP_LOST_FBW_MODE" value="FBW_MODE_MANUAL" />
     <!-- Switch to Failsafe or to Manual on AP loss? -->
-    <define name="INTERMCU_LOST_CNT" value="50" />
+    <define name="INTERMCU_LOST_CNT" value="100" />
     <subsystem name="intermcu" type="uart">
       <configure name="INTERMCU_PORT" value="UART2" />
-      <configure name="INTERMCU_BAUD" value="1500000" />
+      <configure name="INTERMCU_BAUD" value="B230400" />
     </subsystem>
   </firmware>
   <firmware name="test_progs">
@@ -112,10 +112,10 @@
     <set command="YAW" value="@YAW" />
   </rc_commands>
   <servos driver="Default">
-    <servo name="TOP_LEFT" no="2" min="1140" neutral="1150" max="1850" />
-    <servo name="TOP_RIGHT" no="0" min="1140" neutral="1150" max="1850" />
-    <servo name="BOTTOM_RIGHT" no="3" min="1140" neutral="1150" max="1850" />
-    <servo name="BOTTOM_LEFT" no="1" min="1140" neutral="1150" max="1850" />
+    <servo name="TOP_LEFT" no="2" min="1140" neutral="1280" max="1850" />
+    <servo name="TOP_RIGHT" no="0" min="1140" neutral="1280" max="1850" />
+    <servo name="BOTTOM_RIGHT" no="3" min="1140" neutral="1280" max="1850" />
+    <servo name="BOTTOM_LEFT" no="1" min="1140" neutral="1280" max="1850" />
   </servos>
   <section name="MIXING" prefix="MOTOR_MIXING_">
     <define name="TRIM_ROLL" value="0" />
@@ -125,7 +125,7 @@
     <define name="TYPE" value="QUAD_X" />
   </section>
   <command_laws>
-    <call fun="motor_mixing_run(TRUE,FALSE,values)" />
+    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)" />
     <set servo="TOP_LEFT" value="motor_mixing.commands[MOTOR_FRONT_LEFT]" />
     <set servo="TOP_RIGHT" value="motor_mixing.commands[MOTOR_FRONT_RIGHT]" />
     <set servo="BOTTOM_RIGHT" value="motor_mixing.commands[MOTOR_BACK_RIGHT]" />

@@ -157,7 +157,7 @@ STATIC_INLINE void main_periodic(void)
   if (rc_lost) {
     if (ap_lost) {
       // Both are lost
-      fbw_mode = FBW_MODE_FAILSAFE;
+      fbw_mode = FBW_MODE_FAILSAFE;      
     } else {
       if (fbw_mode == FBW_MODE_MANUAL) {
         fbw_mode = RC_LOST_FBW_MODE;
@@ -166,14 +166,15 @@ STATIC_INLINE void main_periodic(void)
           // No change: failsafe stays failsafe
         } else {
           // Lost RC while in working Auto mode
-          fbw_mode = RC_LOST_IN_AUTO_FBW_MODE;
+          fbw_mode = RC_LOST_IN_AUTO_FBW_MODE;          
         }
       }
     }
   } else { // rc_is_good
     if (fbw_mode == FBW_MODE_AUTO) {
       if (ap_lost) {
-        fbw_mode = AP_LOST_FBW_MODE;
+        fbw_mode = AP_LOST_FBW_MODE;        
+        LED_TOGGLE(1);
       }
     }
   }
@@ -183,10 +184,11 @@ STATIC_INLINE void main_periodic(void)
   // TODO make module out of led blink?
   /* set failsafe commands     */
   if (fbw_mode == FBW_MODE_FAILSAFE) {
-      SetCommands(commands_failsafe);
+      SetCommands(commands_failsafe);      
       if (!(dv++ % (PERIODIC_FREQUENCY /20))) { LED_TOGGLE(3);}
   } else if(fbw_mode == FBW_MODE_MANUAL){
       if (!(dv++ % (PERIODIC_FREQUENCY ))) { LED_TOGGLE(3);}
+      LED_TOGGLE(2);
   } else if (fbw_mode == FBW_MODE_AUTO) {
       LED_TOGGLE(3); // toggle instead of on, because then it is still visible when fbw_mode switches very fast
   }
@@ -219,6 +221,7 @@ static void autopilot_on_rc_frame(void)
 
   /* if manual */
   if (fbw_mode == FBW_MODE_MANUAL) {
+    autopilot_motors_on = TRUE;
 #ifdef SetCommandsFromRC
     SetCommandsFromRC(commands, radio_control.values);
 #else
@@ -234,6 +237,8 @@ static void autopilot_on_ap_command(void)
 {
   if (fbw_mode != FBW_MODE_MANUAL) {
     SetCommands(intermcu_commands);
+  } else {
+    autopilot_motors_on = TRUE;
   }
 }
 
