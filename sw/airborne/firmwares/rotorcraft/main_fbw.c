@@ -173,8 +173,7 @@ STATIC_INLINE void main_periodic(void)
   } else { // rc_is_good
     if (fbw_mode == FBW_MODE_AUTO) {
       if (ap_lost) {
-        fbw_mode = AP_LOST_FBW_MODE;        
-        LED_TOGGLE(1);
+        fbw_mode = AP_LOST_FBW_MODE;                
       }
     }
   }
@@ -187,8 +186,7 @@ STATIC_INLINE void main_periodic(void)
       SetCommands(commands_failsafe);      
       if (!(dv++ % (PERIODIC_FREQUENCY /20))) { LED_TOGGLE(3);}
   } else if(fbw_mode == FBW_MODE_MANUAL){
-      if (!(dv++ % (PERIODIC_FREQUENCY ))) { LED_TOGGLE(3);}
-      LED_TOGGLE(2);
+      if (!(dv++ % (PERIODIC_FREQUENCY ))) { LED_TOGGLE(3);}      
   } else if (fbw_mode == FBW_MODE_AUTO) {
       LED_TOGGLE(3); // toggle instead of on, because then it is still visible when fbw_mode switches very fast
   }
