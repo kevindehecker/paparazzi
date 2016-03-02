@@ -101,7 +101,7 @@ void rcc_clock_setup_in_hse_24mhz_out_24mhz_pprz(void)
   /* Select HSI as SYSCLK source. */
   rcc_set_sysclk_source(RCC_CFGR_SW_SYSCLKSEL_HSICLK);
 
-        /* Enable external high-speed oscillator 24MHz. */
+  /* Enable external high-speed oscillator 24MHz. */
   rcc_osc_on(HSE);
   rcc_wait_for_osc_ready(HSE);
   rcc_set_sysclk_source(RCC_CFGR_SW_SYSCLKSEL_HSECLK);
@@ -124,8 +124,8 @@ void rcc_clock_setup_in_hse_24mhz_out_24mhz_pprz(void)
   flash_set_ws(FLASH_ACR_LATENCY_0WS);
 
   /*
-         * Set the PLL multiplication factor to 2.
-         * 24MHz (external) * 2 (multiplier) / 2 (RCC_CFGR_PLLXTPRE_HSE_CLK_DIV2) = 24MHz
+   * Set the PLL multiplication factor to 2.
+   * 24MHz (external) * 2 (multiplier) / 2 (RCC_CFGR_PLLXTPRE_HSE_CLK_DIV2) = 24MHz
    */
   rcc_set_pll_multiplication_factor(RCC_CFGR_PLLMUL_PLL_CLK_MUL2);
 
@@ -138,8 +138,11 @@ void rcc_clock_setup_in_hse_24mhz_out_24mhz_pprz(void)
    */
   rcc_set_pllxtpre(RCC_CFGR_PLLXTPRE_HSE_CLK_DIV2);
 
-  //Keep using the HSE as primary source for everything, using the PLL actually breaks things!!!
-  //e.g. UART baud rate 1500000 starts dropping bytes
+  rcc_osc_on(PLL);
+  rcc_wait_for_osc_ready(PLL);
+
+  /* Select PLL as SYSCLK source. */
+  rcc_set_sysclk_source(RCC_CFGR_SW_SYSCLKSEL_PLLCLK);
 
   /* Set the peripheral clock frequencies used */
   rcc_ahb_frequency = 24000000;
@@ -185,6 +188,7 @@ void mcu_arch_init(void)
   rcc_clock_setup_hse_3v3(&hse_24mhz_3v3[CLOCK_3V3_168MHZ]);
 #elif defined(STM32F1)
   rcc_clock_setup_in_hse_24mhz_out_24mhz_pprz();
+  //rcc_clock_setup_in_hsi_out_24mhz();
 #endif
 #elif EXT_CLK == 25000000
 #if defined(STM32F4)
