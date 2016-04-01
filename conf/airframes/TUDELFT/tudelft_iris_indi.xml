@@ -61,10 +61,10 @@
     <subsystem name="actuators" type="pwm">
       <define name="SERVO_HZ" value="400" />
     </subsystem>
-    <define name="RC_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE" />
+    <define name="RC_LOST_FBW_MODE" value="FBW_MODE_AUTO" />
     <!-- Switch to Failsafe or to Autopilot on RC loss? -->
     <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_AUTO" />
-    <define name="AP_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE" />
+    <define name="AP_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE" /> <!-- Rotorcraft can't do anything without IMU from the AP, so failsafe mode-->
     <!-- Switch to Failsafe or to Manual on AP loss? -->
     <define name="INTERMCU_LOST_CNT" value="100" />
     <subsystem name="intermcu" type="uart">
@@ -226,7 +226,7 @@
     <define name="ACT_DYN_Q" value="0.04" />
     <define name="ACT_DYN_R" value="0.04" />
     <!-- Adaptive Learning Rate -->
-    <define name="USE_ADAPTIVE" value="FALSE" />
+    <define name="USE_ADAPTIVE" value="TRUE" />
     <define name="ADAPTIVE_MU" value="0.0001" />
   </section>
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
@@ -247,7 +247,7 @@
     <define name="IGAIN" value="30" />
   </section>
   <section name="NAVIGATION" prefix="NAV_">
-    <define name="CLIMB_VSPEED" value="4.5" />
+    <define name="CLIMB_VSPEED" value="2.5" />
     <define name="DESCEND_VSPEED" value="-1.0" />
   </section>
   <section name="SIMULATOR" prefix="NPS_">
@@ -256,17 +256,17 @@
     <define name="SENSORS_PARAMS" value="nps_sensors_params_default.h" type="string" />
   </section>
   <section name="AUTOPILOT">
-    <define name="MODE_STARTUP" value="AP_MODE_RC_DIRECT" />
-    <define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT" /> <!-- changing this mode may not work, since fbw will be in mode manual directly from rc!-->
+    <define name="MODE_STARTUP" value="AP_MODE_NAV" />
+    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT" /> <!-- changing this mode may not work, since fbw will be in mode manual directly from rc!-->
     <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_DIRECT" />
-    <define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_DIRECT" />
+    <define name="MODE_AUTO2" value="AP_MODE_NAV" />
     <define name="NO_RC_THRUST_LIMIT" value="TRUE" />
   </section>
   <section name="BAT">
     <define name="MILLIAMP_AT_FULL_THROTTLE" value="8700" />
-    <define name="CATASTROPHIC_BAT_LEVEL" value="9.9" unit="V" />
-    <define name="CRITIC_BAT_LEVEL" value="10.8" unit="V" />
-    <define name="LOW_BAT_LEVEL" value="11.1" unit="V" />
+    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V" />
+    <define name="CRITIC_BAT_LEVEL" value="10.7" unit="V" />
+    <define name="LOW_BAT_LEVEL" value="10.95" unit="V" />
     <define name="MAX_BAT_LEVEL" value="12.4" unit="V" />
   </section>
 </airframe>
