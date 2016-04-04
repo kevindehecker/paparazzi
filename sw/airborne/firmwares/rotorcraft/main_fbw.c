@@ -219,10 +219,11 @@ static void autopilot_on_rc_frame(void)
 {
   /* get autopilot fbw mode as set by RADIO_MODE 3-way switch */
   if (radio_control.values[RADIO_FBW_MODE] < (MIN_PPRZ / 2)) {
-    //TODO, check whether the aircraft can actually be flown in manual mode
-    //most rotory aircraft can't, at least not without additional IMU aid
-    //for now, just turn set to failsafe instead of manual mode.
-    fbw_mode = FBW_MODE_FAILSAFE;
+#if FBW_SUPPORTS_MANUAL
+    fbw_mode = FBW_MODE_MANUAL;
+#else
+    fbw_mode = FBW_MODE_AUTO;
+#endif
   } else {
     fbw_mode = FBW_MODE_AUTO;
   }

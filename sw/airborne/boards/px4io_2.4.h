@@ -9,6 +9,8 @@
 #define AHB_CLK 24000000
 
 
+#define FBW_SUPPORTS_MANUAL false
+
 /*
  * LEDs
  */
