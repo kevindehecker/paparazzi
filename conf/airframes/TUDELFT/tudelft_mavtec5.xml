@@ -26,19 +26,21 @@
     <module name="actuators"     type="pwm"/>
     <module name="telemetry"     type="xbee_api"/>
     <module name="imu"           type="lisa_mx_v2.1"/>
-    <module name="gps"           type="ublox">
+    <module name="gps"           type="datalink">
       <define name="USE_PIKSI_EXT_ANTENNA" value="TRUE"/>
     </module>
-    <module name="stabilization" type="indi"/>
+    <module name="stabilization" type="int_quat"/>
     <module name="ahrs"          type="int_cmpl_quat"/>
-    <module name="ins" type="hff"/>
+    <module name="ins" type="extended"/>
+    <define name="USE_SONAR" value="1"/>
   </firmware>
 
   <modules>
     <module name="geo_mag"/>
     <module name="air_data"/>
     <module name="servo_switch"/>
-    <module name="gps" type="ubx_ucenter"/>
+    <!--module name="gps" type="ubx_ucenter"/-->
+    <module name="kalamos_uart"/>
     <module name="logger_spi_link">
       <configure name="HS_LOG_SPI_DEV" value="SPI1"/>
       <configure name="HS_LOG_SPI_SLAVE_IDX" value="SPI_SLAVE1"/>
@@ -149,9 +151,9 @@
     <define name="PSI_IGAIN" value="10"/>
 
     <!-- feedforward -->
-    <define name="PHI_DDGAIN" value=" 200"/>
-    <define name="THETA_DDGAIN" value=" 200"/>
-    <define name="PSI_DDGAIN" value=" 200"/>
+    <define name="PHI_DDGAIN" value="0"/>
+    <define name="THETA_DDGAIN" value="0"/>
+    <define name="PSI_DDGAIN" value="0"/>
   </section>
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
