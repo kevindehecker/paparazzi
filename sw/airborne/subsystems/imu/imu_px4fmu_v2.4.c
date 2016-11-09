@@ -75,6 +75,7 @@ void imu_px4_event(void)
 
   /* L3GD20 event task */
   l3gd20_spi_event(&imu_px4.l3g);
+
   if (imu_px4.l3g.data_available) {
     //the p and q seem to be swapped on the Pixhawk board compared to the acc
     imu.gyro_unscaled.p = imu_px4.l3g.data_rates.rates.q;

@@ -178,6 +178,8 @@ void lsm303dlhc_spi_read(struct Lsm303dlhc_Spi *lsm)
 
 #define Int16FromBuf(_buf,_idx) ((int16_t)((_buf[_idx+1]<<8) | _buf[_idx]))
 
+
+
 void lsm303dlhc_spi_event(struct Lsm303dlhc_Spi *lsm)
 {
   if (lsm->initialized) {
