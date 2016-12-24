@@ -10,6 +10,7 @@
       <module name="udp"/>
     </target>
 
+    <define name="FIXEDWING_NAVIGATION" value="TRUE"/>
     <!--define name="USE_SONAR" value="TRUE"/-->
 
 	<!-- Subsystem section -->
@@ -207,4 +208,16 @@
     <define name="LOW_BAT_LEVEL" value="11.1" unit="V"/>
     <define name="MAX_BAT_LEVEL" value="12.4" unit="V"/>
   </section>
+
+  <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
+    <define name="COURSE_PGAIN" value="0.8"/>
+    <define name="COURSE_DGAIN" value="0.08"/>
+  </section>
+  <section name="VERTICAL CONTROL" prefix="V_CTL_">
+    <define name="ALTITUDE_PGAIN" value="0.15"/>
+    <define name="ALTITUDE_MAX_CLIMB" value="2." unit="m/s"/>
+    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.6"/>
+    <define name="AUTO_THROTTLE_PGAIN" value="0.15"/>
+  </section>
+
 </airframe>

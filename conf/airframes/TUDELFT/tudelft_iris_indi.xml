@@ -17,6 +17,7 @@
     <!-- to avoid bat low spike detection when strong pullup withch draws short sudden power-->
     <define name="CATASTROPHIC_BATTERY_KILL_DELAY" value="80" />
     <!-- in seconds-->
+    <define name="FIXEDWING_NAVIGATION" value="TRUE"/>
     <module name="telemetry" type="transparent" />
     <module name="imu" type="px4fmu_v2.4"/>
     <module name="gps" type="ublox" >
@@ -219,6 +220,16 @@
     <!-- max rates (conservative) -->
     <define name="STABILIZATION_INDI_MAX_RATE" value="343.77" unit="deg/s"/>
     <define name="STABILIZATION_INDI_MAX_R" value="120" unit="deg/s"/>
+  </section>
+  <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
+    <define name="COURSE_PGAIN" value="0.8"/>
+    <define name="COURSE_DGAIN" value="0.08"/>
+  </section>
+  <section name="VERTICAL CONTROL" prefix="V_CTL_">
+    <define name="ALTITUDE_PGAIN" value="0.15"/>
+    <define name="ALTITUDE_MAX_CLIMB" value="2." unit="m/s"/>
+    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.6"/>
+    <define name="AUTO_THROTTLE_PGAIN" value="0.15"/>
   </section>
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
     <define name="HOVER_KP" value="350" />

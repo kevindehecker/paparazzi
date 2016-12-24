@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="4" ground_alt="0" lat0="51 59 27.6" lon0="4 22 42.0" max_dist_from_home="60" name="Delft Basic" security_height="2">
+<flight_plan alt="4" ground_alt="0" lat0="51 59 27.6" lon0="4 22 42.0" max_dist_from_home="6000" name="Delft Basic" security_height="2">
   <header>
     #include "autopilot.h"
     #include "subsystems/datalink/datalink.h"
@@ -20,10 +20,10 @@
   </waypoints>
   <exceptions>
     <!-- RC-Loss -->
-    <exception cond="((radio_control.status == RC_REALLY_LOST) &&
+    <!--exception cond="((radio_control.status == RC_REALLY_LOST) &&
       !(IndexOfBlock('Takeoff') > nav_block) &&
       !(nav_block >= IndexOfBlock('land')) &&
-      (autopilot_in_flight == true) )" deroute="ComeBackAndLand"/>
+      (autopilot_in_flight == true) )" deroute="ComeBackAndLand"/-->
 
     <!-- GPS loss -->
     <!-- Not done from flight plan, main.c goes to AP_MODE_FAILSAFE hardcoded -->
@@ -70,6 +70,9 @@
       <exception cond="stateGetPositionEnu_f()->z > 2.0" deroute="Standby"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB"/>
+    </block>
+    <block name="circle STDBY">
+      <circle radius="50" wp="STDBY"/>
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
       <stay wp="STDBY"/>
