@@ -394,6 +394,11 @@ void guidance_v_run(bool in_flight)
       }
 #if HYBRID_NAVIGATION
       guidance_hybrid_vertical();
+#elif FIXEDWING_NAVIGATION
+      //thrust (roll pitch yaw are in guidance horizontal):
+      float v_ctl_altitude_error = nav_flight_altitude - stateGetPositionUtm_f()->alt;
+      Bound(v_ctl_altitude_error,-20,20);
+      stabilization_cmd[COMMAND_THRUST] = MAX_PPRZ*V_CTL_AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE + v_ctl_altitude_error * V_CTL_AUTO_THROTTLE_PGAIN;
 #else
 #if !NO_RC_THRUST_LIMIT
       /* use rc limitation if available */
