@@ -586,6 +586,34 @@ void guidance_h_from_nav(bool in_flight)
 #if HYBRID_NAVIGATION
     INT32_VECT2_NED_OF_ENU(guidance_h.sp.pos, navigation_target);
     guidance_hybrid_run();
+#elif FIXEDWING_NAVIGATION
+    struct Int32Eulers sp_cmd_i;
+
+    //heading:
+    float heading = atan2(navigation_target.x - state.enu_pos_i.x,navigation_target.y - state.enu_pos_i.y);
+    float headingerror = heading  - stateGetNedToBodyEulers_f()->phi;
+    static float headingerror_prev = 0.0;
+    float dheadingerror = headingerror - headingerror_prev;
+    headingerror_prev = headingerror;
+    sp_cmd_i.psi = ANGLE_BFP_OF_REAL(heading);
+
+    //roll:
+    sp_cmd_i.phi = ANGLE_BFP_OF_REAL(headingerror * H_CTL_COURSE_PGAIN + dheadingerror*H_CTL_COURSE_DGAIN);
+
+    //pitch:
+    float altitude_pgain_boost = 1.0;
+    float v_ctl_altitude_error = nav_flight_altitude - stateGetPositionUtm_f()->alt;
+    //Bound(v_ctl_altitude_error,-20,20);
+    float v_ctl_climb_setpoint = altitude_pgain_boost * V_CTL_ALTITUDE_PGAIN * v_ctl_altitude_error;
+    //BoundAbs(v_ctl_climb_setpoint, -V_CTL_ALTITUDE_MAX_CLIMB, V_CTL_ALTITUDE_MAX_CLIMB);
+    sp_cmd_i.theta = ANGLE_BFP_OF_REAL(v_ctl_climb_setpoint);
+
+    //guidance_h.sp.phi = headingerror * H_CTL_COURSE_PGAIN + dheadingerror*H_CTL_COURSE_DGAIN; // commandedrollhoek
+    //guidance_h.sp.heading = ANGLE_BFP_OF_REAL(heading);
+    //guidance_h.sp.theta = v_ctl_climb_setpoint;
+
+    stabilization_attitude_set_rpy_setpoint_i(&sp_cmd_i);
+    stabilization_attitude_run(in_flight);
 #else
     INT32_VECT2_NED_OF_ENU(guidance_h.sp.pos, navigation_carrot);
 
