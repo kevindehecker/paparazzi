@@ -13,5 +13,10 @@
       <dl_setting var="autopilot_mode" min="0" step="1" max="19" module="autopilot" shortname="mode" values="KILL|Fail|HOME|Rate|Att|Rate_rcC|Att_rcC|Att_C|Rate_Z|Att_Z|Hover|Hover_C|Hover_Z|Nav|RC_D|CareFree|Forward|Module|Flip|Guided" handler="SetModeHandler"/>
     </dl_settings>
 
+
+    <dl_settings NAME="mode">
+      <dl_setting MAX="1" MIN="0" STEP="1" VAR="launch"/>
+    </dl_settings>
+
   </dl_settings>
 </settings>

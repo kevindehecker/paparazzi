@@ -75,6 +75,8 @@ bool   autopilot_power_switch;
 bool   autopilot_ground_detected;
 bool   autopilot_detect_ground_once;
 
+bool launch;
+
 /* Geofence exceptions */
 #include "modules/nav/nav_geofence.h"
 
@@ -255,6 +257,8 @@ void autopilot_init(void)
   gpio_setup_output(POWER_SWITCH_GPIO);
   gpio_clear(POWER_SWITCH_GPIO); // POWER OFF
 #endif
+
+  launch = false;
 
   // call implementation init
   // it will set startup mode

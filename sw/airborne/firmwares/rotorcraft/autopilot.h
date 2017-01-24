@@ -56,6 +56,8 @@ extern bool kill_throttle;
 extern bool autopilot_rc;
 extern uint32_t autopilot_in_flight_counter;
 
+extern bool launch;
+
 extern bool autopilot_power_switch;
 
 extern void autopilot_init(void);

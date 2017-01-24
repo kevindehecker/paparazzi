@@ -182,8 +182,8 @@
   </section>
 
   <section name="SIMULATOR" prefix="NPS_">
-<!--    <define name="ACTUATOR_NAMES" value="nw_motor, ne_motor, se_motor, sw_motor" type="string[]"/>-->
-    <define name="JSBSIM_MODEL" value="Malolo1" type="string"/>
+    <define name="JSBSIM_LAUNCHSPEED" value="15"/>
+    <define name="JSBSIM_MODEL" value="easystar_rotorhack" type="string"/>
     <define name="SENSORS_PARAMS" value="nps_sensors_params_default.h" type="string"/>
   </section>
 
