@@ -58,7 +58,7 @@
  * The radio XML file is used to assign the
  * input values to RC channels.
  */
-#define SBUS_BUF_LENGTH 24
+#define SBUS_BUF_LENGTH 25
 #define SBUS_NB_CHANNEL 16
 
 /**
