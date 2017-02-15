@@ -68,6 +68,7 @@ extern void autopilot_check_in_flight(bool motors_on);
 
 extern bool autopilot_ground_detected;
 extern bool autopilot_detect_ground_once;
+extern int lock_wings; // sets command thrust to 0, such that the esc will lock the wing in the current position
 
 extern uint16_t autopilot_flight_time;
 

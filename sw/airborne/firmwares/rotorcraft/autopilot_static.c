@@ -173,8 +173,14 @@ void autopilot_static_periodic(void)
     SetCommands(commands_failsafe);
   } else {
     guidance_v_run(autopilot_in_flight);
-    guidance_h_run(autopilot_in_flight);
+    guidance_h_run(autopilot_in_flight);    
     SetRotorcraftCommands(stabilization_cmd, autopilot_in_flight, autopilot_motors_on);
+
+    if (lock_wings == 1 && autopilot_motors_on && commands[COMMAND_THRUST] > 0) {
+      commands[COMMAND_THRUST] = 1100;
+    } else if (lock_wings == 2) {
+      commands[COMMAND_THRUST] = 0;
+    }
   }
 
 }
@@ -390,12 +396,12 @@ void autopilot_static_on_rc_frame(void)
     /* if not in NAV_MODE set commands from the rc */
 #ifdef SetCommandsFromRC
     if (autopilot_mode != AP_MODE_NAV) {
-      SetCommandsFromRC(commands, radio_control.values);
+      SetCommandsFromRC(commands, radio_control.values);      
     }
 #endif
 
     guidance_v_read_rc();
-    guidance_h_read_rc(autopilot_in_flight);
+    guidance_h_read_rc(autopilot_in_flight);    
   }
 
 }
