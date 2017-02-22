@@ -26,10 +26,17 @@
 #ifndef GLIDEWINGLOCK_H
 #define GLIDEWINGLOCK_H
 
+#include "std.h"
+#include "generated/airframe.h"
+
+#define ROTORCRAFT_COMMANDS_THROUGH_MODULE
+
 extern void init(void);
 extern void glide_wing_lock_init(void);
 extern void glide_wing_lock_event(void);
 extern void glide_wing_lock_periodic(void);
+
+extern void SetRotorcraftCommands_module(int32_t _stabilization_cmd[COMMANDS_NB], bool in_flight,  bool motor_on);
 
 #endif
 

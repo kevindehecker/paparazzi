@@ -59,7 +59,6 @@ extern uint8_t ap_mode_of_two_switches(void)
     commands[COMMAND_THRUST] = _cmd[COMMAND_THRUST];            \
   }
 #else
-
 #ifndef ROTORCRAFT_COMMANDS_YAW_ALWAYS_ENABLED
 #define SetRotorcraftCommands(_cmd, _in_flight,  _motor_on) { \
     if (!(_in_flight)) { _cmd[COMMAND_YAW] = 0; }               \

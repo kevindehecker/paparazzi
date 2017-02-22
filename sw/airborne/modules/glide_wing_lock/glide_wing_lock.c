@@ -36,6 +36,8 @@
 
 struct adc_buf adcbuf;
 
+int lock_wings;
+
 #ifndef WING_POS_DOWN_THRESH
 #define WING_POS_DOWN_THRESH 100
 #endif
@@ -45,9 +47,13 @@ struct adc_buf adcbuf;
 #ifndef WING_POS_LOCK_MAX_THRESH
 #define WING_POS_LOCK_MAX_THRESH 2100
 #endif
+#ifndef WING_POS_NOMINAL_THRUST
+#define WING_POS_NOMINAL_THRUST 5000
+#endif
 #ifndef WING_POS_LOCK_SWITCH
 #define WING_POS_LOCK_SWITCH RADIO_AUX2
 #endif
+
 
 void glide_wing_lock_init(void) {
   adc_buf_channel(ADC_CHANNEL_MOTORSENSOR, &adcbuf, 1);
@@ -95,7 +101,20 @@ void glide_wing_lock_periodic() {
   DOWNLINK_SEND_WING_POS(DefaultChannel, DefaultDevice, &wpos);
 }
 
+void SetRotorcraftCommands_module(int32_t _cmd[COMMANDS_NB], bool _in_flight,  bool _motor_on) {
+  if (!(_in_flight)) { _cmd[COMMAND_YAW] = 0; }
+  if (!(_motor_on)) { _cmd[COMMAND_THRUST] = 0; }
+  commands[COMMAND_ROLL] = _cmd[COMMAND_ROLL];
+  commands[COMMAND_PITCH] = _cmd[COMMAND_PITCH];
+  commands[COMMAND_YAW] = _cmd[COMMAND_YAW];
+  commands[COMMAND_THRUST] = _cmd[COMMAND_THRUST];
 
+  if (lock_wings == 1 && autopilot_motors_on && commands[COMMAND_THRUST] > 0) {
+    commands[COMMAND_THRUST] = WING_POS_NOMINAL_THRUST;
+  } else if (lock_wings == 2) {
+    commands[COMMAND_THRUST] = 0;
+  }
+}
 
 
 

@@ -74,7 +74,6 @@ bool   autopilot_power_switch;
 
 bool   autopilot_ground_detected;
 bool   autopilot_detect_ground_once;
-int lock_wings;
 
 /* Geofence exceptions */
 #include "modules/nav/nav_geofence.h"

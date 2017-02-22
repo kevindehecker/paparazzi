@@ -49,6 +49,7 @@
 #include "firmwares/rotorcraft/autopilot_guided.h"
 
 #include "generated/settings.h"
+#include "generated/modules.h"
 
 #if USE_GPS
 #include "subsystems/gps.h"
@@ -174,13 +175,11 @@ void autopilot_static_periodic(void)
   } else {
     guidance_v_run(autopilot_in_flight);
     guidance_h_run(autopilot_in_flight);    
+#ifdef ROTORCRAFT_COMMANDS_THROUGH_MODULE
+    SetRotorcraftCommands_module(stabilization_cmd, autopilot_in_flight, autopilot_motors_on);
+#else
     SetRotorcraftCommands(stabilization_cmd, autopilot_in_flight, autopilot_motors_on);
-
-    if (lock_wings == 1 && autopilot_motors_on && commands[COMMAND_THRUST] > 0) {
-      commands[COMMAND_THRUST] = 1100;
-    } else if (lock_wings == 2) {
-      commands[COMMAND_THRUST] = 0;
-    }
+#endif
   }
 
 }
