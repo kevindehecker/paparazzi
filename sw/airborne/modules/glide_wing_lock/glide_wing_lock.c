@@ -62,7 +62,7 @@ void glide_wing_lock_init(void)
 
 void glide_wing_lock_event()
 {
-  static int lockstate = 0;
+  static int lockstate = 2;
   if (radio_control.values[WING_POS_LOCK_SWITCH] > (MIN_PPRZ / 2)) { // check glide switch
     float wpos = adcbuf.sum / adcbuf.av_nb_sample;
     switch (lockstate) {
@@ -103,6 +103,8 @@ void glide_wing_lock_periodic()
   uint16_t wpos = adcbuf.sum / adcbuf.av_nb_sample;
   DOWNLINK_SEND_ADC_GENERIC(DefaultChannel, DefaultDevice, &wpos, &wpos);
 }
+
+bool first_time_arm_done;
 
 void set_rotorcraft_commands(pprz_t *cmd_out, int32_t *cmd_in, bool in_flight, bool motors_on)
 {
