@@ -54,6 +54,8 @@ int lock_wings;
 #define WING_POS_LOCK_SWITCH RADIO_AUX2
 #endif
 
+int wing_lock_pos_max_thresh = WING_POS_LOCK_MAX_THRESH;
+int wing_lock_pos_min_thresh = WING_POS_LOCK_MIN_THRESH;
 
 void glide_wing_lock_init(void)
 {
@@ -83,7 +85,7 @@ void glide_wing_lock_event()
         }
         break;
       case 3:
-        if (wpos > WING_POS_LOCK_MIN_THRESH && wpos < WING_POS_LOCK_MAX_THRESH) { // wait for exact wing position
+        if (wpos > wing_lock_pos_min_thresh && wpos < wing_lock_pos_max_thresh) { // wait for exact wing position
           //esc brakes when throttle = 0, which should lock the wing in this position;
           lock_wings = 2;
           lockstate++;

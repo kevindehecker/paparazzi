@@ -212,6 +212,7 @@ static void attitude_run_fb(int32_t fb_commands[], struct Int32AttitudeGains *ga
   /*  PID feedback */
   fb_commands[COMMAND_ROLL] =
     GAIN_PRESCALER_P * gains->p.x  * QUAT1_FLOAT_OF_BFP(att_err->qx) +
+    GAIN_PRESCALER_D * gains->d.z  * RATE_FLOAT_OF_BFP(rate_err->r) +
     GAIN_PRESCALER_D * gains->d.x  * RATE_FLOAT_OF_BFP(rate_err->p) +
     GAIN_PRESCALER_I * gains->i.x  * QUAT1_FLOAT_OF_BFP(sum_err->qx);
 
@@ -222,7 +223,7 @@ static void attitude_run_fb(int32_t fb_commands[], struct Int32AttitudeGains *ga
 
   fb_commands[COMMAND_YAW] =
     GAIN_PRESCALER_P * gains->p.z  * QUAT1_FLOAT_OF_BFP(att_err->qz) +
-    GAIN_PRESCALER_D * gains->d.z  * RATE_FLOAT_OF_BFP(rate_err->r) +
+//    GAIN_PRESCALER_D * gains->d.z  * RATE_FLOAT_OF_BFP(rate_err->r) +
     GAIN_PRESCALER_I * gains->i.z  * QUAT1_FLOAT_OF_BFP(sum_err->qz);
 
 }

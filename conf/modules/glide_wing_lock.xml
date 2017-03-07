@@ -10,6 +10,14 @@
     <configure name="WING_POS_LOCK_SWITCH" value="0-5000" description="RC switch to activate lock of the wing"/>
     <configure name="WING_POS_NOMINAL_THRUST" value="0-9600" description="Nominal thrust to use just before locking"/>
   </doc>
+  <settings>
+    <dl_settings>
+      <dl_settings name="glide_wing_lock">
+        <dl_setting var="wing_lock_pos_max_thresh" min="0" step="10" max="9600" shortname="max position" />
+        <dl_setting var="wing_lock_pos_min_thresh" min="0" step="10" max="9600" shortname="min position" />
+      </dl_settings>
+    </dl_settings>
+  </settings>
   <header>
     <file name="glide_wing_lock.h"/>
   </header>

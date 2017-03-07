@@ -37,6 +37,9 @@ extern void glide_wing_lock_init(void);
 extern void glide_wing_lock_event(void);
 extern void glide_wing_lock_periodic(void);
 
+extern int wing_lock_pos_max_thresh ;
+extern int wing_lock_pos_min_thresh ;
+
 //extern void set_rotorcraft_commands(pprz_t *cmd_out, int32_t *cmd_in, bool in_flight __attribute__((unused)), bool motors_on __attribute__((unused)));
 
 #endif
