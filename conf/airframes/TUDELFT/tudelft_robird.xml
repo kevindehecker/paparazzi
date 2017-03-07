@@ -37,8 +37,8 @@
     <module name="glide_wing_lock">
       <configure name="ADC_MOTOR_SENSOR" value="ADC_4" />
       <configure name="WING_POS_DOWN_THRESH" value="100" />
-      <configure name="WING_POS_LOCK_MIN_THRESH" value="2000" />
-      <configure name="WING_POS_LOCK_MAX_THRESH" value="2100" />
+      <configure name="WING_POS_LOCK_MIN_THRESH" value="1655" />
+      <configure name="WING_POS_LOCK_MAX_THRESH" value="1864" />
       <configure name="WING_POS_LOCK_SWITCH" value="RADIO_AUX2" />
     </module>
     <module name="intermcu" type="uart">
