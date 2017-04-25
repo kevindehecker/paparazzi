@@ -8,8 +8,18 @@
     <configure name="WING_POS_LOCK_MIN_THRESH" value="0-5000" description="Prefered lock position of the wing"/>
     <configure name="WING_POS_LOCK_MAX_THRESH" value="0-5000" description="Prefered lock position of the wing"/>
     <configure name="WING_POS_LOCK_SWITCH" value="0-5000" description="RC switch to activate lock of the wing"/>
-    <configure name="WING_POS_NOMINAL_THRUST" value="0-9600" description="Nominal thrust to use just before locking"/>
+    <configure name="WING_PRELOCK_THRUST" value="0-9600" description="Nominal thrust to use just before locking"/>
   </doc>
+  <settings>
+    <dl_settings>
+      <dl_settings name="glide_wing_lock">
+        <dl_setting var="wing_lock_pos_max_thresh" min="0" step="10" max="9600" shortname="Glide max position" />
+        <dl_setting var="wing_lock_pos_min_thresh" min="0" step="10" max="9600" shortname="Glid min position" />
+        <dl_setting var="wing_prelock_min_thrust" min="0" step="10" max="9600" shortname="Min throttle" />
+        <dl_setting var="wing_prelock_thrust" min="0" step="10" max="9600" shortname="Pre lock throttle" />
+      </dl_settings>
+    </dl_settings>
+  </settings>
   <header>
     <file name="glide_wing_lock.h"/>
   </header>

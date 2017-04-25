@@ -37,55 +37,68 @@
 struct adc_buf adcbuf;
 
 int lock_wings;
-
-#ifndef WING_POS_DOWN_THRESH
-#define WING_POS_DOWN_THRESH 100
+int last_commanded_thrust = 0;
+//wing down ~1568-1650
+//wing up ~2930-50
+//wing going down > 0 .. 1500
+//wing going up 1500 .. 2999
+#ifndef WING_POS_FULL_UP
+#define WING_POS_FULL_UP 3000 // mod 3000
 #endif
+#ifndef WING_POS_FULL_DOWN
+#define WING_POS_FULL_DOWN 1500
+#endif
+#ifndef WING_RANGE_THRESH
+#define WING_RANGE_THRESH 100
+#endif
+
 #ifndef WING_POS_LOCK_MIN_THRESH
-#define WING_POS_LOCK_MIN_THRESH 2000
+#define WING_POS_LOCK_MIN_THRESH 800
 #endif
 #ifndef WING_POS_LOCK_MAX_THRESH
-#define WING_POS_LOCK_MAX_THRESH 2100
+#define WING_POS_LOCK_MAX_THRESH 900
 #endif
-#ifndef WING_POS_NOMINAL_THRUST
-#define WING_POS_NOMINAL_THRUST 5000
+#ifndef WING_PRELOCK_THRUST
+#define WING_PRELOCK_THRUST 3000
+#endif
+#ifndef WING_PRELOCK_MIN_THRUST
+#define WING_PRELOCK_MIN_THRUST 2300
 #endif
 #ifndef WING_POS_LOCK_SWITCH
 #define WING_POS_LOCK_SWITCH RADIO_AUX2
 #endif
 
+int wing_lock_pos_max_thresh = WING_POS_LOCK_MAX_THRESH;
+int wing_lock_pos_min_thresh = WING_POS_LOCK_MIN_THRESH;
+int wing_prelock_thrust = WING_PRELOCK_THRUST;
+int wing_prelock_min_thrust = WING_PRELOCK_MIN_THRUST;
 
 void glide_wing_lock_init(void)
 {
   adc_buf_channel(ADC_CHANNEL_MOTORSENSOR, &adcbuf, 1);
 }
-
+float wpos = 0;
 void glide_wing_lock_event()
 {
-  static int lockstate = 0;
-  if (radio_control.values[WING_POS_LOCK_SWITCH] > (MIN_PPRZ / 2)) { // check glide switch
-    float wpos = adcbuf.sum / adcbuf.av_nb_sample;
+  static int lockstate = 2;
+  if (radio_control.values[WING_POS_LOCK_SWITCH] > (MIN_PPRZ / 2) && last_commanded_thrust > 0) {
+
+    if (last_commanded_thrust < wing_prelock_min_thrust)
+      last_commanded_thrust = wing_prelock_min_thrust;
+
+    wpos = adcbuf.sum / adcbuf.av_nb_sample;
     switch (lockstate) {
       case 0:
-        if (wpos < WING_POS_DOWN_THRESH) { //set wings to fixed speed for one rotation starting from when wings are at lowest position
-          lock_wings = 1;
+        lock_wings = 1; // immidiately put speed to fixed speed, so that rc throttle is not influencing anything anymore
+        if (wpos > WING_POS_FULL_UP - WING_RANGE_THRESH || wpos < WING_RANGE_THRESH) { //wait until wing position is full up
+          lock_wings = 2;
           lockstate++;
         }
         break;
       case 1:
-        if (wpos > WING_POS_LOCK_MIN_THRESH) { //start wait for a rotation
-          lockstate++;
-        }
-        break;
-      case 2:
-        if (wpos < WING_POS_DOWN_THRESH) { //rotation finished
-          lockstate++;
-        }
-        break;
-      case 3:
-        if (wpos > WING_POS_LOCK_MIN_THRESH && wpos < WING_POS_LOCK_MAX_THRESH) { // wait for exact wing position
+        if (wpos > wing_lock_pos_min_thresh && wpos < wing_lock_pos_max_thresh) { // wait for exact wing position (just under lock position) and direction (going down)
           //esc brakes when throttle = 0, which should lock the wing in this position;
-          lock_wings = 2;
+          lock_wings = 3;
           lockstate++;
         }
         break;
@@ -98,11 +111,14 @@ void glide_wing_lock_event()
   }
 }
 
+uint16_t tmppos;
 void glide_wing_lock_periodic()
 {
-  uint16_t wpos = adcbuf.sum / adcbuf.av_nb_sample;
-  DOWNLINK_SEND_ADC_GENERIC(DefaultChannel, DefaultDevice, &wpos, &wpos);
+  uint16_t wpostmp = adcbuf.sum / adcbuf.av_nb_sample;
+  DOWNLINK_SEND_ADC_GENERIC(DefaultChannel, DefaultDevice, &wpostmp, &tmppos);
 }
+
+
 
 void set_rotorcraft_commands(pprz_t *cmd_out, int32_t *cmd_in, bool in_flight, bool motors_on)
 {
@@ -113,11 +129,28 @@ void set_rotorcraft_commands(pprz_t *cmd_out, int32_t *cmd_in, bool in_flight, b
   cmd_out[COMMAND_YAW] = cmd_in[COMMAND_YAW];
   cmd_out[COMMAND_THRUST] = cmd_in[COMMAND_THRUST];
 
-  if (lock_wings == 1 && motors_on && cmd_out[COMMAND_THRUST] > 0) {
-    cmd_out[COMMAND_THRUST] = WING_POS_NOMINAL_THRUST;
-  } else if (lock_wings == 2) {
+  if (lock_wings == 0)
+    last_commanded_thrust = cmd_in[COMMAND_THRUST];
+
+  if (lock_wings == 1)
+    cmd_out[COMMAND_THRUST] = last_commanded_thrust;
+
+  if (lock_wings == 2) {
+    //apply linear brake
+    float tmp = WING_POS_LOCK_MIN_THRESH - wpos;
+    float f = (WING_PRELOCK_THRUST/WING_POS_LOCK_MIN_THRESH) * tmp;
+
+    if (f > wing_prelock_min_thrust && f < WING_PRELOCK_THRUST)
+      cmd_out[COMMAND_THRUST] = f;
+    else if (f<wing_prelock_min_thrust)
+      cmd_out[COMMAND_THRUST] = wing_prelock_min_thrust; // minimal thrust to keep wing moving
+    else
+      cmd_out[COMMAND_THRUST] = WING_PRELOCK_THRUST;
+
+  } else if (lock_wings == 3) {
     cmd_out[COMMAND_THRUST] = 0;
   }
+   tmppos =  cmd_out[COMMAND_THRUST]; //tmp pprz msg variable
 }
 
 
