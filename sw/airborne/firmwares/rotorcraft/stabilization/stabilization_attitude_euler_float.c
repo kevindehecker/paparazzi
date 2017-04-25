@@ -212,12 +212,18 @@ void stabilization_attitude_run(bool  in_flight)
   struct FloatRates *rate_float = stateGetBodyRates_f();
   struct FloatRates rate_err;
   RATES_DIFF(rate_err, att_ref_euler_f.rate, *rate_float);
-
+#define ROBIRD
+#ifdef ROBIRD
+  rate_err.r = - rate_float->r;
+#endif
   /*  PID                  */
 
   stabilization_att_fb_cmd[COMMAND_ROLL] =
     stabilization_gains.p.x  * att_err.phi +
     stabilization_gains.d.x  * rate_err.p +
+#ifdef ROBIRD
+     stabilization_gains.d.z  * rate_err.r +
+#endif
     stabilization_gains.i.x  * stabilization_att_sum_err.phi;
 
   stabilization_att_fb_cmd[COMMAND_PITCH] =
@@ -227,7 +233,9 @@ void stabilization_attitude_run(bool  in_flight)
 
   stabilization_att_fb_cmd[COMMAND_YAW] =
     stabilization_gains.p.z  * att_err.psi +
+#ifndef ROBIRD
     stabilization_gains.d.z  * rate_err.r +
+#endif
     stabilization_gains.i.z  * stabilization_att_sum_err.psi;
 
 
