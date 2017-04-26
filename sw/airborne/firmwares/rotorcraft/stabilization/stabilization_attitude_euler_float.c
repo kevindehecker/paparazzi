@@ -212,7 +212,7 @@ void stabilization_attitude_run(bool  in_flight)
   struct FloatRates *rate_float = stateGetBodyRates_f();
   struct FloatRates rate_err;
   RATES_DIFF(rate_err, att_ref_euler_f.rate, *rate_float);
-#define ROBIRD
+//#define ROBIRD
 #ifdef ROBIRD
   rate_err.r = - rate_float->r;
 #endif

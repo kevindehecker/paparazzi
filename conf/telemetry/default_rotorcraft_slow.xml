@@ -97,6 +97,8 @@
       <message name="ALIVE"             period="0.9"/>
       <message name="STAB_ATTITUDE_INT"     period=".03"/>
       <message name="STAB_ATTITUDE_REF_INT" period=".03"/>
+      <message name="STAB_ATTITUDE_FLOAT"     period=".03"/>
+      <message name="STAB_ATTITUDE_REF_FLOAT" period=".03"/>
       <message name="STAB_ATTITUDE_INDI"     period=".25"/>
     </mode>
 

@@ -122,7 +122,6 @@ void glide_wing_lock_periodic()
 
 void set_rotorcraft_commands(pprz_t *cmd_out, int32_t *cmd_in, bool in_flight, bool motors_on)
 {
-  if (!(in_flight)) { cmd_in[COMMAND_YAW] = 0; }
   if (!(motors_on)) { cmd_in[COMMAND_THRUST] = 0; }
   cmd_out[COMMAND_ROLL] = cmd_in[COMMAND_ROLL];
   cmd_out[COMMAND_PITCH] = cmd_in[COMMAND_PITCH];
