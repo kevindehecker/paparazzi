@@ -53,10 +53,10 @@ int last_commanded_thrust = 0;
 #endif
 
 #ifndef WING_POS_LOCK_MIN_THRESH
-#define WING_POS_LOCK_MIN_THRESH 800
+#define WING_POS_LOCK_MIN_THRESH 850
 #endif
 #ifndef WING_POS_LOCK_MAX_THRESH
-#define WING_POS_LOCK_MAX_THRESH 900
+#define WING_POS_LOCK_MAX_THRESH 950
 #endif
 #ifndef WING_PRELOCK_THRUST
 #define WING_PRELOCK_THRUST 3000
