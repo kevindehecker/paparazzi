@@ -193,13 +193,13 @@ void imu_aspirin2_event(void)
      */
 #ifdef LISA_M_OR_MX_21
     RATES_ASSIGN(imu.gyro_unscaled,
-                 -imu_aspirin2.mpu.data_rates.rates.q,
-                 imu_aspirin2.mpu.data_rates.rates.p,
-                 imu_aspirin2.mpu.data_rates.rates.r);
-    VECT3_ASSIGN(imu.accel_unscaled,
-                 -imu_aspirin2.mpu.data_accel.vect.y,
-                 imu_aspirin2.mpu.data_accel.vect.x,
-                 imu_aspirin2.mpu.data_accel.vect.z);
+                 -imu_aspirin2.mpu.data_rates.rates.p,
+                 imu_aspirin2.mpu.data_rates.rates.q,
+                 -imu_aspirin2.mpu.data_rates.rates.r);
+    VECT3_ASSIGN(imu.accel_unscaled,                 
+                 -imu_aspirin2.mpu.data_accel.vect.x,
+                 imu_aspirin2.mpu.data_accel.vect.y,
+                 -imu_aspirin2.mpu.data_accel.vect.z);
 #if !ASPIRIN_2_DISABLE_MAG
     VECT3_ASSIGN(imu.mag_unscaled, -mag.y, mag.x, mag.z);
 #endif
