@@ -122,7 +122,7 @@
   />
   <aircraft
    name="CX10"
-   ac_id="15"
+   ac_id="17"
    airframe="airframes/TUDELFT/tudelft_cx10.xml"
    radio="radios/dummy.xml"
    telemetry="telemetry/default_rotorcraft.xml"
