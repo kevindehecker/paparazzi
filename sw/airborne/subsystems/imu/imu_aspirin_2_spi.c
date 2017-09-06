@@ -195,7 +195,7 @@ void imu_aspirin2_event(void)
     RATES_ASSIGN(imu.gyro_unscaled,                                  
                  -imu_aspirin2.mpu.data_rates.rates.q,
                  imu_aspirin2.mpu.data_rates.rates.p,
-                 imu_aspirin2.mpu.data_rates.rates.r);
+                 -imu_aspirin2.mpu.data_rates.rates.r);
     VECT3_ASSIGN(imu.accel_unscaled,                 
                  imu_aspirin2.mpu.data_accel.vect.y,
                  -imu_aspirin2.mpu.data_accel.vect.x,
