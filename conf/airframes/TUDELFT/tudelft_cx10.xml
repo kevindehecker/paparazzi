@@ -188,6 +188,8 @@
 
       <define name="REMAP_UART3" value="TRUE" />
 
+      <configure name="USE_MAGNETOMETER" value="0"/>
+
       <module name="radio_control" type="datalink"/>
       <!--module name="radio_control" type="spektrum">
         <configure name="RADIO_CONTROL_SPEKTRUM_PRIMARY_PORT" value="UART5" />
@@ -224,7 +226,7 @@
 
 
     <module name="stabilization" type="int_quat"/>
-<module name="ahrs" type="float_cmpl_quat">  
+    <module name="ahrs" type="float_cmpl_quat">  
      	<define name="AHRS_PROPAGATE_LOW_PASS_RATES" value="TRUE"/> <!-- apply a low pass filter on rotational velocity"-->
      	<define name="AHRS_GRAVITY_HEURISTIC_FACTOR" value="10.0"/> <!-- Default is 30. Reduce accelerometer cut-off frequency when the vehicle is accelerating: norm(ax,ay,az) 9,81 m/s2. WARNING: when the IMU is not well damped, the norm of accelerometers never equals to 9,81 m/s2. As a result, the GRAVITY_HEURISTIC_FACTOR will reduce the accelerometer bandwith even if the vehicle is not accelerating. Set to 0 in case of vibrations -->
     </module> 
