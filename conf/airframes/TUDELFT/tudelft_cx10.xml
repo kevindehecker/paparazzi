@@ -54,7 +54,7 @@
     <define name="TRIM_YAW" value="0"/>
     <define name="NB_MOTOR" value="4"/>
     <define name="SCALE" value="256"/>
-    <define name="ROLL_COEF" value="{  -256, -256,  256,  256 }"/>
+    <define name="ROLL_COEF" value="{  256, 256,  -256,  -256 }"/>
     <define name="PITCH_COEF" value="{  256, -256, -256,  256 }"/>
     <define name="YAW_COEF" value="{    256, -256,  256, -256 }"/>
     <define name="THRUST_COEF" value="{ 256,  256,  256,  256 }"/>
@@ -129,15 +129,15 @@
     <define name="REF_MAX_RDOT" value="RadOfDeg(900.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="1058"/>
-    <define name="PHI_DGAIN" value="200"/>
+    <define name="PHI_PGAIN" value="400"/>
+    <define name="PHI_DGAIN" value="100"/>
     <define name="PHI_IGAIN" value="0"/>
 
-    <define name="THETA_PGAIN" value="1015"/>
-    <define name="THETA_DGAIN" value="200"/>
+    <define name="THETA_PGAIN" value="400"/>
+    <define name="THETA_DGAIN" value="100"/>
     <define name="THETA_IGAIN" value="0"/>
 
-    <define name="PSI_PGAIN" value="3030"/>
+    <define name="PSI_PGAIN" value="500"/>
     <define name="PSI_DGAIN" value="300"/>
     <define name="PSI_IGAIN" value="0"/>
 
@@ -226,10 +226,7 @@
 
 
     <module name="stabilization" type="int_quat"/>
-    <module name="ahrs" type="float_cmpl_quat">  
-     	<define name="AHRS_PROPAGATE_LOW_PASS_RATES" value="TRUE"/> <!-- apply a low pass filter on rotational velocity"-->
-     	<define name="AHRS_GRAVITY_HEURISTIC_FACTOR" value="10.0"/> <!-- Default is 30. Reduce accelerometer cut-off frequency when the vehicle is accelerating: norm(ax,ay,az) 9,81 m/s2. WARNING: when the IMU is not well damped, the norm of accelerometers never equals to 9,81 m/s2. As a result, the GRAVITY_HEURISTIC_FACTOR will reduce the accelerometer bandwith even if the vehicle is not accelerating. Set to 0 in case of vibrations -->
-    </module> 
+    <module name="ahrs" type="int_cmpl_quat"/>  
 
     <module name="ins"/>
 
