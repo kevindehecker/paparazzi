@@ -42,6 +42,8 @@ class MinimalDecoder:
         self.data = []
     def add_payload(self,bytes):
         self.data = bytes
+        print("Received payload: ")
+        print( bytes)        
 
     def draw(self,dc,x,y):
         dc.DrawText( "Payload: " + str(self.data),x,y)
@@ -51,16 +53,17 @@ class PayloadForwarderFrame(wx.Frame):
 
     def message_recv(self, ac_id, msg):
         if msg.name == "PAYLOAD":
+            print ("JOEHOE!")
             # convert text to binary
-            pld = msg.get_field(0).split(",")
+            pld = msg.get_field(0)
             b = []
             for p in pld:
                 b.append(int(p))
 
             # forward over UDP
-            self.data['packets'] = self.data['packets'] + 1
-            self.data['bytes'] = self.data['bytes'] + len(b)
-            self.sock.sendto(bytearray(b), (self.settings.ip, self.settings.port))
+            #self.data['packets'] = self.data['packets'] + 1
+            #self.data['bytes'] = self.data['bytes'] + len(b)
+            #self.sock.sendto(bytearray(b), (self.settings.ip, self.settings.port))
 
             # send to decoder
             self.decoder.add_payload(b)
@@ -104,9 +107,10 @@ class PayloadForwarderFrame(wx.Frame):
         self.data = { 'packets': 0, 'bytes': 0}
 
         # Decoder
-        if (self.settings.decoder is 'jpeg100'):
+        if (self.settings.decoder is 'jpeg100'):            
             self.decoder = jpeg100_decoder.ThumbNailFromPayload()
         else:
+            print("HOERRRRRRRRRRRRRR")
             self.decoder = MinimalDecoder()
 
         self.w = WIDTH
