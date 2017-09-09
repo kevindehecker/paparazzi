@@ -1,0 +1,17 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="ram_logger">
+  <doc>
+    <description>Logs data directly into RAM mem</description>
+  </doc>
+  <header>
+    <file name="ram_logger.h"/>
+  </header>
+  <init fun="ram_logger_init()"/>
+  <periodic fun="ram_logger_periodic()" start="ram_logger_start()" stop="ram_logger_stop()" freq="512" autorun="TRUE"/>
+  <event fun="ram_logger_event()"/>
+  <makefile>
+    <file name="ram_logger.c"/>
+  </makefile>
+</module>
+
