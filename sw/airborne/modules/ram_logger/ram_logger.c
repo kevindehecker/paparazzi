@@ -20,18 +20,24 @@
 /**
  * @file "modules/ramlogger/ramlogger.c"
  * @author Kevin van Hecke
- * Logs data directly into RAM mem. Sends it to GCS through a message.
+ * Logs data directly into RAM mem.
  */
 
 #include "modules/ram_logger/ram_logger.h"
 #define MAXBUFFERSIZE 32767
 #include "std.h"
-#include "subsystems/datalink/telemetry.h"
+//#include "subsystems/datalink/telemetry.h"
+#include "led.h"
+#include "led_hw.h"
+#include "autopilot.h"
+
+#include "mcu_periph/uart.h"
+#include "mcu_periph/uart_arch.h"
+
+#define COM_PORT   (&uart3.device)
 
 static unsigned char data1[MAXBUFFERSIZE];
 int count =0;
-int sentCounter = -1;
-int interval = 0;
 bool started;
 bool circular_buffer_mode = false; // TODO: make this a setting;
 
@@ -44,40 +50,67 @@ void ram_logger_init(void){
 
 void ram_logger_start(void) {
     count = 0;
-    sentCounter = 0;
+
     started = true;
 }
 void ram_logger_stop(void) {
     started = false;
-    sentCounter = 0;
-
 }
+
+bool sentnow = false;
 void ram_logger_periodic(void){
-    if (started) {
-        data1[count] = count; // tmp test
-        count +=1;
-        if (count > MAXBUFFERSIZE) {
-            if (circular_buffer_mode)
-                count = 0;
-            else
-                started = false;
-        }
+//    if (started) {
+//        data1[count] = count; // tmp test
+//        count +=1;
+//        if (count > MAXBUFFERSIZE) {
+//            if (circular_buffer_mode)
+//                count = 0;
+//            else
+//                started = false;
+//        }
+//    }
+
+    static int divider = 0;
+    if (divider++ % 100 == 0) {
+        sentnow = true;
+
     }
-    interval++;
 }
 
 
 void ram_logger_event(void) {
 
-    if (sentCounter >= 0 && interval > 200) {
-        uint16_t l = 127;
-        interval = 0;
-        unsigned char * ptr = data1;
-        ptr += sentCounter;
-        *ptr = sentCounter;
-        DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, l, ptr);
-        sentCounter +=l;
-        if (sentCounter  >= count-l)
-            sentCounter =-1; // stop sending when all data was sent
+    if (sentnow) {
+        sentnow = false;
+        //LED_TOGGLE(SYS_TIME_LED);
+        COM_PORT->put_byte(COM_PORT->periph, 0, 0x99);
+        COM_PORT->put_byte(COM_PORT->periph, 0, 7);
+        COM_PORT->put_byte(COM_PORT->periph, 0, 0);
+        COM_PORT->put_byte(COM_PORT->periph, 0, 0);
+
+        COM_PORT->put_byte(COM_PORT->periph, 0, 66);
+
+        COM_PORT->put_byte(COM_PORT->periph, 0, 66+7);
+        COM_PORT->put_byte(COM_PORT->periph, 0, 66+7);
+
+//        for (int i = 0; i < 255; i++) {
+//          COM_PORT->put_byte(COM_PORT->periph, 0, i);
+//        }
+//          COM_PORT->put_byte(COM_PORT->periph, 0, '\n');
+//          COM_PORT->put_byte(COM_PORT->periph, 0, '\0');
+//          COM_PORT->put_byte(COM_PORT->periph, 0, 'O');
+//          COM_PORT->put_byte(COM_PORT->periph, 0, 'E');
+//          COM_PORT->put_byte(COM_PORT->periph, 0, 'R');
+//          COM_PORT->put_byte(COM_PORT->periph, 0, '!');
+//          COM_PORT->put_byte(COM_PORT->periph, 0, '\n');
+//uart3.device.put_byte(&uart3.device,0,100);
+          //COM_PORT->put_buffer(COM_PORT->periph,0,data1,127);
+          //COM_PORT->send_message(COM_PORT->periph,0);
+
+          //autopilot_send_version();
+          //DOWNLINK_SEND_PAYLOAD(DefaultChannel, uart3, 127, data1);
+//        }
     }
+
+
 }
