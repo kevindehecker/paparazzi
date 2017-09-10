@@ -407,6 +407,17 @@
    gui_color="green"
   />
   <aircraft
+   name="aaf3d"
+   ac_id="69"
+   airframe="airframes/TUDELFT/tudelft_f3d.xml"
+   radio="radios/FrSky3dr.xml"
+   telemetry="telemetry/default_rotorcraft.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings="settings/rotorcraft_basic.xml"
+   settings_modules="modules/ins_extended.xml modules/ahrs_int_cmpl_quat.xml modules/stabilization_indi_simple.xml modules/nav_basic_rotorcraft.xml modules/guidance_rotorcraft.xml modules/imu_common.xml"
+   gui_color="#ffffcccaccca"
+  />
+  <aircraft
    name="autonomous_race"
    ac_id="8"
    airframe="airframes/TUDELFT/tudelft_bebop_autonomous_race.xml"
