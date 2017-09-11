@@ -4,7 +4,8 @@
 
 <airframe name="f3d">
   <firmware name="rotorcraft">
-    <target name="ap" board="stm32f3_discovery_1.0_chibios"/>
+<!--    <target name="ap" board="stm32f3_discovery_1.0_chibios"/>-->
+    <target name="ap" board="stm32f37x_vortex_1.0_chibios"/>
     <define name="BAT_CHECKER_DELAY" value="80" />
     <!-- amount of time it take for the bat to check -->
     <!-- to avoid bat low spike detection when strong pullup withch draws short sudden power-->

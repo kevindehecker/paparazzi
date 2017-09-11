@@ -75,6 +75,8 @@
 // STM32F4xx | STM32F7xx
 #define ADC_SAMPLE_RATE ADC_SAMPLE_480
 #define ADC_CR2_CFG ADC_CR2_SWSTART
+#elif defined(__STM32F373xC_H)
+#define ADC_SAMPLE_RATE ADC_SAMPLE_239P5
 #elif defined(__STM32F3xx_H)
 #define ADC_SAMPLE_RATE ADC_SMPR_SMP_601P5
 #endif
@@ -357,8 +359,11 @@ void adc_init(void)
   adcgrpcfg.num_channels = ADC_NUM_CHANNELS;
   adcgrpcfg.end_cb = adc1callback;
   adcgrpcfg.error_cb = adcerrorcallback;
+#if defined(__STM32F373xC_H)
+   //TODO: set AD regs
 
-#if defined(__STM32F3xx_H)
+
+#elif defined(__STM32F3xx_H)
   //TODO: check if something needs to be done with the other regs (can be found in ~/paparazzi/sw/ext/chibios/os/hal/ports/STM32/LLD/ADCv3)
   // cfgr
   // tr1
