@@ -1289,8 +1289,6 @@
 #define RC_POLARITY_GPIO_PORT GPIOB
 #define RC_POLARITY_GPIO_PIN GPIO13
 
-#define USE_UART4 false //RAM size problem
-
 /*
  * ADCs
  */
