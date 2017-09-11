@@ -1,13 +1,7 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- this is a quadrotor frame equiped with
-* Autopilot:   Pixracer
-* IMU:         MPU 9250 & MS5611
-* Actuators:   PWM motor controllers
-* GPS:
-* RC:          Spektrum
--->
+
 <airframe name="f3d">
   <firmware name="rotorcraft">
     <target name="ap" board="stm32f3_discovery_1.0_chibios"/>
@@ -15,15 +9,16 @@
     <!-- amount of time it take for the bat to check -->
     <!-- to avoid bat low spike detection when strong pullup withch draws short sudden power-->
     <define name="CATASTROPHIC_BATTERY_KILL_DELAY" value="80" />
+
+<define name="FUCKINTS"/>
+
     <!-- in seconds-->
     <module name="telemetry" type="transparent" />
 
     <module name="imu" type="lisa_mx_v2.1"/>
 
-
     <module name="stabilization" type="indi_simple" />
-    <!--<module name="stabilization" type="rate_indi" />-->
-    <module name="ahrs" type="int_cmpl_quat" >
+    <module name="ahrs" type="float_cmpl_quat" >
       <configure name="USE_MAGNETOMETER" value="FALSE"/>
       <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
 
@@ -39,8 +34,7 @@
 
 
 	<module name="gps" type="ublox">
-    <configure name="GPS_PORT" value="UART4"/>
-    <configure name="GPS_BAUD" value="B38400"/>
+
 	</module>
 
   </firmware>

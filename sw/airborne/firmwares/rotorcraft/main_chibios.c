@@ -36,13 +36,13 @@
 #endif
 
 #include "firmwares/rotorcraft/main_ap.h"
-
+#define CCMRAM __attribute__((section(".ram4")))
 /*
  * PPRZ/AP thread
  * Also include FBW on single MCU
  */
 static void thd_ap(void *arg);
-static THD_WORKING_AREA(wa_thd_ap, 8192);
+CCMRAM THD_WORKING_AREA(wa_thd_ap, 8192-344);
 static thread_t *apThdPtr = NULL;
 
 /**
