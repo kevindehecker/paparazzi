@@ -45,11 +45,12 @@ HAS_LUFTBOOT = FALSE
 #
 # default LED configuration
 #
-RADIO_CONTROL_LED  ?= 4
+SYS_TIME_LED       ?= 1
+RADIO_CONTROL_LED  ?= 2
 BARO_LED           ?= none
-AHRS_ALIGNER_LED   ?= 5
-GPS_LED            ?= 6
-SYS_TIME_LED       ?= 3
+AHRS_ALIGNER_LED   ?= 3
+GPS_LED            ?= 4
+
 
 #
 # default UART configuration (modem, gps, spektrum)
