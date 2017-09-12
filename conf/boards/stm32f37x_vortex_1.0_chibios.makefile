@@ -17,7 +17,7 @@ RTOS=chibios
 ## FPU on F3
 USE_FPU=hard
 
-$(TARGET).CFLAGS += -DSTM32F3 -DPPRZLINK_ENABLE_FD
+$(TARGET).CFLAGS += -DPPRZLINK_ENABLE_FD
 
 ##############################################################################
 # Architecture or project specific options
