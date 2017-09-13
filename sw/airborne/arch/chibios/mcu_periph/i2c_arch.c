@@ -198,7 +198,7 @@ static struct i2c_init i2c1_init_s = {
 struct i2c_errors i2c1_errors;
 // Thread
 static __attribute__((noreturn)) void thd_i2c1(void *arg);
-static THD_WORKING_AREA(wa_thd_i2c1, 1024);
+static THD_WORKING_AREA(wa_thd_i2c1, 128);
 
 /*
  * I2C1 init
@@ -252,7 +252,7 @@ static struct i2c_init i2c2_init_s = {
 struct i2c_errors i2c2_errors;
 // Thread
 static __attribute__((noreturn)) void thd_i2c2(void *arg);
-static THD_WORKING_AREA(wa_thd_i2c2, 1024);
+static THD_WORKING_AREA(wa_thd_i2c2, 128);
 
 /*
  * I2C2 init
@@ -307,7 +307,7 @@ static struct i2c_init i2c3_init_s = {
 struct i2c_errors i2c3_errors;
 // Thread
 static __attribute__((noreturn)) void thd_i2c3(void *arg);
-static THD_WORKING_AREA(wa_thd_i2c3, 1024);
+static THD_WORKING_AREA(wa_thd_i2c3, 128);
 
 /*
  * I2C3 init

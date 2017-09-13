@@ -37,7 +37,7 @@ MCU  = cortex-m4
 
 
 # default flash mode is via DFU-UTIL
-# possibilities: DFU-UTIL, SWD, STLINK
+# possibilities: DFU-UTIL, SWD, SWD_NOPWR, STLINK
 FLASH_MODE ?= SWD_NOPWR
 
 HAS_LUFTBOOT = FALSE
@@ -46,9 +46,9 @@ HAS_LUFTBOOT = FALSE
 # default LED configuration
 #
 SYS_TIME_LED       ?= 1
-RADIO_CONTROL_LED  ?= 2
+RADIO_CONTROL_LED  ?= 3
 BARO_LED           ?= none
-AHRS_ALIGNER_LED   ?= 3
+AHRS_ALIGNER_LED   ?= 2
 GPS_LED            ?= 4
 
 
@@ -56,10 +56,10 @@ GPS_LED            ?= 4
 # default UART configuration (modem, gps, spektrum)
 #
 
-MODEM_PORT ?= UART1
+MODEM_PORT ?= UART2
 MODEM_BAUD ?= B57600
 
-GPS_PORT ?= UART2
+GPS_PORT ?= UART1
 GPS_BAUD ?= B38400
 
 RADIO_CONTROL_SPEKTRUM_PRIMARY_PORT ?= UART3

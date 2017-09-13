@@ -36,6 +36,9 @@
 #include "peripherals/mpu9250.h"
 #include "peripherals/ak8963.h"
 
+#ifndef IMU_MPU9250_READ_MAG
+#define IMU_MPU9250_READ_MAG TRUE
+#endif
 
 #define MPU9250_BUFFER_EXT_LEN 16
 
@@ -67,7 +70,9 @@ struct Mpu9250_I2c {
   uint8_t data_ext[MPU9250_BUFFER_EXT_LEN];
   struct Mpu9250Config config;
   enum Mpu9250I2cSlaveInitStatus slave_init_status;
+#ifdef IMU_MPU9250_READ_MAG
   struct Ak8963 akm;                  ///< "internal" magnetometer
+#endif
 };
 
 // Functions
