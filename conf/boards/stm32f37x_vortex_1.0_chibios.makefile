@@ -15,7 +15,9 @@ $(TARGET).ARCHDIR = $(ARCH)
 RTOS=chibios
 
 ## FPU on F3
-USE_FPU=hard
+
+##TODO: there is some bug when using the hard FPU unit!!
+USE_FPU=no
 
 $(TARGET).CFLAGS += -DPPRZLINK_ENABLE_FD
 
