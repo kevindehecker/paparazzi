@@ -11,7 +11,12 @@
     <!-- to avoid bat low spike detection when strong pullup withch draws short sudden power-->
     <define name="CATASTROPHIC_BATTERY_KILL_DELAY" value="80" />
 
-<define name="FUCKINTS"/>
+<!--<define name="PPRZ_TRIG_INT_USE_FLOAT"/>-->
+<!--<define name="PPRZ_TRIG_INT_COMPR_FLASH"/>-->
+<!--<define name="PPRZ_TRIG_INT_COMPR_HIGHEST"/>-->
+<!--<define name="TRIG_INT_COMPR_LEN" value="256"/>-->
+<define name="PPRZ_TRIG_CONST" value="const"/> <!--TODO: prolly want this in some makefile somewhere-->
+<configure name="USE_MAGNETOMETER" value="FALSE"/>
 
     <!-- in seconds-->
     <module name="telemetry" type="transparent" />
@@ -20,13 +25,13 @@
         <configure name="IMU_MPU9250_I2C_DEV" value="i2c1"/>
         <define name="IMU_MPU9250_READ_MAG" value="FALSE"/>
         <define name="IMU_MPU9250_I2C_ADDR" value="MPU9250_ADDR"/>
+<!--        <define name="IMU_MPU9250_Z_SIGN" value="-1"/>-->
     </module>
 
     <module name="stabilization" type="indi_simple" />
     <module name="ahrs" type="float_cmpl_quat" >
       <configure name="USE_MAGNETOMETER" value="FALSE"/>
       <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
-
     </module>
     <module name="ins" type="extended" />
     <module name="actuators" type="pwm">
@@ -52,12 +57,23 @@
 
   <section name="IMU" prefix="IMU_">
     <!-- replace this with your own calibration -->
-    <define name="MAG_X_NEUTRAL" value="105"/>
-    <define name="MAG_Y_NEUTRAL" value="10"/>
-    <define name="MAG_Z_NEUTRAL" value="-23"/>
-    <define name="MAG_X_SENS" value="4.01453293111" integer="16"/>
-    <define name="MAG_Y_SENS" value="3.96379405627" integer="16"/>
-    <define name="MAG_Z_SENS" value="3.92499630895" integer="16"/>
+    <define name="MAG_X_NEUTRAL" value="30"/>
+    <define name="MAG_Y_NEUTRAL" value="127"/>
+    <define name="MAG_Z_NEUTRAL" value="140"/>
+    <define name="MAG_X_SENS" value="7.11726808648" integer="16"/>
+    <define name="MAG_Y_SENS" value="7.09366475279" integer="16"/>
+    <define name="MAG_Z_SENS" value="6.84467824688" integer="16"/>
+
+    <define name="ACCEL_X_NEUTRAL" value="-52"/>
+    <define name="ACCEL_Y_NEUTRAL" value="-4"/>
+    <define name="ACCEL_Z_NEUTRAL" value="-7"/>
+    <define name="ACCEL_X_SENS" value="2.45056441681" integer="16"/>
+    <define name="ACCEL_Y_SENS" value="2.44991708802" integer="16"/>
+    <define name="ACCEL_Z_SENS" value="2.44199722843" integer="16"/>
+
+    <define name="BODY_TO_IMU_PHI"   value="-90." unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value="180." unit="deg"/>
+    <define name="BODY_TO_IMU_PSI"   value="90." unit="deg"/>
   </section>
   <commands>
     <axis name="PITCH" failsafe_value="0" />
