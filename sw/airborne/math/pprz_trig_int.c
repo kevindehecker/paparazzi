@@ -26,7 +26,7 @@
 
 #include "pprz_trig_int.h"
 #include "pprz_algebra_int.h"
-#if !defined(FUCKINTS)
+#if !defined(PPRZ_TRIG_INT_USE_FLOAT)
 #if !defined(PPRZ_TRIG_INT_COMPR_FLASH) || defined(PPRZ_TRIG_INT_TEST)
 PPRZ_TRIG_CONST int16_t pprz_trig_int[6434] = {    0,
                                                    3,     7,    11,    15,    19,    23,    27,    31,    35,    39,    43,    47,    51,    55,    59,    63,
@@ -858,7 +858,7 @@ inline int16_t pprz_trig_int_f(int32_t angle)
 
 int32_t pprz_itrig_sin(int32_t angle)
 {
-#if defined(FUCKINTS)
+#if defined(PPRZ_TRIG_INT_USE_FLOAT)
     float tmp;
     tmp = ANGLE_FLOAT_OF_BFP(angle);
     tmp = sinf(tmp);
