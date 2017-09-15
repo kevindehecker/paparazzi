@@ -41,12 +41,17 @@ for flg in cflags:
     #they are in the form -Dsomestuff-Isomepath -Ianotherpath ...
     prev=0
     tmpflg = ""
+    includes = list()
     while (prev < len(flg)):
         flgss = flg[prev:]  
         #print("Old; " + flgss)      
         
-        id1 =flgss.find(" -I")
-
+        if flgss.startswith("-I"):
+            id1=0
+            flgss = " " + flgss
+        else:
+            id1 =flgss.find(" -I")
+               
         if (id1 > -1):
             
             flgsst = flgss[id1+3:]
@@ -64,13 +69,14 @@ for flg in cflags:
             for vpath in vpaths:                
                 if os.path.isdir(path.join(vpath, flgsst)) :
                     iflgss = "-I" + path.join(vpath, flgsst) + ' '
+                    includes.append(path.join(vpath, flgsst))
                     found = found +1                    
                     break
             if found == 0:                
-                iflgss = "ERROR, could not find: " + flgsst
+                iflgss = "ERROR: could not find: " + flgsst
                 print(iflgss)
             if found > 1:
-                iflgss = "ERROR, found more than once: " + iflgss
+                iflgss = "ERROR: found more than once: " + iflgss
                 print(iflgss)
 
 
@@ -93,6 +99,9 @@ for flg in cflags:
             qflg = qflg + flg[i]
     cmd = cmd + qflg + ' '
 
+
+#print(includes)
+#print("****************************************************")
 for i in range(0,len(srcs)):
     f = srcs[i]
     found = 0
@@ -109,7 +118,7 @@ for i in range(0,len(srcs)):
         tmps = "ERROR, found more than once: " + f
         cmd = cmd + tmps #hack to make the error known
         print(tmps)
-
+#print(cmd)
 #call gcc
 os.system(cmd)
 
