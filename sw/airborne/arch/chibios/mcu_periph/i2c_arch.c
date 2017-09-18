@@ -57,7 +57,7 @@ struct i2c_init {
 static void handle_i2c_thd(struct i2c_periph *p);
 
 // Timeout for I2C transaction
-static const systime_t tmo = US2ST(1000000/PERIODIC_FREQUENCY);
+static const systime_t tmo = US2ST(10000000/PERIODIC_FREQUENCY);
 
 /**
  * main thread function
@@ -261,8 +261,7 @@ void i2c2_hw_init(void)
 {
   i2cStart(&I2CD2, &i2cfg2);
   i2c2.reg_addr = &I2CD2;
-  i2c2.init_struct = NULL;
-  i2c2.errors = &i2c2_errors;
+    i2c2.errors = &i2c2_errors;
   i2c2.init_struct = &i2c2_init_s;
   // Create thread
   chThdCreateStatic(wa_thd_i2c2, sizeof(wa_thd_i2c2),

@@ -50,9 +50,8 @@ HAS_LUFTBOOT = FALSE
 SYS_TIME_LED       ?= 1
 RADIO_CONTROL_LED  ?= 3
 BARO_LED           ?= none
-AHRS_ALIGNER_LED   ?= 2
+AHRS_ALIGNER_LED   ?= none
 GPS_LED            ?= 4
-
 
 #
 # default UART configuration (modem, gps, spektrum)

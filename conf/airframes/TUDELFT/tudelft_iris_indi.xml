@@ -10,7 +10,7 @@
 -->
 <airframe name="iris_indi">
   <firmware name="rotorcraft">
-    <target name="ap" board="px4fmu_2.4" />
+    <target name="ap" board="px4fmu_2.4_chibios" />
     <define name="BAT_CHECKER_DELAY" value="80" />
     <define name="RADIO_MODE_2x3" value="true"/>
     <!-- amount of time it take for the bat to check -->
@@ -19,8 +19,8 @@
     <!-- in seconds-->
     <module name="telemetry" type="transparent" />
     <module name="imu" type="px4fmu_v2.4"/>
-    <module name="gps" type="ublox" >
-      <configure name="GPS_BAUD" value="B57600"/>
+    <module name="gps" type="ubx_i2c" >
+        <configure name="GPS_UBX_I2C_DEV" value="i2c1"/>
     </module>
     <module name="gps" type="ubx_ucenter" />
     <module name="stabilization" type="indi_simple" />
@@ -74,9 +74,6 @@
     </module>
   </firmware>
   <modules main_freq="512">
-    <module name="px4_flash">
-      <configure name="PX4IO_UART" value="uart6"/>
-    </module>
     <module name="px4_gimbal" />
     <module name="geo_mag" />
     <module name="air_data" />

@@ -97,9 +97,9 @@
 #define GPIOC_PIN7                  7U
 #define GPIOC_PIN8                  8U
 #define GPIOC_PIN9                  9U
-#define GPIOC_SPI3_SCK              10U
-#define GPIOC_SPI3_MISO             11U
-#define GPIOC_SPI3_MOSI             12U
+#define GPIOC_PIN10                 10U
+#define GPIOC_PIN11                 11U
+#define GPIOC_PIN12                 12U
 #define GPIOC_PIN13                 13U
 #define GPIOC_OSC32_IN              14U
 #define GPIOC_OSC32_OUT             15U
@@ -144,8 +144,8 @@
 #define GPIOF_PIN3                  3U
 #define GPIOF_JOY_LEFT              4U
 #define GPIOF_PIN5                  5U
-#define GPIOF_I2C_SCL               6U
-#define GPIOF_I2C_SDA               7U
+#define GPIOF_I2C2_SCL              6U
+#define GPIOF_I2C2_SDA              7U
 #define GPIOF_PIN8                  8U
 #define GPIOF_JOY_RIGHT             9U
 #define GPIOF_JOY_UP                10U
@@ -192,60 +192,60 @@
 /*
  * IO lines assignments.
  */
-#define LINE_WKUP_BUTTON            PAL_LINE(GPIOA, 0U)
-#define LINE_LDR_OUT                PAL_LINE(GPIOA, 1U)
-#define LINE_KEY_BUTTON             PAL_LINE(GPIOA, 2U)
-#define LINE_COMP2_OUT              PAL_LINE(GPIOA, 7U)
-#define LINE_I2C2_SMB               PAL_LINE(GPIOA, 8U)
-#define LINE_I2C2_SCL               PAL_LINE(GPIOA, 9U)
-#define LINE_I2C2_SDA               PAL_LINE(GPIOA, 10U)
-#define LINE_USB_DM                 PAL_LINE(GPIOA, 11U)
-#define LINE_USB_DP                 PAL_LINE(GPIOA, 12U)
-#define LINE_SWDIO                  PAL_LINE(GPIOA, 13U)
-#define LINE_SWCLK                  PAL_LINE(GPIOA, 14U)
-#define LINE_JTDI                   PAL_LINE(GPIOA, 15U)
+//#define LINE_WKUP_BUTTON            PAL_LINE(GPIOA, 0U)
+//#define LINE_LDR_OUT                PAL_LINE(GPIOA, 1U)
+//#define LINE_KEY_BUTTON             PAL_LINE(GPIOA, 2U)
+//#define LINE_COMP2_OUT              PAL_LINE(GPIOA, 7U)
+//#define LINE_I2C2_SMB               PAL_LINE(GPIOA, 8U)
+//#define LINE_I2C2_SCL               PAL_LINE(GPIOA, 9U)
+//#define LINE_I2C2_SDA               PAL_LINE(GPIOA, 10U)
+//#define LINE_USB_DM                 PAL_LINE(GPIOA, 11U)
+//#define LINE_USB_DP                 PAL_LINE(GPIOA, 12U)
+//#define LINE_SWDIO                  PAL_LINE(GPIOA, 13U)
+//#define LINE_SWCLK                  PAL_LINE(GPIOA, 14U)
+//#define LINE_JTDI                   PAL_LINE(GPIOA, 15U)
 
-#define LINE_MIC_IN                 PAL_LINE(GPIOB, 0U)
-#define LINE_ADC_POT_IN             PAL_LINE(GPIOB, 1U)
-#define LINE_SWO                    PAL_LINE(GPIOB, 3U)
-#define LINE_JTRST                  PAL_LINE(GPIOB, 4U)
-#define LINE_I2C1_SCL               PAL_LINE(GPIOB, 6U)
-#define LINE_I2C1_SDA               PAL_LINE(GPIOB, 7U)
+//#define LINE_MIC_IN                 PAL_LINE(GPIOB, 0U)
+//#define LINE_ADC_POT_IN             PAL_LINE(GPIOB, 1U)
+//#define LINE_SWO                    PAL_LINE(GPIOB, 3U)
+//#define LINE_JTRST                  PAL_LINE(GPIOB, 4U)
+//#define LINE_I2C1_SCL               PAL_LINE(GPIOB, 6U)
+//#define LINE_I2C1_SDA               PAL_LINE(GPIOB, 7U)
 
-#define LINE_LED1                   PAL_LINE(GPIOC, 0U)
-#define LINE_LED2                   PAL_LINE(GPIOC, 1U)
-#define LINE_LED3                   PAL_LINE(GPIOC, 2U)
-#define LINE_LED4                   PAL_LINE(GPIOC, 3U)
-#define LINE_USB_DISCONNECT         PAL_LINE(GPIOC, 5U)
-#define LINE_SPI3_SCK               PAL_LINE(GPIOC, 10U)
-#define LINE_SPI3_MISO              PAL_LINE(GPIOC, 11U)
-#define LINE_SPI3_MOSI              PAL_LINE(GPIOC, 12U)
-#define LINE_OSC32_IN               PAL_LINE(GPIOC, 14U)
-#define LINE_OSC32_OUT              PAL_LINE(GPIOC, 15U)
+//#define LINE_LED1                   PAL_LINE(GPIOC, 0U)
+//#define LINE_LED2                   PAL_LINE(GPIOC, 1U)
+//#define LINE_LED3                   PAL_LINE(GPIOC, 2U)
+//#define LINE_LED4                   PAL_LINE(GPIOC, 3U)
+//#define LINE_USB_DISCONNECT         PAL_LINE(GPIOC, 5U)
+//#define LINE_SPI3_SCK               PAL_LINE(GPIOC, 10U)
+//#define LINE_SPI3_MISO              PAL_LINE(GPIOC, 11U)
+//#define LINE_SPI3_MOSI              PAL_LINE(GPIOC, 12U)
+//#define LINE_OSC32_IN               PAL_LINE(GPIOC, 14U)
+//#define LINE_OSC32_OUT              PAL_LINE(GPIOC, 15U)
 
-#define LINE_CAN_RX                 PAL_LINE(GPIOD, 0U)
-#define LINE_CAN_TX                 PAL_LINE(GPIOD, 1U)
-#define LINE_LCD_CS                 PAL_LINE(GPIOD, 2U)
-#define LINE_USART2_CTS             PAL_LINE(GPIOD, 3U)
-#define LINE_USART2_RST             PAL_LINE(GPIOD, 4U)
-#define LINE_USART2_TX              PAL_LINE(GPIOD, 5U)
-#define LINE_USART2_RX              PAL_LINE(GPIOD, 6U)
-#define LINE_AUDIO_RST              PAL_LINE(GPIOD, 11U)
+//#define LINE_CAN_RX                 PAL_LINE(GPIOD, 0U)
+//#define LINE_CAN_TX                 PAL_LINE(GPIOD, 1U)
+//#define LINE_LCD_CS                 PAL_LINE(GPIOD, 2U)
+//#define LINE_USART2_CTS             PAL_LINE(GPIOD, 3U)
+//#define LINE_USART2_RST             PAL_LINE(GPIOD, 4U)
+//#define LINE_USART2_TX              PAL_LINE(GPIOD, 5U)
+//#define LINE_USART2_RX              PAL_LINE(GPIOD, 6U)
+//#define LINE_AUDIO_RST              PAL_LINE(GPIOD, 11U)
 
-#define LINE_SD_CS                  PAL_LINE(GPIOE, 2U)
-#define LINE_SD_DETECT              PAL_LINE(GPIOE, 3U)
-#define LINE_JOY_SEL                PAL_LINE(GPIOE, 6U)
-#define LINE_RTD_IN                 PAL_LINE(GPIOE, 7U)
-#define LINE_PRESSUREP              PAL_LINE(GPIOE, 8U)
-#define LINE_PRESSUREN              PAL_LINE(GPIOE, 9U)
-#define LINE_PRESSURE_TEPM          PAL_LINE(GPIOE, 14U)
+//#define LINE_SD_CS                  PAL_LINE(GPIOE, 2U)
+//#define LINE_SD_DETECT              PAL_LINE(GPIOE, 3U)
+//#define LINE_JOY_SEL                PAL_LINE(GPIOE, 6U)
+//#define LINE_RTD_IN                 PAL_LINE(GPIOE, 7U)
+//#define LINE_PRESSUREP              PAL_LINE(GPIOE, 8U)
+//#define LINE_PRESSUREN              PAL_LINE(GPIOE, 9U)
+//#define LINE_PRESSURE_TEPM          PAL_LINE(GPIOE, 14U)
 
-#define LINE_OSC_IN                 PAL_LINE(GPIOF, 0U)
-#define LINE_OSC_OUT                PAL_LINE(GPIOF, 1U)
-#define LINE_JOY_DOWN               PAL_LINE(GPIOF, 2U)
-#define LINE_JOY_LEFT               PAL_LINE(GPIOF, 4U)
-#define LINE_JOY_RIGHT              PAL_LINE(GPIOF, 9U)
-#define LINE_JOY_UP                 PAL_LINE(GPIOF, 10U)
+//#define LINE_OSC_IN                 PAL_LINE(GPIOF, 0U)
+//#define LINE_OSC_OUT                PAL_LINE(GPIOF, 1U)
+//#define LINE_JOY_DOWN               PAL_LINE(GPIOF, 2U)
+//#define LINE_JOY_LEFT               PAL_LINE(GPIOF, 4U)
+//#define LINE_JOY_RIGHT              PAL_LINE(GPIOF, 9U)
+//#define LINE_JOY_UP                 PAL_LINE(GPIOF, 10U)
 
 /*
  * I/O ports initial setup, this configuration is established soon after reset
@@ -517,9 +517,9 @@
                                      PIN_MODE_INPUT(GPIOC_PIN7) |           \
                                      PIN_MODE_INPUT(GPIOC_PIN8) |           \
                                      PIN_MODE_INPUT(GPIOC_PIN9) |           \
-                                     PIN_MODE_ALTERNATE(GPIOC_SPI3_SCK) |   \
-                                     PIN_MODE_ALTERNATE(GPIOC_SPI3_MISO) |  \
-                                     PIN_MODE_ALTERNATE(GPIOC_SPI3_MOSI) |  \
+                                     PIN_MODE_INPUT(GPIOC_PIN10) |   \
+                                     PIN_MODE_INPUT(GPIOC_PIN11) |  \
+                                     PIN_MODE_INPUT(GPIOC_PIN12) |  \
                                      PIN_MODE_INPUT(GPIOC_PIN13) |          \
                                      PIN_MODE_INPUT(GPIOC_OSC32_IN) |       \
                                      PIN_MODE_INPUT(GPIOC_OSC32_OUT))
@@ -533,9 +533,9 @@
                                      PIN_OTYPE_PUSHPULL(GPIOC_PIN7) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOC_PIN8) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOC_PIN9) |       \
-                                     PIN_OTYPE_PUSHPULL(GPIOC_SPI3_SCK) |   \
-                                     PIN_OTYPE_PUSHPULL(GPIOC_SPI3_MISO) |  \
-                                     PIN_OTYPE_PUSHPULL(GPIOC_SPI3_MOSI) |  \
+                                     PIN_OTYPE_PUSHPULL(GPIOC_PIN10) |   \
+                                     PIN_OTYPE_PUSHPULL(GPIOC_PIN11) |  \
+                                     PIN_OTYPE_PUSHPULL(GPIOC_PIN12) |  \
                                      PIN_OTYPE_PUSHPULL(GPIOC_PIN13) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOC_OSC32_IN) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOC_OSC32_OUT))
@@ -549,9 +549,9 @@
                                      PIN_OSPEED_VERYLOW(GPIOC_PIN7) |       \
                                      PIN_OSPEED_VERYLOW(GPIOC_PIN8) |       \
                                      PIN_OSPEED_VERYLOW(GPIOC_PIN9) |       \
-                                     PIN_OSPEED_HIGH(GPIOC_SPI3_SCK) |      \
-                                     PIN_OSPEED_HIGH(GPIOC_SPI3_MISO) |     \
-                                     PIN_OSPEED_HIGH(GPIOC_SPI3_MOSI) |     \
+                                     PIN_OSPEED_VERYLOW(GPIOC_PIN10) |      \
+                                     PIN_OSPEED_VERYLOW(GPIOC_PIN11) |     \
+                                     PIN_OSPEED_VERYLOW(GPIOC_PIN12) |     \
                                      PIN_OSPEED_VERYLOW(GPIOC_PIN13) |      \
                                      PIN_OSPEED_HIGH(GPIOC_OSC32_IN) |      \
                                      PIN_OSPEED_HIGH(GPIOC_OSC32_OUT))
@@ -565,9 +565,9 @@
                                      PIN_PUPDR_PULLUP(GPIOC_PIN7) |         \
                                      PIN_PUPDR_PULLUP(GPIOC_PIN8) |         \
                                      PIN_PUPDR_PULLUP(GPIOC_PIN9) |         \
-                                     PIN_PUPDR_FLOATING(GPIOC_SPI3_SCK) |   \
-                                     PIN_PUPDR_PULLUP(GPIOC_SPI3_MISO) |    \
-                                     PIN_PUPDR_FLOATING(GPIOC_SPI3_MOSI) |  \
+                                     PIN_PUPDR_PULLUP(GPIOC_PIN10) |   \
+                                     PIN_PUPDR_PULLUP(GPIOC_PIN11) |    \
+                                     PIN_PUPDR_PULLUP(GPIOC_PIN12) |  \
                                      PIN_PUPDR_PULLUP(GPIOC_PIN13) |        \
                                      PIN_PUPDR_FLOATING(GPIOC_OSC32_IN) |   \
                                      PIN_PUPDR_FLOATING(GPIOC_OSC32_OUT))
@@ -581,9 +581,9 @@
                                      PIN_ODR_HIGH(GPIOC_PIN7) |             \
                                      PIN_ODR_HIGH(GPIOC_PIN8) |             \
                                      PIN_ODR_HIGH(GPIOC_PIN9) |             \
-                                     PIN_ODR_HIGH(GPIOC_SPI3_SCK) |         \
-                                     PIN_ODR_HIGH(GPIOC_SPI3_MISO) |        \
-                                     PIN_ODR_HIGH(GPIOC_SPI3_MOSI) |        \
+                                     PIN_ODR_HIGH(GPIOC_PIN10) |         \
+                                     PIN_ODR_HIGH(GPIOC_PIN11) |        \
+                                     PIN_ODR_HIGH(GPIOC_PIN12) |        \
                                      PIN_ODR_HIGH(GPIOC_PIN13) |            \
                                      PIN_ODR_HIGH(GPIOC_OSC32_IN) |         \
                                      PIN_ODR_HIGH(GPIOC_OSC32_OUT))
@@ -597,9 +597,9 @@
                                      PIN_AFIO_AF(GPIOC_PIN7, 0U))
 #define VAL_GPIOC_AFRH              (PIN_AFIO_AF(GPIOC_PIN8, 0U) |          \
                                      PIN_AFIO_AF(GPIOC_PIN9, 0U) |          \
-                                     PIN_AFIO_AF(GPIOC_SPI3_SCK, 6U) |      \
-                                     PIN_AFIO_AF(GPIOC_SPI3_MISO, 6U) |     \
-                                     PIN_AFIO_AF(GPIOC_SPI3_MOSI, 6U) |     \
+                                     PIN_AFIO_AF(GPIOC_PIN10, 0U) |      \
+                                     PIN_AFIO_AF(GPIOC_PIN11, 0U) |     \
+                                     PIN_AFIO_AF(GPIOC_PIN12, 0U) |     \
                                      PIN_AFIO_AF(GPIOC_PIN13, 0U) |         \
                                      PIN_AFIO_AF(GPIOC_OSC32_IN, 0U) |      \
                                      PIN_AFIO_AF(GPIOC_OSC32_OUT, 0U))
@@ -864,8 +864,8 @@
                                      PIN_MODE_INPUT(GPIOF_PIN3) |           \
                                      PIN_MODE_INPUT(GPIOF_JOY_LEFT) |       \
                                      PIN_MODE_INPUT(GPIOF_PIN5) |           \
-                                     PIN_MODE_ALTERNATE(GPIOF_I2C_SCL) |           \
-                                     PIN_MODE_ALTERNATE(GPIOF_I2C_SDA) |           \
+                                     PIN_MODE_ALTERNATE(GPIOF_I2C2_SCL) |           \
+                                     PIN_MODE_ALTERNATE(GPIOF_I2C2_SDA) |           \
                                      PIN_MODE_INPUT(GPIOF_PIN8) |           \
                                      PIN_MODE_INPUT(GPIOF_JOY_RIGHT) |      \
                                      PIN_MODE_INPUT(GPIOF_JOY_UP) |         \
@@ -880,8 +880,8 @@
                                      PIN_OTYPE_PUSHPULL(GPIOF_PIN3) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOF_JOY_LEFT) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOF_PIN5) |       \
-                                     PIN_OTYPE_OPENDRAIN(GPIOF_I2C_SCL) |       \
-                                     PIN_OTYPE_OPENDRAIN(GPIOF_I2C_SDA) |       \
+                                     PIN_OTYPE_OPENDRAIN(GPIOF_I2C2_SCL) |       \
+                                     PIN_OTYPE_OPENDRAIN(GPIOF_I2C2_SDA) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOF_PIN8) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOF_JOY_RIGHT) |  \
                                      PIN_OTYPE_PUSHPULL(GPIOF_JOY_UP) |     \
@@ -896,8 +896,8 @@
                                      PIN_OSPEED_VERYLOW(GPIOF_PIN3) |       \
                                      PIN_OSPEED_HIGH(GPIOF_JOY_LEFT) |      \
                                      PIN_OSPEED_VERYLOW(GPIOF_PIN5) |       \
-                                     PIN_OSPEED_HIGH(GPIOF_I2C_SCL) |       \
-                                     PIN_OSPEED_HIGH(GPIOF_I2C_SDA) |       \
+                                     PIN_OSPEED_HIGH(GPIOF_I2C2_SCL) |       \
+                                     PIN_OSPEED_HIGH(GPIOF_I2C2_SDA) |       \
                                      PIN_OSPEED_VERYLOW(GPIOF_PIN8) |       \
                                      PIN_OSPEED_HIGH(GPIOF_JOY_RIGHT) |     \
                                      PIN_OSPEED_HIGH(GPIOF_JOY_UP) |        \
@@ -912,8 +912,8 @@
                                      PIN_PUPDR_PULLUP(GPIOF_PIN3) |         \
                                      PIN_PUPDR_PULLDOWN(GPIOF_JOY_LEFT) |   \
                                      PIN_PUPDR_PULLUP(GPIOF_PIN5) |         \
-                                     PIN_PUPDR_FLOATING(GPIOF_I2C_SCL) |         \
-                                     PIN_PUPDR_FLOATING(GPIOF_I2C_SDA) |         \
+                                     PIN_PUPDR_FLOATING(GPIOF_I2C2_SCL) |         \
+                                     PIN_PUPDR_FLOATING(GPIOF_I2C2_SDA) |         \
                                      PIN_PUPDR_PULLUP(GPIOF_PIN8) |         \
                                      PIN_PUPDR_PULLDOWN(GPIOF_JOY_RIGHT) |  \
                                      PIN_PUPDR_PULLDOWN(GPIOF_JOY_UP) |     \
@@ -928,8 +928,8 @@
                                      PIN_ODR_HIGH(GPIOF_PIN3) |             \
                                      PIN_ODR_HIGH(GPIOF_JOY_LEFT) |         \
                                      PIN_ODR_HIGH(GPIOF_PIN5) |             \
-                                     PIN_ODR_HIGH(GPIOF_I2C_SCL) |             \
-                                     PIN_ODR_HIGH(GPIOF_I2C_SDA) |             \
+                                     PIN_ODR_HIGH(GPIOF_I2C2_SCL) |             \
+                                     PIN_ODR_HIGH(GPIOF_I2C2_SDA) |             \
                                      PIN_ODR_HIGH(GPIOF_PIN8) |             \
                                      PIN_ODR_HIGH(GPIOF_JOY_RIGHT) |        \
                                      PIN_ODR_HIGH(GPIOF_JOY_UP) |           \
@@ -944,8 +944,8 @@
                                      PIN_AFIO_AF(GPIOF_PIN3, 0U) |          \
                                      PIN_AFIO_AF(GPIOF_JOY_LEFT, 0U) |      \
                                      PIN_AFIO_AF(GPIOF_PIN5, 0U) |          \
-                                     PIN_AFIO_AF(GPIOF_I2C_SCL, 4U) |          \
-                                     PIN_AFIO_AF(GPIOF_I2C_SDA, 4U))
+                                     PIN_AFIO_AF(GPIOF_I2C2_SCL, 4U) |          \
+                                     PIN_AFIO_AF(GPIOF_I2C2_SDA, 4U))
 #define VAL_GPIOF_AFRH              (PIN_AFIO_AF(GPIOF_PIN8, 0U) |          \
                                      PIN_AFIO_AF(GPIOF_JOY_RIGHT, 0U) |     \
                                      PIN_AFIO_AF(GPIOF_JOY_UP, 0U) |        \
@@ -1219,7 +1219,7 @@
 
 /*orange  */
 #ifndef USE_LED_3
-#define USE_LED_3 1
+#define USE_LED_3 0
 #endif
 #define LED_3_GPIO GPIOE
 #define LED_3_GPIO_PIN GPIO10
@@ -1228,7 +1228,7 @@
 
 /* green */
 #ifndef USE_LED_4
-#define USE_LED_4 1
+#define USE_LED_4 0
 #endif
 #define LED_4_GPIO GPIOE
 #define LED_4_GPIO_PIN GPIO11
@@ -1305,7 +1305,7 @@
 
 // Internal ADC for battery enabled by default
 #ifndef USE_ADC_4
-#define USE_ADC_4 1
+#define USE_ADC_4 0
 #endif
 #if USE_ADC_4
 #define AD1_4_CHANNEL ADC_CHANNEL_IN4
@@ -1314,14 +1314,14 @@
 #define ADC_4_GPIO_PIN GPIO4
 #endif
 
-/* allow to define ADC_CHANNEL_VSUPPLY in the airframe file*/
-#ifndef ADC_CHANNEL_VSUPPLY
-#define ADC_CHANNEL_VSUPPLY ADC_4
-#endif
+///* allow to define ADC_CHANNEL_VSUPPLY in the airframe file*/
+//#ifndef ADC_CHANNEL_VSUPPLY
+//#define ADC_CHANNEL_VSUPPLY ADC_4
+//#endif
 
-#define DefaultVoltageOfAdc(adc) (0.006185*adc)
+//#define DefaultVoltageOfAdc(adc) (0.006185*adc)
 
-#define ACTUATORS_PWM_NB 4
+#define ACTUATORS_PWM_NB 2
 /*
  * PWM defines
  */
@@ -1356,7 +1356,7 @@
 #endif
 
 #ifndef USE_PWM2
-#define USE_PWM2 1
+#define USE_PWM2 0
 #endif
 #if USE_PWM2
 #define PWM_SERVO_2 2
@@ -1371,7 +1371,7 @@
 #endif
 
 #ifndef USE_PWM3
-#define USE_PWM3 1
+#define USE_PWM3 0
 #endif
 #if USE_PWM3
 #define PWM_SERVO_3 3
@@ -1455,32 +1455,32 @@ STM32_TIMINGR_SCLL(21U),    \
 0,0 }
 
 
-/**
- * SPI Config
- */
-#define SPI1_GPIO_AF GPIO_AF5
-#define SPI1_GPIO_PORT_MISO GPIOA
-#define SPI1_GPIO_MISO GPIO6
-#define SPI1_GPIO_PORT_MOSI GPIOA
-#define SPI1_GPIO_MOSI GPIO7
-#define SPI1_GPIO_PORT_SCK GPIOA
-#define SPI1_GPIO_SCK GPIO5
+///**
+// * SPI Config
+// */
+//#define SPI1_GPIO_AF GPIO_AF5
+//#define SPI1_GPIO_PORT_MISO GPIOA
+//#define SPI1_GPIO_MISO GPIO6
+//#define SPI1_GPIO_PORT_MOSI GPIOA
+//#define SPI1_GPIO_MOSI GPIO7
+//#define SPI1_GPIO_PORT_SCK GPIOA
+//#define SPI1_GPIO_SCK GPIO5
 
-// SLAVE0 on SPI connector
-#define SPI_SELECT_SLAVE0_PORT GPIOB
-#define SPI_SELECT_SLAVE0_PIN GPIO9
-// SLAVE1 on AUX1
-#define SPI_SELECT_SLAVE1_PORT GPIOB
-#define SPI_SELECT_SLAVE1_PIN GPIO1
-// SLAVE2 on AUX2
-#define SPI_SELECT_SLAVE2_PORT GPIOC
-#define SPI_SELECT_SLAVE2_PIN GPIO5
-// SLAVE3 on AUX3
-#define SPI_SELECT_SLAVE3_PORT GPIOC
-#define SPI_SELECT_SLAVE3_PIN GPIO4
-// SLAVE4 on AUX4
-#define SPI_SELECT_SLAVE4_PORT GPIOB
-#define SPI_SELECT_SLAVE4_PIN GPIO15
+//// SLAVE0 on SPI connector
+//#define SPI_SELECT_SLAVE0_PORT GPIOB
+//#define SPI_SELECT_SLAVE0_PIN GPIO9
+//// SLAVE1 on AUX1
+//#define SPI_SELECT_SLAVE1_PORT GPIOB
+//#define SPI_SELECT_SLAVE1_PIN GPIO1
+//// SLAVE2 on AUX2
+//#define SPI_SELECT_SLAVE2_PORT GPIOC
+//#define SPI_SELECT_SLAVE2_PIN GPIO5
+//// SLAVE3 on AUX3
+//#define SPI_SELECT_SLAVE3_PORT GPIOC
+//#define SPI_SELECT_SLAVE3_PIN GPIO4
+//// SLAVE4 on AUX4
+//#define SPI_SELECT_SLAVE4_PORT GPIOB
+//#define SPI_SELECT_SLAVE4_PIN GPIO15
 
 /**
  * Baro
@@ -1488,9 +1488,9 @@ STM32_TIMINGR_SCLL(21U),    \
  * Apparently needed for backwards compatibility
  * with the ancient onboard baro boards
  */
-// #ifndef USE_BARO_BOARD
-// #define USE_BARO_BOARD 1
-// #endif
+ #ifndef USE_BARO_BOARD
+ #define USE_BARO_BOARD 1
+ #endif
 
 /*
  * Actuators for fixedwing
@@ -1502,29 +1502,29 @@ STM32_TIMINGR_SCLL(21U),    \
 #define ActuatorsDefaultCommit() ActuatorsPwmCommit()
 
 
-/**
- * SDIO
- */
-#define SDIO_D0_PORT GPIOC
-#define SDIO_D0_PIN GPIOC_SDIO_D0
-#define SDIO_D1_PORT GPIOC
-#define SDIO_D1_PIN GPIOC_SDIO_D1
-#define SDIO_D2_PORT GPIOC
-#define SDIO_D2_PIN GPIOC_SDIO_D2
-#define SDIO_D3_PORT GPIOC
-#define SDIO_D3_PIN GPIOC_SDIO_D3
-#define SDIO_CK_PORT GPIOC
-#define SDIO_CK_PIN GPIOC_SDIO_CK
-#define SDIO_CMD_PORT GPIOD
-#define SDIO_CMD_PIN GPIOD_SDIO_CMD
-#define SDIO_AF 12
-// bat monitoring for file closing
-#define SDLOG_BAT_ADC ADCD1
-#define SDLOG_BAT_CHAN AD1_4_CHANNEL
-// usb led status
-#define SDLOG_USB_LED 4
-#define SDLOG_USB_VBUS_PORT GPIOA
-#define SDLOG_USB_VBUS_PIN GPIO9
+///**
+// * SDIO
+// */
+//#define SDIO_D0_PORT GPIOC
+//#define SDIO_D0_PIN GPIOC_SDIO_D0
+//#define SDIO_D1_PORT GPIOC
+//#define SDIO_D1_PIN GPIOC_SDIO_D1
+//#define SDIO_D2_PORT GPIOC
+//#define SDIO_D2_PIN GPIOC_SDIO_D2
+//#define SDIO_D3_PORT GPIOC
+//#define SDIO_D3_PIN GPIOC_SDIO_D3
+//#define SDIO_CK_PORT GPIOC
+//#define SDIO_CK_PIN GPIOC_SDIO_CK
+//#define SDIO_CMD_PORT GPIOD
+//#define SDIO_CMD_PIN GPIOD_SDIO_CMD
+//#define SDIO_AF 12
+//// bat monitoring for file closing
+//#define SDLOG_BAT_ADC ADCD1
+//#define SDLOG_BAT_CHAN AD1_4_CHANNEL
+//// usb led status
+//#define SDLOG_USB_LED 4
+//#define SDLOG_USB_VBUS_PORT GPIOA
+//#define SDLOG_USB_VBUS_PIN GPIO9
 
 
 //*****************************************************************************

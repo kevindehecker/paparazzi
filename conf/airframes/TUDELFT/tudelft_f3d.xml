@@ -16,7 +16,7 @@
 <!--<define name="PPRZ_TRIG_INT_COMPR_HIGHEST"/>-->
 <!--<define name="TRIG_INT_COMPR_LEN" value="256"/>-->
 <define name="PPRZ_TRIG_CONST" value="const"/> <!--TODO: prolly want this in some makefile somewhere-->
-<configure name="USE_MAGNETOMETER" value="FALSE"/>
+<configure name="USE_MAGNETOMETER" value="TRUE"/>
 
     <!-- in seconds-->
     <module name="telemetry" type="transparent" />
@@ -25,12 +25,14 @@
         <configure name="IMU_MPU9250_I2C_DEV" value="i2c1"/>
         <define name="IMU_MPU9250_READ_MAG" value="FALSE"/>
         <define name="IMU_MPU9250_I2C_ADDR" value="MPU9250_ADDR"/>
+        <define name="AHRS_ICQ_MAG_ID" value="MAG_HMC58XX_SENDER_ID" />         <!-- Meaning the external hmc-->
+        <configure name="USE_MAGNETOMETER" value="TRUE"/>
 <!--        <define name="IMU_MPU9250_Z_SIGN" value="-1"/>-->
     </module>
 
     <module name="stabilization" type="indi_simple" />
     <module name="ahrs" type="float_cmpl_quat" >
-      <configure name="USE_MAGNETOMETER" value="FALSE"/>
+      <configure name="USE_MAGNETOMETER" value="TRUE"/>
       <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
     </module>
     <module name="ins" type="extended" />
@@ -42,16 +44,31 @@
 
     <module name="radio_control" type="sbus"/>
 
+<!--    <module name="gps" type="ublox"/>-->
 
-	<module name="gps" type="ublox">
+  <module name="gps" type="ubx_i2c">
+      <configure name="GPS_UBX_I2C_DEV" value="i2c2"/>
+  </module>
 
-	</module>
-
+  <!--<module name="mag" type="hmc5843">
+      <configure name="HMC5843_I2C_DEV" value="i2c2"/>
+  </module>-->
+  <module name="mag" type="hmc58xx">
+    <configure name="MAG_HMC58XX_I2C_DEV" value="i2c2"/>
+    <define name="MODULE_HMC58XX_UPDATE_AHRS" value="TRUE"/>
+    <define name="HMC58XX_CHAN_X" value="1"/>
+    <define name="HMC58XX_CHAN_Y" value="0"/>
+    <define name="HMC58XX_CHAN_Z" value="2"/>
+    <define name="HMC58XX_CHAN_X_SIGN" value="-"/>
+    <define name="HMC58XX_CHAN_Y_SIGN" value="+"/>
+    <define name="HMC58XX_CHAN_Z_SIGN" value="+"/>
+  </module>
   </firmware>
 
 	<modules main_freq="512">
-	   <module name="gps" type="ubx_ucenter"/>
-	   <module name="send_imu_mag_current"/>
+     <module name="gps" type="ubx_ucenter"/>
+     <module name="send_imu_mag_current"/>
+     <module name="air_data"/>
 	 </modules>
 
 
@@ -90,8 +107,8 @@
   <servos driver="Default">
     <servo name="TOP_LEFT" no="0" min="1000" neutral="1100" max="2000" />
     <servo name="TOP_RIGHT" no="1" min="1000" neutral="1100" max="2000" />
-    <servo name="BOTTOM_RIGHT" no="2" min="1000" neutral="1100" max="2000" />
-    <servo name="BOTTOM_LEFT" no="3" min="1000" neutral="1100" max="2000" />    
+    <!--<servo name="BOTTOM_RIGHT" no="2" min="1000" neutral="1100" max="2000" />
+    <servo name="BOTTOM_LEFT" no="3" min="1000" neutral="1100" max="2000" />  -->
   </servos>
   <section name="MIXING" prefix="MOTOR_MIXING_">
     <define name="TRIM_ROLL" value="0" />
@@ -104,8 +121,8 @@
     <call fun="motor_mixing_run(autopilot_get_motors_on(),FALSE,values)" />
     <set servo="TOP_LEFT" value="motor_mixing.commands[MOTOR_FRONT_LEFT]" />
     <set servo="TOP_RIGHT" value="motor_mixing.commands[MOTOR_FRONT_RIGHT]" />
-    <set servo="BOTTOM_RIGHT" value="motor_mixing.commands[MOTOR_BACK_RIGHT]" />
-    <set servo="BOTTOM_LEFT" value="motor_mixing.commands[MOTOR_BACK_LEFT]" />
+    <!--<set servo="BOTTOM_RIGHT" value="motor_mixing.commands[MOTOR_BACK_RIGHT]" />
+    <set servo="BOTTOM_LEFT" value="motor_mixing.commands[MOTOR_BACK_LEFT]" />-->
   </command_laws>
   <section name="AIR_DATA" prefix="AIR_DATA_">
     <define name="CALC_AIRSPEED" value="FALSE" />
