@@ -30,6 +30,7 @@
       <message name="VECTORNAV_INFO"         period="0.5"/>
       <message name="FBW_STATUS"             period="2"/>      
       <message name="ADC_GENERIC"            period="0.1"/>
+      <message name="PAYLOAD_FLOAT"            period="1.0"/>
     </mode>
 
     <mode name="ppm">

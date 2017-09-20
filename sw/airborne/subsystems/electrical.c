@@ -125,8 +125,10 @@ void electrical_periodic(void)
   static bool vsupply_check_started = false;
 
 #if defined(ADC_CHANNEL_VSUPPLY) && !defined(SITL) && !USE_BATTERY_MONITOR
-  electrical.vsupply = 10 * VoltageOfAdc((electrical_priv.vsupply_adc_buf.sum /
-                                          electrical_priv.vsupply_adc_buf.av_nb_sample));
+  electrical.vsupply = 10 * 12;
+
+          //VoltageOfAdc((electrical_priv.vsupply_adc_buf.sum /
+            //                              electrical_priv.vsupply_adc_buf.av_nb_sample));
 #endif
 
 #ifdef ADC_CHANNEL_CURRENT

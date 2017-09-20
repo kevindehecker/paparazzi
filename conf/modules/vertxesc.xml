@@ -1,0 +1,24 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="vertxesc">
+  <doc>
+    <description>Driver for the vert-x vtol escs</description>
+    <configure name="ESCS_PORT" value="usb_serial" description="Port used to connect to the atmegas escs."/>
+    <configure name="ESCS_BAUD" value="250000" description="Baud rate for ESCS_PORT if a UART"/>
+  </doc>
+  <header>
+    <file name="vertxesc.h"/>
+  </header>
+  <init fun="vertx_esc_init()"/>
+  <periodic fun="vertx_esc_periodic()" freq="512" autorun="TRUE"/>
+  <event fun="vertx_esc_event()"/>
+  <makefile>
+    <file name="vertxesc.c"/>
+    <configure name="ESCS_PORT" default="uart1" case="upper|lower"/>
+    <configure name="ESCS_BAUD" default="250000"/>
+    <define name="USE_$(ESCS_PORT_UPPER)"/>
+    <define name="ESCS_UART" value="$(ESCS_PORT_LOWER)"/>
+    <define name="$(ESCS_PORT_UPPER)_BAUD" value="$(ESCS_BAUD)"/>
+  </makefile>
+</module>
+

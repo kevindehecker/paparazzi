@@ -4,7 +4,6 @@
 
 <airframe name="f3d">
   <firmware name="rotorcraft">
-<!--    <target name="ap" board="stm32f3_discovery_1.0_chibios"/>-->
     <target name="ap" board="stm32f37x_vortex_1.0_chibios"/>
     <define name="BAT_CHECKER_DELAY" value="80" />
     <!-- amount of time it take for the bat to check -->
@@ -15,38 +14,41 @@
 <!--<define name="PPRZ_TRIG_INT_COMPR_FLASH"/>-->
 <!--<define name="PPRZ_TRIG_INT_COMPR_HIGHEST"/>-->
 <!--<define name="TRIG_INT_COMPR_LEN" value="256"/>-->
-<define name="PPRZ_TRIG_CONST" value="const"/> <!--TODO: prolly want this in some makefile somewhere-->
-<configure name="USE_MAGNETOMETER" value="TRUE"/>
+    <define name="PPRZ_TRIG_CONST" value="const"/> <!--TODO: prolly want this in some makefile somewhere-->
+    <configure name="USE_MAGNETOMETER" value="FALSE"/>
 
     <!-- in seconds-->
-    <module name="telemetry" type="transparent" />
+    <module name="telemetry" type="transparent" >
+        <define name="MODEM_BAUD" value="57600"/>
+    </module>
+    <module name="guidance"      type="hybrid"/>
+    <module name="motor_mixing"/>
 
     <module name="imu" type="mpu9250_i2c">
         <configure name="IMU_MPU9250_I2C_DEV" value="i2c1"/>
         <define name="IMU_MPU9250_READ_MAG" value="FALSE"/>
         <define name="IMU_MPU9250_I2C_ADDR" value="MPU9250_ADDR"/>
         <define name="AHRS_ICQ_MAG_ID" value="MAG_HMC58XX_SENDER_ID" />         <!-- Meaning the external hmc-->
-        <configure name="USE_MAGNETOMETER" value="TRUE"/>
-<!--        <define name="IMU_MPU9250_Z_SIGN" value="-1"/>-->
+        <configure name="USE_MAGNETOMETER" value="FALSE"/>
     </module>
 
     <module name="stabilization" type="indi_simple" />
     <module name="ahrs" type="float_cmpl_quat" >
-      <configure name="USE_MAGNETOMETER" value="TRUE"/>
+      <configure name="USE_MAGNETOMETER" value="FALSE"/>
       <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
     </module>
-    <module name="ins" type="extended" />
+    <module name="ins" type="float_invariant">
+      <define name="INS_PROPAGATE_FREQUENCY" value="500"/>
+      <define name="INS_FINV_MAG_ID" value="MAG_HMC58XX_SENDER_ID"/>
+    </module>
     <module name="actuators" type="pwm">
       <define name="SERVO_HZ" value="40" />
     </module>
 
-    <module name="motor_mixing" />
+    <module name="radio_control" type="datalink"/>
 
-    <module name="radio_control" type="sbus"/>
 
-<!--    <module name="gps" type="ublox"/>-->
-
-  <module name="gps" type="ubx_i2c">
+   <module name="gps" type="ubx_i2c">
       <configure name="GPS_UBX_I2C_DEV" value="i2c2"/>
   </module>
 
@@ -66,11 +68,17 @@
   </firmware>
 
 	<modules main_freq="512">
+     <module name="vertxesc"/>
      <module name="gps" type="ubx_ucenter"/>
      <module name="send_imu_mag_current"/>
      <module name="air_data"/>
 	 </modules>
 
+  <section name="INS" prefix="INS_">
+    <define name="H_X" value="0.5138"/>
+    <define name="H_Y" value="0.00019"/>
+    <define name="H_Z" value="0.8578"/>
+  </section>
 
   <section name="IMU" prefix="IMU_">
     <!-- replace this with your own calibration -->
@@ -88,62 +96,61 @@
     <define name="ACCEL_Y_SENS" value="2.44991708802" integer="16"/>
     <define name="ACCEL_Z_SENS" value="2.44199722843" integer="16"/>
 
-    <define name="BODY_TO_IMU_PHI"   value="-90." unit="deg"/>
-    <define name="BODY_TO_IMU_THETA" value="180." unit="deg"/>
+    <define name="BODY_TO_IMU_PHI"   value="90." unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value="0." unit="deg"/>
     <define name="BODY_TO_IMU_PSI"   value="90." unit="deg"/>
   </section>
   <commands>
-    <axis name="PITCH" failsafe_value="0" />
-    <axis name="ROLL" failsafe_value="0" />
-    <axis name="YAW" failsafe_value="0" />
-    <axis name="THRUST" failsafe_value="0" />
+    <axis name="PITCH"  failsafe_value="0"/>
+    <axis name="ROLL"   failsafe_value="0"/>
+    <axis name="YAW"    failsafe_value="0"/>
+    <axis name="THRUST" failsafe_value="0"/>
   </commands>
-  <rc_commands>
-    <set command="THRUST" value="@THROTTLE" />
-    <set command="ROLL" value="@ROLL" />
-    <set command="PITCH" value="@PITCH" />
-    <set command="YAW" value="@YAW" />
-  </rc_commands>
-  <servos driver="Default">
-    <servo name="TOP_LEFT" no="0" min="1000" neutral="1100" max="2000" />
-    <servo name="TOP_RIGHT" no="1" min="1000" neutral="1100" max="2000" />
-    <!--<servo name="BOTTOM_RIGHT" no="2" min="1000" neutral="1100" max="2000" />
-    <servo name="BOTTOM_LEFT" no="3" min="1000" neutral="1100" max="2000" />  -->
+
+  <servos driver="Pwm">
+    <servo name="RM" no="0" min="1160" neutral="1200" max="1880"/>
+    <servo name="LM" no="1" min="1160" neutral="1200" max="1880"/>
+    <servo name="ELEVON_LEFT"  no="2" min="1000" neutral="1500" max="2000"/>
+    <servo name="ELEVON_RIGHT" no="3" min="1000" neutral="1500" max="2000"/>
   </servos>
-  <section name="MIXING" prefix="MOTOR_MIXING_">
-    <define name="TRIM_ROLL" value="0" />
-    <define name="TRIM_PITCH" value="0" />
-    <define name="TRIM_YAW" value="0" />
-    <define name="REVERSE" value="FALSE" />
-    <define name="TYPE" value="QUAD_X" />
-  </section>
-  <command_laws>
-    <call fun="motor_mixing_run(autopilot_get_motors_on(),FALSE,values)" />
-    <set servo="TOP_LEFT" value="motor_mixing.commands[MOTOR_FRONT_LEFT]" />
-    <set servo="TOP_RIGHT" value="motor_mixing.commands[MOTOR_FRONT_RIGHT]" />
-    <!--<set servo="BOTTOM_RIGHT" value="motor_mixing.commands[MOTOR_BACK_RIGHT]" />
-    <set servo="BOTTOM_LEFT" value="motor_mixing.commands[MOTOR_BACK_LEFT]" />-->
-  </command_laws>
+
+<command_laws>
+  <call fun="motor_mixing_run(autopilot_get_motors_on(),FALSE,values)"/>
+  <set servo="RM" value="motor_mixing.commands[0]"/>
+  <set servo="LM"  value="motor_mixing.commands[1]"/>
+
+<!-- Mode dependent actuator laws for the elevons. The elevons act different in rc attitude flight mode-->
+<!-- First the correct feedback is stored in variables -->
+  <let var="aileron_feedback_left"  value="-@YAW"/>
+  <let var="aileron_feedback_right" value="-@YAW"/>
+
+  <let var="elevator_feedback_left"  value="-@PITCH"/>
+  <let var="elevator_feedback_right" value="+@PITCH"/>
+
+<!-- Here the gains are defined for the two feedback cases, hover and forward-->
+  <let var="hover_left"  value="15*$aileron_feedback_left"/>
+  <let var="hover_right" value="15*$aileron_feedback_right"/>
+
+<!--     if using INDI -->
+<!--    <let var="forward_left"  value="aileron_gain*$aileron_feedback_left+elevator_gain*$elevator_feedback_left"/>
+  <let var="forward_right" value="aileron_gain*$aileron_feedback_right+elevator_gain*$elevator_feedback_right"/>-->
+
+<!--     if using PID with gain scheduling -->
+  <let var="forward_left"  value="5*$aileron_feedback_left + 4*$elevator_feedback_left"/>
+  <let var="forward_right" value="5*$aileron_feedback_right + 4*$elevator_feedback_right"/>
+
+  <!-- This statement tells the autopilot to use the hover feedback if in mode attitude direct and to use the forward feedback in all other cases-->
+  <set servo="ELEVON_LEFT"    value="AP_MODE == AP_MODE_ATTITUDE_DIRECT ? $hover_left  : $forward_left" />
+  <set servo="ELEVON_RIGHT"   value="AP_MODE == AP_MODE_ATTITUDE_DIRECT ? $hover_right  : $forward_right" />
+<!--     <set servo="ELEVON_RIGHT"   value="AP_MODE == AP_MODE_ATTITUDE_DIRECT ? 9000 : -9000" /> -->
+</command_laws>
+
   <section name="AIR_DATA" prefix="AIR_DATA_">
     <define name="CALC_AIRSPEED" value="FALSE" />
     <define name="CALC_TAS_FACTOR" value="FALSE" />
     <define name="CALC_AMSL_BARO" value="TRUE" />
   </section>
-  <!-- local magnetic field -->
-  <!-- http://wiki.paparazziuav.org/wiki/Subsystem/ahrs#Local_Magnetic_Field -->
-  <section name="AHRS" prefix="AHRS_">
-    <!-- values used if no GPS fix, on 3D fix is update by geo_mag module -->
-    <!-- Delft -->
-    <define name="H_X" value="0.3892503" />
-    <define name="H_Y" value="0.0017972" />
-    <define name="H_Z" value="0.9211303" />
-    <!-- For vibrating airfames -->
-    <define name="GRAVITY_HEURISTIC_FACTOR" value="0"/>
-  </section>
-  <section name="INS" prefix="INS_">
-    <define name="SONAR_MAX_RANGE" value="2.2" />
-    <define name="SONAR_UPDATE_ON_AGL" value="TRUE" />
-  </section>
+
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
     <!-- setpoint limits for attitude stabilization rc flight -->
     <define name="SP_MAX_PHI" value="45" unit="deg" />
@@ -153,21 +160,7 @@
     <define name="DEADBAND_E" value="0" />
     <define name="DEADBAND_R" value="50" />
   </section>
-  <section name="ATTITUDE_REFERENCE" prefix="STABILIZATION_ATTITUDE_">
-    <!-- attitude reference generation model -->
-    <define name="REF_OMEGA_P" value="450" unit="deg/s" />
-    <define name="REF_ZETA_P" value="0.9" />
-    <define name="REF_MAX_P" value="600." unit="deg/s" />
-    <define name="REF_MAX_PDOT" value="RadOfDeg(8000.)" />
-    <define name="REF_OMEGA_Q" value="450" unit="deg/s" />
-    <define name="REF_ZETA_Q" value="0.9" />
-    <define name="REF_MAX_Q" value="600." unit="deg/s" />
-    <define name="REF_MAX_QDOT" value="RadOfDeg(8000.)" />
-    <define name="REF_OMEGA_R" value="450" unit="deg/s" />
-    <define name="REF_ZETA_R" value="0.9" />
-    <define name="REF_MAX_R" value="600." unit="deg/s" />
-    <define name="REF_MAX_RDOT" value="RadOfDeg(8000.)" />
-  </section>
+
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
     <!-- control effectiveness -->
     <define name="G1_P" value="0.02692" />
@@ -235,4 +228,18 @@
     <define name="LOW_BAT_LEVEL" value="10.2" unit="V" />
     <define name="MAX_BAT_LEVEL" value="12.4" unit="V" />
   </section>
+
+<section name="MIXING" prefix="MOTOR_MIXING_">
+  <define name="TRIM_ROLL" value="0"/>
+  <define name="TRIM_PITCH" value="0"/>
+  <define name="TRIM_YAW" value="0"/>
+  <define name="NB_MOTOR" value="2"/>
+  <define name="SCALE" value="256"/>
+  <define name="PITCH_COEF"  value="{ 0, 0}"/>
+  <define name="ROLL_COEF"   value="{  -256, 256 }"/>
+  <define name="YAW_COEF"    value="{ 0,  0 }"/>
+  <define name="THRUST_COEF" value="{  256,  256 }"/>
+</section>
+
+
 </airframe>
