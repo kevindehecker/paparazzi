@@ -65,8 +65,8 @@
 #define GPIOA_UART1TX               9U
 #define GPIOA_UART1RX               10U
 #define GPIOA_PWM_PIN11             11U
-#define GPIOA_PIN12                 12U
-#define GPIOA_PWM_PIN13                 13U
+#define GPIOA_PWM_PIN12             12U
+#define GPIOA_SWD                   13U
 #define GPIOA_SWCLK                 14U
 #define GPIOA_PIN15                 15U
 
@@ -282,8 +282,8 @@
                                      PIN_MODE_ALTERNATE(GPIOA_UART1TX) |   \
                                      PIN_MODE_ALTERNATE(GPIOA_UART1RX) |   \
                                      PIN_MODE_INPUT(GPIOA_PWM_PIN11) |     \
-                                     PIN_MODE_INPUT(GPIOA_PIN12) |     \
-                                     PIN_MODE_INPUT(GPIOA_PWM_PIN13) |      \
+                                     PIN_MODE_INPUT(GPIOA_PWM_PIN12) |     \
+                                     PIN_MODE_ALTERNATE(GPIOA_SWD) |      \
                                      PIN_MODE_ALTERNATE(GPIOA_SWCLK) |      \
                                      PIN_MODE_INPUT(GPIOA_PIN15))
 
@@ -299,10 +299,10 @@
                                      PIN_OTYPE_PUSHPULL(GPIOA_UART1TX) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOA_UART1RX) |   \
                                      PIN_OTYPE_OPENDRAIN(GPIOA_PWM_PIN11) |     \
-                                     PIN_OTYPE_PUSHPULL(GPIOA_PIN12) |     \
-                                     PIN_OTYPE_OPENDRAIN(GPIOA_PWM_PIN13) |      \
+                                     PIN_OTYPE_OPENDRAIN(GPIOA_PWM_PIN12) |     \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_SWD) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOA_SWCLK) |      \
-                                     PIN_OTYPE_PUSHPULL(GPIOA_PIN15)) 
+                                     PIN_OTYPE_PUSHPULL(GPIOA_PIN15))
 
 #define VAL_GPIOA_OSPEEDR           (PIN_OSPEED_VERYLOW(GPIOA_PIN0) |\
                                      PIN_OSPEED_VERYLOW(GPIOA_LED) |    \
@@ -316,8 +316,8 @@
                                      PIN_OSPEED_HIGH(GPIOA_UART1TX) |      \
                                      PIN_OSPEED_HIGH(GPIOA_UART1RX) |      \
                                      PIN_OSPEED_VERYLOW(GPIOA_PWM_PIN11) |        \
-                                     PIN_OSPEED_VERYLOW(GPIOA_PIN12) |     \
-                                     PIN_OSPEED_VERYLOW(GPIOA_PWM_PIN13) |         \
+                                     PIN_OSPEED_VERYLOW(GPIOA_PWM_PIN12) |     \
+                                     PIN_OSPEED_HIGH(GPIOA_SWD) |         \
                                      PIN_OSPEED_HIGH(GPIOA_SWCLK) |         \
                                      PIN_OSPEED_VERYLOW(GPIOA_PIN15))
 
@@ -333,8 +333,8 @@
                                      PIN_PUPDR_FLOATING(GPIOA_UART1TX) |   \
                                      PIN_PUPDR_FLOATING(GPIOA_UART1RX) |   \
                                      PIN_PUPDR_PULLDOWN(GPIOA_PWM_PIN11) |     \
-                                     PIN_PUPDR_FLOATING(GPIOA_PIN12) |     \
-                                     PIN_PUPDR_PULLDOWN(GPIOA_PWM_PIN13) |        \
+                                     PIN_PUPDR_PULLDOWN(GPIOA_PWM_PIN12) |     \
+                                     PIN_PUPDR_PULLUP(GPIOA_SWD) |        \
                                      PIN_PUPDR_PULLDOWN(GPIOA_SWCLK) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_PIN15))
 #define VAL_GPIOA_ODR               (PIN_ODR_HIGH(GPIOA_PIN0) |      \
@@ -349,8 +349,8 @@
                                      PIN_ODR_HIGH(GPIOA_UART1TX) |         \
                                      PIN_ODR_HIGH(GPIOA_UART1RX) |         \
                                      PIN_ODR_HIGH(GPIOA_PWM_PIN11) |           \
-                                     PIN_ODR_HIGH(GPIOA_PIN12) |           \
-                                     PIN_ODR_HIGH(GPIOA_PWM_PIN13) |            \
+                                     PIN_ODR_HIGH(GPIOA_PWM_PIN12) |           \
+                                     PIN_ODR_HIGH(GPIOA_SWD) |            \
                                      PIN_ODR_HIGH(GPIOA_SWCLK) |            \
                                      PIN_ODR_HIGH(GPIOA_PIN15))
 #define VAL_GPIOA_AFRL              (PIN_AFIO_AF(GPIOA_PIN0, 0U) |   \
@@ -365,8 +365,8 @@
                                      PIN_AFIO_AF(GPIOA_UART1TX, 7U) |      \
                                      PIN_AFIO_AF(GPIOA_UART1RX, 7U) |      \
                                      PIN_AFIO_AF(GPIOA_PWM_PIN11, 2U) |       \
-                                     PIN_AFIO_AF(GPIOA_PIN12, 14U) |       \
-                                     PIN_AFIO_AF(GPIOA_PWM_PIN13, 2U) |         \
+                                     PIN_AFIO_AF(GPIOA_PWM_PIN12, 2U) |       \
+                                     PIN_AFIO_AF(GPIOA_SWD, 0U) |         \
                                      PIN_AFIO_AF(GPIOA_SWCLK, 0U) |         \
                                      PIN_AFIO_AF(GPIOA_PIN15, 0U))
 
@@ -1361,7 +1361,7 @@
 #define PWM_SERVO_2_PIN GPIO11
 #define PWM_SERVO_2_AF GPIO_AF2 //alternate function of the pin, alsu used to select which timer (table 12 in datasheet)
 #define PWM_SERVO_2_DRIVER PWMD5 //timer ID. Which timer is being used by this pwm pin
-#define PWM_SERVO_2_CHANNEL 2   //channel *in* the timer Find it in table 12
+#define PWM_SERVO_2_CHANNEL 1   //channel *in* the timer Find it in table 12 (subtract by 1!)
 #define PWM_SERVO_2_ACTIVE PWM_OUTPUT_ACTIVE_HIGH
 #else
 #define PWM_SERVO_2_ACTIVE PWM_OUTPUT_DISABLED
@@ -1373,10 +1373,10 @@
 #if USE_PWM3
 #define PWM_SERVO_3 3
 #define PWM_SERVO_3_GPIO GPIOA
-#define PWM_SERVO_3_PIN GPIO13
+#define PWM_SERVO_3_PIN GPIO12
 #define PWM_SERVO_3_AF GPIO_AF2
 #define PWM_SERVO_3_DRIVER PWMD5
-#define PWM_SERVO_3_CHANNEL 4
+#define PWM_SERVO_3_CHANNEL 2
 #define PWM_SERVO_3_ACTIVE PWM_OUTPUT_ACTIVE_HIGH
 #else
 #define PWM_SERVO_3_ACTIVE PWM_OUTPUT_DISABLED
@@ -1392,9 +1392,9 @@
   PWM_FREQUENCY/TIM5_SERVO_HZ, \
   NULL, \
   { \
-    { PWM_OUTPUT_DISABLED, NULL }, \
+    { PWM_SERVO_3_ACTIVE, NULL }, \
     { PWM_SERVO_2_ACTIVE, NULL }, \
-    { PWM_OUTPUT_DISABLED, NULL }, \
+    { PWM_SERVO_3_ACTIVE, NULL }, \
     { PWM_SERVO_3_ACTIVE, NULL }, \
   }, \
   0, \

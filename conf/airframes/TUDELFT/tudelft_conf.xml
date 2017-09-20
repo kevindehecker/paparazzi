@@ -410,7 +410,7 @@
    name="aaf3d"
    ac_id="69"
    airframe="airframes/TUDELFT/tudelft_f3d.xml"
-   radio="radios/dummy.xml"
+   radio="radios/FrSky3dr.xml"
    telemetry="telemetry/default_rotorcraft_slow.xml"
    flight_plan="flight_plans/rotorcraft_basic.xml"
    settings="settings/rotorcraft_basic.xml"
