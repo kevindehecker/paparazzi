@@ -42,7 +42,7 @@
       <define name="INS_FINV_MAG_ID" value="MAG_HMC58XX_SENDER_ID"/>
     </module>
     <module name="actuators" type="pwm">
-      <define name="SERVO_HZ" value="40" />
+      <define name="SERVO_HZ" value="400" />
     </module>
 
     <module name="radio_control" type="datalink"/>
@@ -110,8 +110,8 @@
   <servos driver="Pwm">
     <servo name="RM" no="0" min="1160" neutral="1200" max="1880"/>
     <servo name="LM" no="1" min="1160" neutral="1200" max="1880"/>
-    <servo name="ELEVON_LEFT"  no="2" min="1000" neutral="1500" max="2000"/>
-    <servo name="ELEVON_RIGHT" no="3" min="1000" neutral="1500" max="2000"/>
+    <servo name="ELEVON_RIGHT"  no="2" min="1000" neutral="1500" max="2000"/>
+    <servo name="ELEVON_LEFT" no="3" min="1000" neutral="1500" max="2000"/>
   </servos>
 
 <command_laws>
@@ -121,27 +121,27 @@
 
 <!-- Mode dependent actuator laws for the elevons. The elevons act different in rc attitude flight mode-->
 <!-- First the correct feedback is stored in variables -->
-  <let var="aileron_feedback_left"  value="-@YAW"/>
-  <let var="aileron_feedback_right" value="-@YAW"/>
+  <let var="aileron_feedback_left"  value="@YAW"/>
+  <let var="aileron_feedback_right" value="@YAW"/>
 
   <let var="elevator_feedback_left"  value="-@PITCH"/>
   <let var="elevator_feedback_right" value="+@PITCH"/>
 
 <!-- Here the gains are defined for the two feedback cases, hover and forward-->
-  <let var="hover_left"  value="15*$aileron_feedback_left"/>
-  <let var="hover_right" value="15*$aileron_feedback_right"/>
+  <let var="hover_left"  value="$aileron_feedback_left"/>
+  <let var="hover_right" value="$aileron_feedback_right"/>
 
 <!--     if using INDI -->
 <!--    <let var="forward_left"  value="aileron_gain*$aileron_feedback_left+elevator_gain*$elevator_feedback_left"/>
   <let var="forward_right" value="aileron_gain*$aileron_feedback_right+elevator_gain*$elevator_feedback_right"/>-->
 
 <!--     if using PID with gain scheduling -->
-  <let var="forward_left"  value="5*$aileron_feedback_left + 4*$elevator_feedback_left"/>
-  <let var="forward_right" value="5*$aileron_feedback_right + 4*$elevator_feedback_right"/>
+  <let var="forward_left"  value="$aileron_feedback_left + $elevator_feedback_left"/>
+  <let var="forward_right" value="$aileron_feedback_right + $elevator_feedback_right"/>
 
   <!-- This statement tells the autopilot to use the hover feedback if in mode attitude direct and to use the forward feedback in all other cases-->
-  <set servo="ELEVON_LEFT"    value="AP_MODE == AP_MODE_ATTITUDE_DIRECT ? $hover_left  : $forward_left" />
-  <set servo="ELEVON_RIGHT"   value="AP_MODE == AP_MODE_ATTITUDE_DIRECT ? $hover_right  : $forward_right" />
+  <set servo="ELEVON_LEFT"    value="$forward_left" />
+  <set servo="ELEVON_RIGHT"   value="$forward_right" />
 <!--     <set servo="ELEVON_RIGHT"   value="AP_MODE == AP_MODE_ATTITUDE_DIRECT ? 9000 : -9000" /> -->
 </command_laws>
 
@@ -163,10 +163,10 @@
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
     <!-- control effectiveness -->
-    <define name="G1_P" value="0.02692" />
-    <define name="G1_Q" value="0.025867" />
-    <define name="G1_R" value="0.002055" />
-    <define name="G2_R" value="0.15865" />
+    <define name="G1_P" value="0.01292" />
+    <define name="G1_Q" value="0.014867" />
+    <define name="G1_R" value="0.012055" />
+    <define name="G2_R" value="0.0" />
     <!-- For the bebop2 we need to filter the roll rate due to the dampers -->
     <define name="FILTER_ROLL_RATE" value="FALSE" />
     <define name="FILTER_PITCH_RATE" value="FALSE" />
