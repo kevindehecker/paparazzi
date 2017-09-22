@@ -123,17 +123,6 @@ void vertx_esc_periodic(void) {
 
     ESCS_PORT->put_buffer(ESCS_PORT->periph, 0, (unsigned char *) &package, sizeof(struct EscData));
 
-
-    static int slower = 0;
-    if (slower++ % 100 == 1) {
-
-        float tmp[4];
-        tmp[0] = actuators_pwm_values[PWM_SERVO_0];
-        tmp[1] = actuators_pwm_values[PWM_SERVO_1];
-        tmp[2] = actuators_pwm_values[PWM_SERVO_2];
-        tmp[3] = actuators_pwm_values[PWM_SERVO_3];
-        DOWNLINK_SEND_PAYLOAD_FLOAT(DefaultChannel, DefaultDevice,4,tmp);
-    }
 }
 void vertx_esc_event(void) {
 
