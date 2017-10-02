@@ -27,6 +27,7 @@
 #include "subsystems/datalink/datalink.h"
 
 struct pprz_transport pprz_tp;
+bool disable_datalink;
 
 void pprz_dl_init(void)
 {
@@ -35,7 +36,9 @@ void pprz_dl_init(void)
 
 void pprz_dl_event(void)
 {
-  pprz_check_and_parse(&DOWNLINK_DEVICE.device, &pprz_tp, dl_buffer, &dl_msg_available);
-  DlCheckAndParse(&DOWNLINK_DEVICE.device, &pprz_tp.trans_tx, dl_buffer, &dl_msg_available);
+    if (!disable_datalink) {
+        pprz_check_and_parse(&DOWNLINK_DEVICE.device, &pprz_tp, dl_buffer, &dl_msg_available);
+        DlCheckAndParse(&DOWNLINK_DEVICE.device, &pprz_tp.trans_tx, dl_buffer, &dl_msg_available);
+    }
 }
 

@@ -24,60 +24,80 @@
  */
 
 #include "modules/ram_logger/ram_logger.h"
-#define MAXBUFFERSIZE 32767
+#define MAXBUFFERSIZE 16383
 #include "std.h"
 #include "subsystems/datalink/telemetry.h"
+#include "led.h"
+#include "mcu_periph/uart.h"
+#include "mcu_periph/uart_arch.h"
+#include "datalink/pprz_dl.h"
 
-static unsigned char data1[MAXBUFFERSIZE];
+
+int ram_logger_enable_logging;
+int ram_logger_download_log;
+int ram_logger_stop_telemetry;
+
+unsigned char data1[MAXBUFFERSIZE];
 int count =0;
 int sentCounter = -1;
 int interval = 0;
-bool started;
-bool circular_buffer_mode = false; // TODO: make this a setting;
+//bool started;
+//bool circular_buffer_mode = false; // TODO: make this a setting;
+//bool sentnow = false;
+
+#define COM_PORT   (&DOWNLINK_DEVICE.device)
 
 void ram_logger_init(void){
     for (int i = 0; i< MAXBUFFERSIZE; i++)
-        data1[0] = 0;
-    started = false;
+        data1[0] = i;
+  //  started = false;
 }
-
 
 void ram_logger_start(void) {
-    count = 0;
-    sentCounter = 0;
-    started = true;
+//    count = 0;
+//    sentCounter = 0;
+//    started = true;
+
 }
 void ram_logger_stop(void) {
-    started = false;
-    sentCounter = 0;
+//    started = false;
+//    sentCounter = 0;
 
 }
 void ram_logger_periodic(void){
-    if (started) {
-        data1[count] = count; // tmp test
-        count +=1;
-        if (count > MAXBUFFERSIZE) {
-            if (circular_buffer_mode)
-                count = 0;
-            else
-                started = false;
-        }
-    }
-    interval++;
+//    static int divider = 0;
+//    if (divider++ % 1000 == 0) {
+//        sentnow = true;
+//    }
 }
 
-
 void ram_logger_event(void) {
+//    if (sentnow) {
+//        sentnow = false;
 
-    if (sentCounter >= 0 && interval > 200) {
-        uint16_t l = 127;
-        interval = 0;
-        unsigned char * ptr = data1;
-        ptr += sentCounter;
-        *ptr = sentCounter;
-        DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, l, ptr);
-        sentCounter +=l;
-        if (sentCounter  >= count-l)
-            sentCounter =-1; // stop sending when all data was sent
+
+//    }
+}
+
+void ram_logger_download_handle(int enable) {
+    if (enable) {
+        for (int i = 0; i < MAXBUFFERSIZE; i++) {
+            COM_PORT->put_byte(COM_PORT->periph, 0, data1[i]);
+        }
+    }
+}
+extern void ram_logger_logging_handle(int enable) {
+    for (int i = 0; i < MAXBUFFERSIZE; i++) {
+        data1[i] = i;
+    }
+}
+extern void ram_logger_telemetry_handle(int enable){
+    LED_TOGGLE(SYS_TIME_LED);
+    if (enable) {
+        disable_datalink = true;
+        telemetry_mode_Main = 255 ; //disable all downlink telemetry
+    } else {
+        disable_datalink = false;
+        telemetry_mode_Main = 0 ; //disable all downlink telemetry
     }
 }

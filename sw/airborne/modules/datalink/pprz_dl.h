@@ -36,6 +36,8 @@
 #include "mcu_periph/udp.h"
 #endif
 
+extern bool disable_datalink;
+
 /** PPRZ transport structure */
 extern struct pprz_transport pprz_tp;
 

@@ -26,6 +26,12 @@
 #ifndef RAMLOGGER_H
 #define RAMLOGGER_H
 
+extern int ram_logger_enable_logging;
+extern int ram_logger_download_log;
+extern int ram_logger_stop_telemetry;
+extern void ram_logger_download_handle(int enable);
+extern void ram_logger_logging_handle(int enable);
+extern void ram_logger_telemetry_handle(int enable);
 
 extern void ram_logger_init(void);
 extern void ram_logger_periodic(void);
