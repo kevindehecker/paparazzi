@@ -36,20 +36,13 @@ int disable_telemetry_delay = -1; // to re-enable normal telemetry
 int log_packge_delay = 0; // log_packge_delay in between log packages
 int send_id = 0; // send data over datalink counter pointer
 
-#define MAXBUFFERSIZE 65536
-unsigned char data1[MAXBUFFERSIZE];
 #define CCMRAM __attribute__((section(".ram4")))
+
+#define MAXBUFFERSIZE 4096
+unsigned char data1[MAXBUFFERSIZE];
 CCMRAM unsigned char data2[MAXBUFFERSIZE];
-#define TOTALBUFFERSIZE 131072
+#define TOTALBUFFERSIZE 8192 // must be 2 * MAXBUFFERSIZE
 #define ESPBUFFERSIZE 2048
-
-#define COM_PORT (&DOWNLINK_DEVICE.device)
-int entry_id1 = 0;
-int entry_id2 = 0;
-
-static abi_event gyro_ev;
-static abi_event accel_ev;
-
 struct RAM_log_data {
     int32_t accx;
     int32_t accy;
@@ -58,6 +51,14 @@ struct RAM_log_data {
     int32_t gyroq;
     int32_t gyror;
 } __attribute__((__packed__));
+
+static abi_event gyro_ev;
+static abi_event accel_ev;
+
+#define COM_PORT (&DOWNLINK_DEVICE.device)
+int entry_id1 = 0;
+int entry_id2 = 0;
+
 
 static void gyro_cb(uint8_t __attribute__((unused)) sender_id,
                     uint32_t  __attribute__((unused)) stamp, struct Int32Rates *gyro)
