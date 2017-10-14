@@ -21,6 +21,9 @@
  * @file "modules/ramlogger/ramlogger.c"
  * @author Kevin van Hecke
  * Logs data directly into RAM mem and sends it over the datalink in a special package.
+ * This package is handled by the ESP, which filters it out based on the header. All log
+ * data is then collected and sent over a special tcp connection. (instead of the usual
+ * udp connection pprz seems to like). During send time, all other telemetry is disabled.
  */
 
 #include "modules/ram_logger/ram_logger.h"
@@ -37,12 +40,13 @@ int log_packge_delay = 0; // log_packge_delay in between log packages
 int send_id = 0; // send data over datalink counter pointer
 
 #define CCMRAM __attribute__((section(".ram4")))
-
+//*************This section must be the same as the pc-side parser****************
+//except for the CCRAM tag
 #define MAXBUFFERSIZE 65536
 unsigned char data1[MAXBUFFERSIZE];
 CCMRAM unsigned char data2[MAXBUFFERSIZE];
 #define TOTALBUFFERSIZE 131072 // must be 2 * MAXBUFFERSIZE
-#define ESPBUFFERSIZE 2048
+#define ESPBUFFERSIZE 2048 // for some reason more then ~2900 bytes doesn't seem to work. This variable must be the same as in the ESP
 struct RAM_log_data {
     int32_t accx;
     int32_t accy;
@@ -51,7 +55,7 @@ struct RAM_log_data {
     int32_t gyroq;
     int32_t gyror;
 } __attribute__((__packed__));
-
+//**********************************************************************************
 static abi_event gyro_ev;
 static abi_event accel_ev;
 
@@ -95,18 +99,20 @@ static void accel_cb(uint8_t __attribute__((unused)) sender_id,
         tmp[entry_id2].accz = accel->z;
     }
 
-    if ((entry_id1 +1 ) * sizeof(struct RAM_log_data) < MAXBUFFERSIZE)
+    if ((entry_id1 +1 ) * sizeof(struct RAM_log_data) < MAXBUFFERSIZE) {
         entry_id1++;
-    else if ((entry_id2 +2 ) * sizeof(struct RAM_log_data) < MAXBUFFERSIZE) //stop after +2 because in the next pass that will be +1 (which just fits)
+        LED_TOGGLE(SYS_TIME_LED);
+    }
+    else if ((entry_id2 +2 ) * sizeof(struct RAM_log_data) < MAXBUFFERSIZE) { //stop after +2 because in the next pass that will be +1 (which just fits)
         entry_id2++;
-    else
-        LED_TOGGLE(1);
+        LED_TOGGLE(SYS_TIME_LED);
+    }
 }
 
 void ram_logger_init(void){    
     AbiBindMsgIMU_GYRO_INT32(ABI_BROADCAST, &gyro_ev, gyro_cb);
     AbiBindMsgIMU_ACCEL_INT32(ABI_BROADCAST, &accel_ev, accel_cb);
-
+/*
     //init with some test data:
     for (int i = 0; i< MAXBUFFERSIZE; i++) {
         data1[i] = 66;
@@ -123,21 +129,11 @@ void ram_logger_init(void){
     }
     data1[MAXBUFFERSIZE-1] = '\n';
     data2[MAXBUFFERSIZE-1] = '\n';
+    */
 }
 
-
-
-void ram_logger_start(void) {
-//    count = 0;
-//    sentCounter = 0;
-//    started = true;
-
-}
-void ram_logger_stop(void) {
-//    started = false;
-//    sentCounter = 0;
-
-}
+void ram_logger_start(void) {}
+void ram_logger_stop(void) {}
 
 void ram_logger_periodic(void){
     if (disable_telemetry_delay > -1)
@@ -156,6 +152,9 @@ void ram_logger_event(void) {
     if (log_packge_delay==0) {
         if (disable_datalink && send_id < TOTALBUFFERSIZE) {
             if (send_id % ESPBUFFERSIZE == 0) {
+                //first send a header
+                //the esp already knows how long the log package will be,
+                //and to be very efficient no crc and other stuff is added
                 COM_PORT->put_byte(COM_PORT->periph, 0, 'l');
                 COM_PORT->put_byte(COM_PORT->periph, 0, 'o');
                 COM_PORT->put_byte(COM_PORT->periph, 0, 'g');
@@ -178,8 +177,7 @@ void ram_logger_event(void) {
 
 }
 
-void ram_logger_download_handle(int enable) {
-    LED_OFF(1);
+void ram_logger_download_handle(int enable) {    
     if (enable) {
         send_id = 0;
         disable_datalink = true;
@@ -187,8 +185,7 @@ void ram_logger_download_handle(int enable) {
         telemetry_mode_Main = 255;
     }
 }
-extern void ram_logger_logging_handle(__attribute__((unused)) int enable) {
-    LED_OFF(1);
+extern void ram_logger_logging_handle(__attribute__((unused)) int enable) {    
     entry_id1 = 0;
     entry_id2 = 0;
 //    float tmp[10];

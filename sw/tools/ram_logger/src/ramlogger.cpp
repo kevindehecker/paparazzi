@@ -1,8 +1,4 @@
-/**
-    C++ client example using sockets
-*/
 #include<iostream>    //cout
-#include<stdio.h> //printf
 #include<string.h>    //strlen
 #include<string>  //string
 #include<sys/socket.h>    //socket
@@ -14,8 +10,7 @@
 
 using namespace std;
 
-std::ofstream logger;
-
+//*************This section must be the same as the pc-side parser****************
 #define MAXBUFFERSIZE 65536
 unsigned char data1[MAXBUFFERSIZE];
 unsigned char data2[MAXBUFFERSIZE];
@@ -29,6 +24,7 @@ struct RAM_log_data {
     int32_t gyroq;
     int32_t gyror;
 } __attribute__((__packed__));
+//**********************************************************************************
 
 /**
     TCP Client class
@@ -158,6 +154,7 @@ int main(int argc , char *argv[])
 {    
 
     tcp_client c;
+    std::ofstream logger;
 
     //connect to host
     //c.conn("127.0.0.1", 9988);
@@ -176,12 +173,13 @@ int main(int argc , char *argv[])
     int totcnt = 0;
     cout << "|--------------------------------------------------|" << std::endl;
     cout << " ";
-    //std::cout.setf( std::ios_base::unitbuf );
     int progress_stepsize = TOTALBUFFERSIZE / 50;
     while (entry_id2 < junk_start) {
 
         struct RAM_log_data * rtmp ;
         int id;
+        //calculate some ids
+        //bit eleborate, because uses the same calculation code as in the drone
         if ((entry_id1 +1 ) * sizeof(struct RAM_log_data) < MAXBUFFERSIZE) {
             tmp = (struct RAM_log_data * ) data1;
             rtmp = &tmp[entry_id1];
@@ -201,7 +199,7 @@ int main(int argc , char *argv[])
             logger << rtmp->accx << ", " << rtmp->accy << ", " << rtmp->accz << ", " << rtmp->gyrop << ", " << rtmp->gyroq << ", " << rtmp->gyror << std::endl;
         }
 
-        //there are some bytes in between the two buffers that are not filled:
+        //there are some bytes in between the two buffers that are not filled. Get rid of them:
         if (entry_id1 == junk_start) {
             entry_id1 = 99999999;
             unsigned char junk[junk_size+1];
@@ -210,6 +208,7 @@ int main(int argc , char *argv[])
             totcnt+=junk_size;
         }
 
+        //print a progress bar
         static int totcnt_prev=0;
         if ( totcnt - totcnt_prev > progress_stepsize ) {
             totcnt_prev = totcnt;
