@@ -24,32 +24,14 @@
  */
 
 #include "modules/ram_logger/ram_logger.h"
-#define MAXBUFFERSIZE 1024
+#define MAXBUFFERSIZE 65536
+#define ESPBUFFERSIZE 2048
 #include "std.h"
 #include "subsystems/datalink/telemetry.h"
 #include "led_hw.h"
 #include "mcu_periph/uart.h"
 #include "mcu_periph/uart_arch.h"
 #include "datalink/pprz_dl.h"
-
-
-
-
-#include "mcu_periph/uart_arch.h"
-#include "mcu_periph/uart.h"
-#include "mcu_periph/gpio.h"
-
-//#include <libopencm3/stm32/gpio.h>
-//#include <libopencm3/stm32/rcc.h>
-//#include <libopencm3/stm32/usart.h>
-//#include <libopencm3/cm3/nvic.h>
-
-#include "std.h"
-
-#include BOARD_CONFIG
-
-
-
 
 int ram_logger_enable_logging;
 int ram_logger_download_log;
@@ -67,8 +49,15 @@ void ram_logger_init(void){
     data1[4] = 's';
     data1[5] = 't';
 
-    for (int i = 6; i< MAXBUFFERSIZE; i++)
+    for (int i = 0; i< MAXBUFFERSIZE; i++) {
         data1[i] = 67;
+        if (i % ESPBUFFERSIZE == 0) {
+            data1[i] = '1' +  i / ESPBUFFERSIZE;
+            if (i>0)
+                data1[i-1] = '\n';
+        }
+    }
+    data1[MAXBUFFERSIZE-1] = '\n';
 
 }
 
@@ -84,6 +73,7 @@ void ram_logger_stop(void) {
 
 }
 int downcount = -1;
+int wait = false;
 void ram_logger_periodic(void){
 //    static int divider = 0;
 //    if (divider++ % 1000 == 0) {
@@ -100,51 +90,44 @@ void ram_logger_periodic(void){
 
     }
     //telemetry_mode_Main = 0;
+
+    if (wait>0)
+        wait --;
 }
 
 
 int cnt = 0;
 void ram_logger_event(void) {
-    if (disable_datalink && cnt < MAXBUFFERSIZE) {
-        //struct uart_periph *p;
-        //p = COM_PORT->periph;
-        //usart_send_blocking((uint32_t)p->reg_addr, 'A' + (cnt % 25));
-        COM_PORT->put_byte(COM_PORT->periph, 0, data1[cnt]);
-        cnt++;
+    if (wait==0) {
+        if (disable_datalink && cnt < MAXBUFFERSIZE) {
+            if (cnt % ESPBUFFERSIZE == 0) {
+                COM_PORT->put_byte(COM_PORT->periph, 0, 'l');
+                COM_PORT->put_byte(COM_PORT->periph, 0, 'o');
+                COM_PORT->put_byte(COM_PORT->periph, 0, 'g');
+                COM_PORT->put_byte(COM_PORT->periph, 0, '_');
+                COM_PORT->put_byte(COM_PORT->periph, 0, 's');
+                COM_PORT->put_byte(COM_PORT->periph, 0, 't');
+                //data1[cnt] = '1' +  cnt / ESPBUFFERSIZE;
+            }
+            COM_PORT->put_byte(COM_PORT->periph, 0, data1[cnt]);
+            cnt++;
+        }
+        if (cnt >= MAXBUFFERSIZE && downcount < 0) {
+            downcount = 0;
+        }
+        if (cnt % ESPBUFFERSIZE == 0)
+            wait = 200;
     }
-    if (cnt >= MAXBUFFERSIZE && downcount < 0) {
-      downcount = 0;
-    }
+
 }
 
 void ram_logger_download_handle(int enable) {
     LED_OFF(1);
     if (enable) {
-
-//        struct uart_periph *p;
-//        p = COM_PORT->periph;
-        //USART_CR1((uint32_t)p->reg_addr) &= ~USART_CR1_TXEIE; // Disable TX interrupt
-//        usart_send_blocking((uint32_t)p->reg_addr, data1[0]);
-//        p->tx_insert_idx = 0;
-//        p->tx_extract_idx = 0;
         cnt = 0;
-        //for (cnt = 0; cnt < 6; cnt++) {
-            //p->tx_insert_idx = i;
-            //p->tx_buf[p->tx_insert_idx] = data1[i];
-
-//            usart_send_blocking((uint32_t)p->reg_addr, data1[i]);
-          //  COM_PORT->put_byte(COM_PORT->periph, 0, data1[cnt]);
-
-
-        //}
-//        COM_PORT->put_buffer(COM_PORT->periph, 0, data1,300);
-        //p->tx_running = true;
-
         disable_datalink = true;
         downcount = -1;
         telemetry_mode_Main = 255;
-
-        //USART_CR1((uint32_t)p->reg_addr) |= USART_CR1_TXEIE; // Enable TX interrupt
     }
 }
 extern void ram_logger_logging_handle(int enable) {
