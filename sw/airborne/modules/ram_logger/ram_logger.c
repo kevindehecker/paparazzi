@@ -37,6 +37,9 @@ int ram_logger_enable_logging;
 int ram_logger_download_log;
 int ram_logger_stop_telemetry;
 
+int disable_telemetry_delay = -1; // to re-enable normal telemetry
+int log_packge_delay = 0; // log_packge_delay in between log packages
+int send_id = 0; // send data over datalink counter pointer
 unsigned char data1[MAXBUFFERSIZE];
 
 #define COM_PORT   (&DOWNLINK_DEVICE.device)
@@ -49,6 +52,7 @@ void ram_logger_init(void){
     data1[4] = 's';
     data1[5] = 't';
 
+    //init with some test data:
     for (int i = 0; i< MAXBUFFERSIZE; i++) {
         data1[i] = 67;
         if (i % ESPBUFFERSIZE == 0) {
@@ -72,35 +76,26 @@ void ram_logger_stop(void) {
 //    sentCounter = 0;
 
 }
-int downcount = -1;
-int wait = false;
+
 void ram_logger_periodic(void){
-//    static int divider = 0;
-//    if (divider++ % 1000 == 0) {
-//        sentnow = true;
-//    }
-    if (downcount > -1)
-        downcount++;
-    if (downcount > 50) {
-//        USART_CR1((uint32_t)p->reg_addr) |= USART_CR1_TXEIE; // Enable TX interrupt
+    if (disable_telemetry_delay > -1)
+        disable_telemetry_delay++;
+    if (disable_telemetry_delay > 50) {
         disable_datalink = false;
         telemetry_mode_Main = 0;
-        downcount = -1;
-//        LED_ON(1);
-
+        disable_telemetry_delay = -1;
     }
-    //telemetry_mode_Main = 0;
 
-    if (wait>0)
-        wait --;
+    if (log_packge_delay>0)
+        log_packge_delay --;
 }
 
 
-int cnt = 0;
+
 void ram_logger_event(void) {
-    if (wait==0) {
-        if (disable_datalink && cnt < MAXBUFFERSIZE) {
-            if (cnt % ESPBUFFERSIZE == 0) {
+    if (log_packge_delay==0) {
+        if (disable_datalink && send_id < MAXBUFFERSIZE) {
+            if (send_id % ESPBUFFERSIZE == 0) {
                 COM_PORT->put_byte(COM_PORT->periph, 0, 'l');
                 COM_PORT->put_byte(COM_PORT->periph, 0, 'o');
                 COM_PORT->put_byte(COM_PORT->periph, 0, 'g');
@@ -109,14 +104,14 @@ void ram_logger_event(void) {
                 COM_PORT->put_byte(COM_PORT->periph, 0, 't');
                 //data1[cnt] = '1' +  cnt / ESPBUFFERSIZE;
             }
-            COM_PORT->put_byte(COM_PORT->periph, 0, data1[cnt]);
-            cnt++;
+            COM_PORT->put_byte(COM_PORT->periph, 0, data1[send_id]);
+            send_id++;
         }
-        if (cnt >= MAXBUFFERSIZE && downcount < 0) {
-            downcount = 0;
+        if (send_id >= MAXBUFFERSIZE && disable_telemetry_delay < 0) {
+            disable_telemetry_delay = 0;
         }
-        if (cnt % ESPBUFFERSIZE == 0)
-            wait = 200;
+        if (send_id % ESPBUFFERSIZE == 0)
+            log_packge_delay = 200;
     }
 
 }
@@ -124,9 +119,9 @@ void ram_logger_event(void) {
 void ram_logger_download_handle(int enable) {
     LED_OFF(1);
     if (enable) {
-        cnt = 0;
+        send_id = 0;
         disable_datalink = true;
-        downcount = -1;
+        disable_telemetry_delay = -1;
         telemetry_mode_Main = 255;
     }
 }
