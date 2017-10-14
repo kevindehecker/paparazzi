@@ -17,7 +17,7 @@
     <file name="ram_logger.h"/>
   </header>
   <init fun="ram_logger_init()"/>
-  <periodic fun="ram_logger_periodic()" start="ram_logger_start()" stop="ram_logger_stop()" freq="512" autorun="FALSE"/>
+  <periodic fun="ram_logger_periodic()" start="ram_logger_start()" stop="ram_logger_stop()" freq="512" autorun="TRUE"/>
   <event fun="ram_logger_event()"/>
   <makefile>
     <file name="ram_logger.c"/>
