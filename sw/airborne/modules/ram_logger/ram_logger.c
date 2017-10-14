@@ -29,9 +29,6 @@
 #include "std.h"
 #include "subsystems/datalink/telemetry.h"
 #include "led_hw.h"
-#include "mcu_periph/uart.h"
-#include "mcu_periph/uart_arch.h"
-#include "datalink/pprz_dl.h"
 
 int ram_logger_enable_logging;
 int ram_logger_download_log;
