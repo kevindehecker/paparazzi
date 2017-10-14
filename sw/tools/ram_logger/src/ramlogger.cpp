@@ -9,13 +9,17 @@
 #include<arpa/inet.h> //inet_addr
 #include<netdb.h> //hostent
 
+#include <fstream>      // std::ifstream
+#include <sstream>
+
 using namespace std;
 
+std::ofstream logger;
 
-#define MAXBUFFERSIZE 4096
+#define MAXBUFFERSIZE 65536
 unsigned char data1[MAXBUFFERSIZE];
 unsigned char data2[MAXBUFFERSIZE];
-#define TOTALBUFFERSIZE (MAXBUFFERSIZE + MAXBUFFERSIZE);
+#define TOTALBUFFERSIZE (MAXBUFFERSIZE + MAXBUFFERSIZE)
 #define ESPBUFFERSIZE 2048
 struct RAM_log_data {
     int32_t accx;
@@ -159,6 +163,8 @@ int main(int argc , char *argv[])
     //c.conn("127.0.0.1", 9988);
     c.conn("192.168.4.1", 666);
 
+    logger.open("log.csv",std::ofstream::out);
+
     struct RAM_log_data * tmp;
 
     int entry_id1 = 0;
@@ -168,6 +174,10 @@ int main(int argc , char *argv[])
     int junk_size = MAXBUFFERSIZE - junk_start*sizeof(struct RAM_log_data);
 
     int totcnt = 0;
+    cout << "|--------------------------------------------------|" << std::endl;
+    cout << " ";
+    //std::cout.setf( std::ios_base::unitbuf );
+    int progress_stepsize = TOTALBUFFERSIZE / 50;
     while (entry_id2 < junk_start) {
 
         struct RAM_log_data * rtmp ;
@@ -187,7 +197,8 @@ int main(int argc , char *argv[])
         int k = c.receive((unsigned char * )rtmp,sizeof(struct RAM_log_data));
         if (k > 0) {
             totcnt+=k;
-            std::cout << totcnt << " | " << id << ": " << rtmp->accx << ", " << rtmp->accy << ", " << rtmp->accz << ", " << rtmp->gyrop << ", " << rtmp->gyroq << ", " << rtmp->gyror << std::endl;
+            //std::cout << totcnt << " | " << id << ": " << rtmp->accx << ", " << rtmp->accy << ", " << rtmp->accz << ", " << rtmp->gyrop << ", " << rtmp->gyroq << ", " << rtmp->gyror << std::endl;
+            logger << rtmp->accx << ", " << rtmp->accy << ", " << rtmp->accz << ", " << rtmp->gyrop << ", " << rtmp->gyroq << ", " << rtmp->gyror << std::endl;
         }
 
         //there are some bytes in between the two buffers that are not filled:
@@ -199,6 +210,13 @@ int main(int argc , char *argv[])
             totcnt+=junk_size;
         }
 
+        static int totcnt_prev=0;
+        if ( totcnt - totcnt_prev > progress_stepsize ) {
+            totcnt_prev = totcnt;
+            cout << "*" << std::flush;
+        }
     }
+    cout << "*" << std::endl;
+    logger.close();
     return 0;
 }

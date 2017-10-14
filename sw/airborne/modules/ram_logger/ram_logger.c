@@ -38,10 +38,10 @@ int send_id = 0; // send data over datalink counter pointer
 
 #define CCMRAM __attribute__((section(".ram4")))
 
-#define MAXBUFFERSIZE 4096
+#define MAXBUFFERSIZE 65536
 unsigned char data1[MAXBUFFERSIZE];
 CCMRAM unsigned char data2[MAXBUFFERSIZE];
-#define TOTALBUFFERSIZE 8192 // must be 2 * MAXBUFFERSIZE
+#define TOTALBUFFERSIZE 131072 // must be 2 * MAXBUFFERSIZE
 #define ESPBUFFERSIZE 2048
 struct RAM_log_data {
     int32_t accx;
