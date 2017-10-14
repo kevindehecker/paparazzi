@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2016 Gautier Hattenberger <gautier.hattenberger@enac.fr>
+ * Copyright (C) Kevin van Hecke
  *
- * This file is part of paparazzi.
+ * This file is part of paparazzi
  *
  * paparazzi is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,29 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with paparazzi; see the file COPYING.  If not, see
  * <http://www.gnu.org/licenses/>.
- *
+ */
+/**
+ * @file "modules/ramlogger/ramlogger.h"
+ * @author Kevin van Hecke
+ * Logs data directly into RAM mem
  */
 
-/** \file modules/datalink/pprz_dl.h
- *  \brief Datalink using PPRZ protocol
- */
+#ifndef RAMLOGGER_H
+#define RAMLOGGER_H
 
-#include "modules/datalink/pprz_dl.h"
-#include "subsystems/datalink/datalink.h"
+extern int ram_logger_enable_logging;
+extern int ram_logger_download_log;
+extern void ram_logger_download_handle(int enable);
+extern void ram_logger_logging_handle(int enable);
 
-struct pprz_transport pprz_tp;
-bool disable_datalink;
+extern void ram_logger_init(void);
+extern void ram_logger_periodic(void);
+extern void ram_logger_start(void);
+extern void ram_logger_stop(void);
+extern void ram_logger_event(void);
 
-void pprz_dl_init(void)
-{
-  pprz_transport_init(&pprz_tp);
-}
 
-void pprz_dl_event(void)
-{
-    if (!disable_datalink) {
-        pprz_check_and_parse(&DOWNLINK_DEVICE.device, &pprz_tp, dl_buffer, &dl_msg_available);
-        DlCheckAndParse(&DOWNLINK_DEVICE.device, &pprz_tp.trans_tx, dl_buffer, &dl_msg_available);
-    }
-}
+#endif
 

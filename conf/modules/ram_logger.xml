@@ -1,0 +1,25 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="ram_logger">
+  <doc>
+    <description>Logs data directly into RAM mem</description>
+  </doc>
+  <settings>
+    <dl_settings NAME="ram_logger">
+      <dl_settings NAME="ram_logger">
+        <dl_setting module="ram_logger/ram_logger" var="ram_logger_enable_logging" min="0" max="1" step="1" values="off|on" shortname="Logging" handler="logging_handle"/>        
+        <dl_setting module="ram_logger/ram_logger" var="ram_logger_download_log" min="0" max="1" step="1" values="off|on" shortname="Download" handler="download_handle"/>        
+      </dl_settings>
+    </dl_settings>
+  </settings>
+  <header>
+    <file name="ram_logger.h"/>
+  </header>
+  <init fun="ram_logger_init()"/>
+  <periodic fun="ram_logger_periodic()" start="ram_logger_start()" stop="ram_logger_stop()" freq="512" autorun="TRUE"/>
+  <event fun="ram_logger_event()"/>
+  <makefile>
+    <file name="ram_logger.c"/>
+  </makefile>    
+</module>
+
