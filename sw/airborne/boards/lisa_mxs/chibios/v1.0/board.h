@@ -207,8 +207,8 @@
  * PB7  - Alternate Push Pull output 50MHz (SERVO8-Timer4Ch2)/USART1_RX
  * PB8  - Digital input.                   (CAN_RX)
  * PB9  - Open Drain output 50MHz.         (CAN_TX)
- * PB10 - Alternate Open Drain output 2MHz.(I2C2_SCL)
- * PB11 - Alternate Open Drain output 2MHz.(I2C2_SDA)
+ * PB10 - Alternate Open Drain output 2MHz.(UART3_TX)
+ * PB11 - Alternate Open Drain output 2MHz.(UART3_RX)
  * PB12 - Push Pull output 50MHz.          (IMU_ACC_SPI2_CS)
  * PB13 - Alternate Push Pull output 50MHz (IMU_SPI2_SCK)
  * PB14 - Digital input                    (IMU_SPI2_MISO)
@@ -240,8 +240,8 @@
                                      PIN_OTYPE_PUSHPULL(7) |       \
                                      PIN_OTYPE_PUSHPULL(8) |       \
                                      PIN_OTYPE_OPENDRAIN(9) |       \
-                                     PIN_OTYPE_OPENDRAIN(10) |     \
-                                     PIN_OTYPE_OPENDRAIN(11) |      \
+                                     PIN_OTYPE_PUSHPULL(10) |     \
+                                     PIN_OTYPE_PUSHPULL(11) |      \
                                      PIN_OTYPE_PUSHPULL(12) |      \
                                      PIN_OTYPE_PUSHPULL(13) |      \
                                      PIN_OTYPE_PUSHPULL(14) |      \
@@ -256,7 +256,7 @@
                                      PIN_OSPEED_50M(7) |          \
                                      PIN_OSPEED_50M(8) |          \
                                      PIN_OSPEED_50M(9) |           \
-                                     PIN_OSPEED_2M(10) |        \
+                                     PIN_OSPEED_50M(10) |        \
                                      PIN_OSPEED_2M(11) |         \
                                      PIN_OSPEED_50M(12) |         \
                                      PIN_OSPEED_50M(13) |         \
@@ -304,8 +304,8 @@
                                      PIN_AFIO_AF(7, 7))
 #define VAL_GPIOB_AFRH              (PIN_AFIO_AF(8, 9) |           \
                                      PIN_AFIO_AF(9, 9) |            \
-                                     PIN_AFIO_AF(10, 4) |         \
-                                     PIN_AFIO_AF(11, 4) |          \
+                                     PIN_AFIO_AF(10, 7) |         \
+                                     PIN_AFIO_AF(11, 7) |          \
                                      PIN_AFIO_AF(12, 0) |          \
                                      PIN_AFIO_AF(13, 5) |          \
                                      PIN_AFIO_AF(14, 5) |          \
@@ -323,8 +323,8 @@
  * PC7  - Alternate Push Pull output 50MHz (SERVO2-Timer3Ch2)
  * PC8  - Alternate Push Pull output 50MHz (SERVO3-Timer3Ch3)
  * PC9  - Alternate Push Pull output 50MHz (SERVO4-Timer3Ch4)
- * PC10 - Alternate Push Pull output 50MHz (UART3_TX)
- * PC11 - Digital input                    (UART3_RX)
+ * PC10 - Alternate Push Pull output 50MHz (-)
+ * PC11 - Digital input                    (-)
  * PC12 - Alternate Push Pull output 50MHz (PC12-UART5_TX)
  * PC13 - Push Pull output 50MHz.          (IMU_GYRO_SS-Baro_SS_SPI2)
  * PC14 - Digital input                    (IMU_GYRO_DRDY)
@@ -340,8 +340,8 @@
                                      PIN_MODE_ALTERNATE(7) |       \
                                      PIN_MODE_ALTERNATE(8) |           \
                                      PIN_MODE_ALTERNATE(9) |           \
-                                     PIN_MODE_ALTERNATE(10) |       \
-                                     PIN_MODE_ALTERNATE(11) |          \
+                                     PIN_MODE_INPUT(10) |       \
+                                     PIN_MODE_INPUT(11) |          \
                                      PIN_MODE_ALTERNATE(12) |       \
                                      PIN_MODE_OUTPUT(13) |          \
                                      PIN_MODE_INPUT(14) |          \
@@ -420,8 +420,8 @@
                                      PIN_AFIO_AF(7, 2))
 #define VAL_GPIOC_AFRH              (PIN_AFIO_AF(8, 2) |           \
                                      PIN_AFIO_AF(9, 2) |           \
-                                     PIN_AFIO_AF(10, 7) |           \
-                                     PIN_AFIO_AF(11, 7) |          \
+                                     PIN_AFIO_AF(10, 0) |           \
+                                     PIN_AFIO_AF(11, 0) |          \
                                      PIN_AFIO_AF(12, 8) |           \
                                      PIN_AFIO_AF(13, 0) |          \
                                      PIN_AFIO_AF(14, 0) |          \
