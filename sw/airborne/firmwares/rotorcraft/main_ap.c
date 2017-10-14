@@ -274,7 +274,8 @@ void telemetry_periodic(void)
   /* then report periodicly */
   else {
 #if PERIODIC_TELEMETRY
-    periodic_telemetry_send_Main(DefaultPeriodic, &(DefaultChannel).trans_tx, &(DefaultDevice).device);
+      if (!disable_datalink)
+          periodic_telemetry_send_Main(DefaultPeriodic, &(DefaultChannel).trans_tx, &(DefaultDevice).device);
 #endif
   }
 }
