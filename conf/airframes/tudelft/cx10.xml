@@ -201,9 +201,8 @@
       <define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
     </target>
 
-
     <module name="motor_mixing"/>
-    <module name="ram_logger"/>
+<!--    <module name="ram_logger"/>-->
     <module name="actuators" type="pwm">
       <!-- This airframe is using the servo PWM outputs directly to drive mosfets, which in turn directly drive brushed motors.
            With the following settings we will be driving the motors with a 36KHz signal that should be well above anyone's hearing range.
@@ -226,7 +225,6 @@
       <configure name="GPS_PORT" value="UART2"/>
       <configure name="GPS_BAUD" value="B38400"/>
     </module>
-
 
     <module name="stabilization" type="int_quat"/>
     <module name="ahrs" type="int_cmpl_quat"/>  

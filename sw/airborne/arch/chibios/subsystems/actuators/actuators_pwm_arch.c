@@ -34,6 +34,8 @@
 #include "subsystems/actuators/actuators_pwm.h"
 #include "mcu_periph/gpio.h"
 
+#include "pprzlink/messages.h"
+#include "subsystems/datalink/downlink.h"
 
 /**
  * CMD_TO_US() is depending on architecture (e.g STM32 vs LPC),
@@ -44,7 +46,8 @@
  * in milliseconds to microseconds (required by pwmEnableChannel())
  */
 #ifndef PWM_CMD_TO_US
-#define PWM_CMD_TO_US(_t) (1000000 * _t / PWM_FREQUENCY)
+//this does not seem to do anything?!
+#define PWM_CMD_TO_US(_t) (PWM_BASE_FREQ * _t / PWM_BASE_FREQ)
 #endif
 
 int32_t actuators_pwm_values[ACTUATORS_PWM_NB];
@@ -154,6 +157,7 @@ void actuators_pwm_arch_init(void)
 
 void actuators_pwm_commit(void)
 {
+
 #ifdef PWM_SERVO_0
   pwmEnableChannel(&PWM_SERVO_0_DRIVER, PWM_SERVO_0_CHANNEL, PWM_CMD_TO_US(actuators_pwm_values[PWM_SERVO_0]));
 #endif

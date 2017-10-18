@@ -42,10 +42,14 @@
 #define ACTUATORS_PWM_NB 8
 #endif
 
+#define ONE_MHZ_CLK 1000000
 /* Default timer base frequency is 1MHz */
-#ifndef PWM_FREQUENCY
-#define PWM_FREQUENCY 1000000
+#if ! defined(PWM_BASE_FREQ)
+#define PWM_BASE_FREQ ONE_MHZ_CLK
 #endif
+
+//remain backwards compatible with old naming:
+#define PWM_FREQUENCY PWM_BASE_FREQ
 
 /** Default servo update rate in Hz */
 #ifndef SERVO_HZ
