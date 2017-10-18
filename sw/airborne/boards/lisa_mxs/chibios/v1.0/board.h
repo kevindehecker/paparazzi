@@ -1199,9 +1199,6 @@
 #define PWM_SERVO_1_ACTIVE PWM_OUTPUT_DISABLED
 #endif
 
-#ifndef USE_PWM2
-//#define USE_PWM2 1
-#endif
 #if USE_PWM2
 #define PWM_SERVO_2 2
 #define PWM_SERVO_2_GPIO GPIOC
@@ -1214,9 +1211,6 @@
 #define PWM_SERVO_2_ACTIVE PWM_OUTPUT_DISABLED
 #endif
 
-#ifndef USE_PWM3
-//#define USE_PWM3 1
-#endif
 #if USE_PWM3
 #define PWM_SERVO_3 3
 #define PWM_SERVO_3_GPIO GPIOC
