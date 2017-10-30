@@ -26,3 +26,5 @@ DFU_PRODUCT = Lisa/Lia
 endif
 
 include $(PAPARAZZI_SRC)/conf/boards/lisa_m_defaults.makefile
+
+FLASH_MODE ?= SWD_NOPWR
