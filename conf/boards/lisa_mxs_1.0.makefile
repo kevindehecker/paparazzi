@@ -28,3 +28,5 @@ endif
 FLASH_MODE ?= SWD_NOPWR
 
 include $(PAPARAZZI_SRC)/conf/boards/lisa_m_defaults.makefile
+
+FLASH_MODE ?= SWD_NOPWR
