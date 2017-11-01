@@ -38,7 +38,7 @@ MCU  = cortex-m4
 
 # default flash mode is via usb dfu bootloader
 # possibilities: DFU-UTIL, SWD, STLINK
-FLASH_MODE ?= DFU-UTIL
+FLASH_MODE ?= SWD_NOPWR
 
 HAS_LUFTBOOT = FALSE
 
