@@ -186,6 +186,8 @@
  </modules>
 
   <firmware name="rotorcraft">
+    <configure name="RTOS_DEBUG" value="1"/>
+
     <target name="ap" board="lisa_mxs_1.0_chibios">
 
       <define name="REMAP_UART3" value="TRUE" />
