@@ -35,6 +35,14 @@
     <module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
     </module>
+<!--    <module name="udp">-->
+<!--        <define name="USE_UDP1" value="1"/>-->
+<!--        <define name="UDP1_HOST" value="192.168.45.1"/>-->
+<!--        <define name="UDP1_PORT_OUT" value="4244"/>-->
+<!--        <define name="UDP1_PORT_IN" value="4245"/>-->
+<!--        <define name="UDP1_BROADCAST" value="TRUE"/>-->
+<!--    </module>-->
+    <module name="slamdunk_udp"/>
   </modules>
 
   <commands>
