@@ -41,7 +41,6 @@
         <configure name="RADIO_CONTROL_SPEKTRUM_PRIMARY_PORT" value="UART5" />
       </module-->
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
-      <!--      <define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>-->
     </target>
     <module name="motor_mixing"/>
     <module name="ram_logger"/>
@@ -173,15 +172,15 @@
     <define name="REF_MAX_RDOT" value="RadOfDeg(900.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="1150"/>
+    <define name="PHI_PGAIN" value="650"/>
     <define name="PHI_DGAIN" value="285"/>
     <define name="PHI_IGAIN" value="48"/>
 
-    <define name="THETA_PGAIN" value="1150"/>
+    <define name="THETA_PGAIN" value="650"/>
     <define name="THETA_DGAIN" value="351"/>
     <define name="THETA_IGAIN" value="52"/>
 
-    <define name="PSI_PGAIN" value="4000"/>
+    <define name="PSI_PGAIN" value="500"/>
     <define name="PSI_DGAIN" value="150"/>
     <define name="PSI_IGAIN" value="300"/>
 
@@ -206,6 +205,9 @@
   </section>
 
   <section name="AHRS" prefix="AHRS_">
+    <!--This airframe vibrates a lot, which causes accel measurements in excess of 1g continuously-->
+    <!--  <define name="GRAVITY_HEURISTIC_FACTOR" value="0"/>-->
+
     <define name="H_X" value=" 0.47577"/>
     <define name="H_Y" value=" 0.11811"/>
     <define name="H_Z" value=" 0.87161"/>
