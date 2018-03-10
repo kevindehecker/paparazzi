@@ -10,8 +10,11 @@
 
 %% Initialize variables.
 %filename = '/home/houjebek/Desktop/CX10data/log_flight3.csv';
-filename = '/home/houjebek/Desktop/CX10data/log_static.txt';
+% filename = '/home/houjebek/Desktop/CX10data/log_static.txt';
 % filename = '/home/houjebek/Desktop/CX10data/log_static2.txt';
+% filename = '/home/houjebek/Desktop/CX10data/log_spinupdown2motor2.csv';
+% filename = '/home/houjebek/Desktop/CX10data/log_lpf05_thrt.csv';
+filename = '~/paparazzi/sw/tools/ram_logger/build/log.csv';
 delimiter = ',';
 
 %% Format for each line of text:
@@ -50,11 +53,28 @@ clearvars filename delimiter formatSpec fileID dataArray ans;
 
 %%
 figure;
-subplot(3,2,1);plot(logflight3{:,1});legend('accX')
-subplot(3,2,3);plot(logflight3{:,2});legend('accY')
-subplot(3,2,5);plot(logflight3{:,3});legend('accZ')
+subplot(3,2,1);plot(logflight3{:,1}*(1/9810));legend('accX')
+subplot(3,2,3);plot(logflight3{:,2}*(1/9810));legend('accY')
+subplot(3,2,5);plot(logflight3{:,3}*(1/9810));legend('accZ')
 
-subplot(3,2,2);plot(logflight3{:,4});legend('gyroX')
-subplot(3,2,4);plot(logflight3{:,5});legend('gyroY')
-subplot(3,2,6);plot(logflight3{:,6});legend('gyroZ')
+subplot(3,2,2);plot(logflight3{:,4}*(1/9810));legend('gyroX')
+subplot(3,2,4);plot(logflight3{:,5}*(1/9810));legend('gyroY')
+subplot(3,2,6);plot(logflight3{:,6}*(1/9810));legend('gyroZ')
+
+figure;
+
+subplot(3,1,1);plot( filter(ones(100,1)/100,1,logflight3{:,1}*(1/9810)));
+hold on
+plot(logflight3{:,6}/max(logflight3{:,6}))
+legend('Filtered accX [g]', 'Throttle')
+
+subplot(3,1,2);plot( filter(ones(100,1)/100,1,logflight3{:,2}*(1/9810)));
+hold on
+plot(logflight3{:,6}/max(logflight3{:,6}))
+legend('Filtered accY [g]', 'Throttle')
+
+subplot(3,1,3);plot( filter(ones(100,1)/100,1,logflight3{:,3}*(1/9810)));
+hold on
+plot(logflight3{:,6}/max(logflight3{:,6}))
+legend('Filtered accZ [g]', 'Throttle')
 
