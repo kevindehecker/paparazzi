@@ -31,6 +31,7 @@
 #include "subsystems/datalink/telemetry.h"
 #include "led_hw.h"
 #include "subsystems/abi.h"
+#include "subsystems/radio_control.h"
 
 int ram_logger_enable_logging;
 int ram_logger_download_log;
@@ -73,12 +74,12 @@ static void gyro_cb(uint8_t __attribute__((unused)) sender_id,
         tmp = (struct RAM_log_data * ) data1;
         tmp[entry_id1].gyrop = gyro->p;
         tmp[entry_id1].gyroq = gyro->q;
-        tmp[entry_id1].gyror = gyro->r;
+        tmp[entry_id1].gyror = radio_control.values[RADIO_THROTTLE];
     } else {
         tmp = (struct RAM_log_data * ) data2;
         tmp[entry_id2].gyrop = gyro->p;
         tmp[entry_id2].gyroq = gyro->q;
-        tmp[entry_id2].gyror = gyro->r;
+        tmp[entry_id2].gyror = radio_control.values[RADIO_THROTTLE];
     }
 }
 
@@ -138,7 +139,7 @@ void ram_logger_stop(void) {}
 void ram_logger_periodic(void){
     if (disable_telemetry_delay > -1)
         disable_telemetry_delay++;
-    if (disable_telemetry_delay > 50) {
+    if (disable_telemetry_delay > 250) {
         disable_datalink = false;
         telemetry_mode_Main = 0;
         disable_telemetry_delay = -1;
@@ -172,7 +173,7 @@ void ram_logger_event(void) {
             disable_telemetry_delay = 0;
         }
         if (send_id % ESPBUFFERSIZE == 0)
-            log_packge_delay = 200;
+            log_packge_delay = 500;
     }
 
 }
