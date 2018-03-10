@@ -26,7 +26,7 @@
   <description>Lisa MX-CX10 (F4)
   </description>
 
-  <modules main_freq="512">
+  <modules main_freq="1000">
     <!--module name="gps" type="ubx_ucenter"/-->
     <!--module name="send_imu_mag_current"/-->
   </modules>
@@ -40,7 +40,9 @@
       <!--module name="radio_control" type="spektrum">
         <configure name="RADIO_CONTROL_SPEKTRUM_PRIMARY_PORT" value="UART5" />
       </module-->
-      <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
+<!--      <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>-->
+      <configure name="PERIODIC_FREQUENCY" value="500"/>
+<!--      <configure name="MODULES_FREQUENCY" value="2000"/>-->
     </target>
     <module name="motor_mixing"/>
     <module name="ram_logger"/>
@@ -59,6 +61,9 @@
       <configure name="MODEM_BAUD" value="B921600"/>
     </module>
     <module name="imu" type="lisa_mx_v2.1"/>
+    <define name="ASPIRIN_2_DISABLE_MAG" value="1"/>
+    <define name="ASPIRIN_2_LOWPASS_FILTER" value="MPU60X0_DLPF_98HZ"/>
+    <define name="ASPIRIN_2_SMPLRT_DIV" value="7"/>
     <module name="gps" type="ublox">
       <configure name="GPS_PORT" value="UART2"/>
       <configure name="GPS_BAUD" value="B38400"/>
@@ -66,9 +71,9 @@
     <module name="stabilization" type="int_quat"/>
     <module name="ahrs" type="int_cmpl_quat"/>
     <module name="ins"/>
-    <module name="air_data">
+<!--    <module name="air_data">
       <define name="AIR_DATA_CALC_AMSL_BARO" value="TRUE"/>
-    </module>
+    </module>-->
   </firmware>
 
   <servos driver="Pwm">
@@ -172,17 +177,17 @@
     <define name="REF_MAX_RDOT" value="RadOfDeg(900.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="650"/>
-    <define name="PHI_DGAIN" value="285"/>
-    <define name="PHI_IGAIN" value="48"/>
+    <define name="PHI_PGAIN" value="300"/>
+    <define name="PHI_DGAIN" value="125"/>
+    <define name="PHI_IGAIN" value="50"/>
 
-    <define name="THETA_PGAIN" value="650"/>
-    <define name="THETA_DGAIN" value="351"/>
-    <define name="THETA_IGAIN" value="52"/>
+    <define name="THETA_PGAIN" value="300"/>
+    <define name="THETA_DGAIN" value="125"/>
+    <define name="THETA_IGAIN" value="50"/>
 
-    <define name="PSI_PGAIN" value="500"/>
-    <define name="PSI_DGAIN" value="150"/>
-    <define name="PSI_IGAIN" value="300"/>
+    <define name="PSI_PGAIN" value="600"/>
+    <define name="PSI_DGAIN" value="400"/>
+    <define name="PSI_IGAIN" value="100"/>
 
     <!-- feedforward -->
     <define name="PHI_DDGAIN" value="0"/>
