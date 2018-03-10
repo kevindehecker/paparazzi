@@ -29,6 +29,7 @@
 #include "mcu_periph/sys_time.h"
 #include "mcu_periph/spi.h"
 #include "peripherals/hmc58xx_regs.h"
+#include "generated/modules.h"
 
 /* defaults suitable for Lisa */
 #ifndef ASPIRIN_2_SPI_SLAVE_IDX
@@ -43,14 +44,14 @@ PRINT_CONFIG_VAR(ASPIRIN_2_SPI_DEV)
 
 /* MPU60x0 gyro/accel internal lowpass frequency */
 #if !defined ASPIRIN_2_LOWPASS_FILTER && !defined  ASPIRIN_2_SMPLRT_DIV
-#if (PERIODIC_FREQUENCY == 60) || (PERIODIC_FREQUENCY == 120)
+#if (MODULES_FREQUENCY == 60) || (MODULES_FREQUENCY == 120)
 /* Accelerometer: Bandwidth 44Hz, Delay 4.9ms
  * Gyroscope: Bandwidth 42Hz, Delay 4.8ms sampling 1kHz
  */
 #define ASPIRIN_2_LOWPASS_FILTER MPU60X0_DLPF_42HZ
 #define ASPIRIN_2_SMPLRT_DIV 9
 PRINT_CONFIG_MSG("Gyro/Accel output rate is 100Hz at 1kHz internal sampling")
-#elif PERIODIC_FREQUENCY == 512
+#elif MODULES_FREQUENCY == 512
 /* Accelerometer: Bandwidth 260Hz, Delay 0ms
  * Gyroscope: Bandwidth 256Hz, Delay 0.98ms sampling 8kHz
  */
@@ -58,7 +59,7 @@ PRINT_CONFIG_MSG("Gyro/Accel output rate is 100Hz at 1kHz internal sampling")
 #define ASPIRIN_2_SMPLRT_DIV 3
 PRINT_CONFIG_MSG("Gyro/Accel output rate is 2kHz at 8kHz internal sampling")
 #else
-#error Non-default PERIODIC_FREQUENCY: please define ASPIRIN_2_LOWPASS_FILTER and ASPIRIN_2_SMPLRT_DIV.
+#error Non-default MODULES_FREQUENCY: please define ASPIRIN_2_LOWPASS_FILTER and ASPIRIN_2_SMPLRT_DIV.
 #endif
 #endif
 PRINT_CONFIG_VAR(ASPIRIN_2_LOWPASS_FILTER)
@@ -105,11 +106,11 @@ void imu_aspirin2_init(void)
   imu_aspirin2.mpu.config.gyro_range = ASPIRIN_2_GYRO_RANGE;
   imu_aspirin2.mpu.config.accel_range = ASPIRIN_2_ACCEL_RANGE;
 
+  /* use mag if not disabled */
+#if !ASPIRIN_2_DISABLE_MAG
   /* read 15 bytes for status, accel, gyro + 6 bytes for mag slave */
   imu_aspirin2.mpu.config.nb_bytes = 21;
 
-  /* use mag if not disabled */
-#if !ASPIRIN_2_DISABLE_MAG
   /* HMC5883 magnetometer as I2C slave */
   imu_aspirin2.mpu.config.nb_slaves = 1;
 
@@ -150,6 +151,7 @@ void imu_aspirin2_periodic(void)
 }
 
 #define Int16FromBuf(_buf,_idx) ((int16_t)((_buf[_idx]<<8) | _buf[_idx+1]))
+
 
 void imu_aspirin2_event(void)
 {

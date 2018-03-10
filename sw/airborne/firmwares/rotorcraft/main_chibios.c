@@ -82,7 +82,7 @@ static void thd_ap(void *arg)
   while (!chThdShouldTerminateX()) {
     handle_periodic_tasks();
     main_event();
-    chThdSleepMicroseconds(500);
+    chThdSleepMicroseconds(100);
   }
 
   chThdExit(0);

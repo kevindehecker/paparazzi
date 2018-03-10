@@ -119,7 +119,7 @@ static __attribute__((noreturn)) void thd_sys_tick(void *arg)
 
   while (TRUE) {
     sys_tick_handler();
-    chThdSleepMilliseconds(1);
+    chThdSleepMicroseconds(100);
   }
 }
 
