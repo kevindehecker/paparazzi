@@ -106,7 +106,7 @@
     <define name="SCALE" value="256"/>
     <define name="ROLL_COEF" value="{  256, 256,  -256,  -256 }"/>
     <define name="PITCH_COEF" value="{  256, -256, -256,  256 }"/>
-    <define name="YAW_COEF" value="{    256, -256,  256, -256 }"/>
+    <define name="YAW_COEF" value="{    -256, 256,  -256, 256 }"/>
     <define name="THRUST_COEF" value="{ 256,  256,  256,  256 }"/>
   </section>
 
@@ -177,17 +177,17 @@
     <define name="REF_MAX_RDOT" value="RadOfDeg(900.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="300"/>
-    <define name="PHI_DGAIN" value="125"/>
-    <define name="PHI_IGAIN" value="50"/>
+    <define name="PHI_PGAIN" value="200"/>
+    <define name="PHI_DGAIN" value="75"/>
+    <define name="PHI_IGAIN" value="25"/>
 
-    <define name="THETA_PGAIN" value="300"/>
-    <define name="THETA_DGAIN" value="125"/>
-    <define name="THETA_IGAIN" value="50"/>
+    <define name="THETA_PGAIN" value="200"/>
+    <define name="THETA_DGAIN" value="75"/>
+    <define name="THETA_IGAIN" value="25"/>
 
-    <define name="PSI_PGAIN" value="600"/>
-    <define name="PSI_DGAIN" value="400"/>
-    <define name="PSI_IGAIN" value="100"/>
+    <define name="PSI_PGAIN" value="300"/>
+    <define name="PSI_DGAIN" value="150"/>
+    <define name="PSI_IGAIN" value="50"/>
 
     <!-- feedforward -->
     <define name="PHI_DDGAIN" value="0"/>
