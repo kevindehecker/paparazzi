@@ -18,7 +18,7 @@
     <!-- to avoid bat low spike detection when strong pullup withch draws short sudden power-->
     <define name="CATASTROPHIC_BATTERY_KILL_DELAY" value="80" />
     <!-- in seconds-->
-    <module name="telemetry" type="transparent" />
+    <module name="telemetry" type="transparent_usb" />
     <module name="imu" type="px4fmu_v2.4"/>
     <module name="gps" type="ublox" >
       <configure name="GPS_BAUD" value="B57600"/>
@@ -75,9 +75,9 @@
     </module>
   </firmware>
   <modules main_freq="512">
-    <module name="px4_flash">
+<!--    <module name="px4_flash">
       <configure name="PX4IO_UART" value="uart6"/>
-    </module>
+    </module>-->
     <module name="px4_gimbal" />
     <module name="geo_mag" />
     <module name="air_data" />
