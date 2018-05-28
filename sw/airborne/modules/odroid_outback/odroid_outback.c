@@ -38,7 +38,7 @@
 
 #include "generated/flight_plan.h"
 
- /* Main magneto structure */
+/* Main magneto structure */
 static struct odroid_outback_t odroid_outback = {
   .device = (&((ODROID_OUTBACK_PORT).device)),
   .msg_available = false
@@ -63,23 +63,23 @@ struct FloatVect3 land_cmd;
 static void send_odroid_outback(struct transport_tx *trans, struct link_device *dev)
 {
 
-//  //fix rotated orientation of camera in DelftaCopter
-//  float ggmphi = -k2p_package.att_calib_theta;
-//  float ggmtheta = k2p_package.att_calib_phi;
-//  pprz_msg_send_ODROID_OUTBACK(trans, dev, AC_ID,
-//                        &k2p_package.status,
-//                        &k2p_package.height,
-//                        &k2p_package.avoid_psi,
-//                        &k2p_package.avoid_rate,
-//                        &k2p_package.descend_z,
-//                        &k2p_package.joe_enu_x,
-//                        &k2p_package.joe_enu_y,
-//                        &k2p_package.land_enu_x,
-//                        &k2p_package.land_enu_y,
-//                        &k2p_package.flow_x,
-//                        &k2p_package.flow_y,
-//                        &ggmphi,
-//                        &ggmtheta);
+  //  //fix rotated orientation of camera in DelftaCopter
+  //  float ggmphi = -k2p_package.att_calib_theta;
+  //  float ggmtheta = k2p_package.att_calib_phi;
+  //  pprz_msg_send_ODROID_OUTBACK(trans, dev, AC_ID,
+  //                        &k2p_package.status,
+  //                        &k2p_package.height,
+  //                        &k2p_package.avoid_psi,
+  //                        &k2p_package.avoid_rate,
+  //                        &k2p_package.descend_z,
+  //                        &k2p_package.joe_enu_x,
+  //                        &k2p_package.joe_enu_y,
+  //                        &k2p_package.land_enu_x,
+  //                        &k2p_package.land_enu_y,
+  //                        &k2p_package.flow_x,
+  //                        &k2p_package.flow_y,
+  //                        &ggmphi,
+  //                        &ggmtheta);
 }
 #endif
 
@@ -104,7 +104,6 @@ void odroid_outback_init() {
 
 static int timeoutcount = 0;
 
-static int payload_package_per_sixtieth_second = 0;
 
 /* Parse the InterMCU message */
 static inline void odroid_outback_parse_msg(void)
@@ -115,49 +114,44 @@ static inline void odroid_outback_parse_msg(void)
 
   switch (msg_id) {
 
-  /* Received a part of a thumbnail: forward to 900MHz and irridium... */
-  case DL_IMCU_PAYLOAD:
-    payload_package_per_sixtieth_second++;
+    /* Received a part of a thumbnail: forward to 900MHz and irridium... */
+    case DL_IMCU_PAYLOAD:
 
-    // Do not overflow our datalinks
-    if (payload_package_per_sixtieth_second < 2)
-    {
       ////////////////////////////////////
       // Forward to 900MHz (or XBee)
-      uint8_t size = DL_IMCU_PAYLOAD_data_length(mp_msg_buf);
-      uint8_t *data = DL_IMCU_PAYLOAD_data(mp_msg_buf);
+//      uint8_t size = DL_IMCU_PAYLOAD_data_length(mp_msg_buf);
+//      uint8_t *data = DL_IMCU_PAYLOAD_data(mp_msg_buf);
 
-      DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, size, data);
+//      DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, size, data);
 
       ////////////////////////////////////
       // Forward to FBW with IRRIDIUM
       //pprz_msg_send_PAYLOAD(&(telemetry_intermcu.trans.trans_tx), &telemetry_intermcu.dev, AC_ID, size, data);
 
-    }
-    break;
+      break;
 
-  /* Got a odroid_outback message */
-  case DL_IMCU_DEBUG: {
-    uint8_t size = DL_IMCU_DEBUG_msg_length(mp_msg_buf);
-    uint8_t *msg = DL_IMCU_DEBUG_msg(mp_msg_buf);
+      /* Got a odroid_outback message */
+    case DL_IMCU_DEBUG: {
+        uint8_t size = DL_IMCU_DEBUG_msg_length(mp_msg_buf);
+        uint8_t *msg = DL_IMCU_DEBUG_msg(mp_msg_buf);
 
-    unsigned char * tmp = (unsigned char*)&k2p_package;
-    for(uint8_t i = 0; i < size; i++) {
-      tmp[i] = msg[i];
-    }
-    timeoutcount = 100;
+        unsigned char * tmp = (unsigned char*)&k2p_package;
+        for(uint8_t i = 0; i < size; i++) {
+            tmp[i] = msg[i];
+          }
+        timeoutcount = 100;
 
-    struct EnuCoor_f *pos = stateGetPositionEnu_f();
+        struct EnuCoor_f *pos = stateGetPositionEnu_f();
 
-    //float diff_search = (odroid_outback_search_height - k2p_package.height)*odroid_outback_height_gain;
+        //float diff_search = (odroid_outback_search_height - k2p_package.height)*odroid_outback_height_gain;
 
-    if (odroid_outback_enable_spotsearch) {
-        // WP_ODROID_OUTBACK_LANDSPOT
-      waypoint_set_xy_i(WP_dummy, POS_BFP_OF_REAL(k2p_package.land_enu_x), POS_BFP_OF_REAL(k2p_package.land_enu_y));
-    }
+        if (odroid_outback_enable_spotsearch) {
+            // WP_ODROID_OUTBACK_LANDSPOT
+            waypoint_set_xy_i(WP_dummy, POS_BFP_OF_REAL(k2p_package.land_enu_x), POS_BFP_OF_REAL(k2p_package.land_enu_y));
+          }
 
-    if (odroid_outback_enable_landing) {
-/*
+        if (odroid_outback_enable_landing) {
+            /*
       struct FloatQuat *att = stateGetNedToBodyQuat_f();
 
       struct FloatRMat ltp_to_odroid_outback_rmat;
@@ -175,42 +169,42 @@ static inline void odroid_outback_parse_msg(void)
       waypoint_set_xy_i(WP_ODROID_OUTBACK_LANDING,POS_BFP_OF_REAL(measured_ltp.x), POS_BFP_OF_REAL(measured_ltp.y));
       */
 
-      land_cmd.x = k2p_package.descend_x * odroid_outback_land_xy_gain;
-      land_cmd.y = k2p_package.descend_y * odroid_outback_land_xy_gain;
-      land_cmd.z = -k2p_package.descend_z * odroid_outback_land_z_gain;
+            land_cmd.x = k2p_package.descend_x * odroid_outback_land_xy_gain;
+            land_cmd.y = k2p_package.descend_y * odroid_outback_land_xy_gain;
+            land_cmd.z = -k2p_package.descend_z * odroid_outback_land_z_gain;
 
-      float psi = stateGetNedToBodyEulers_f()->psi;
-      //
-      float heading_to_go = psi + k2p_package.avoid_psi - 0.5 * M_PI;
-      FLOAT_ANGLE_NORMALIZE(heading_to_go);
+            float psi = stateGetNedToBodyEulers_f()->psi;
+            //
+            float heading_to_go = psi + k2p_package.avoid_psi - 0.5 * M_PI;
+            FLOAT_ANGLE_NORMALIZE(heading_to_go);
 
-      struct EnuCoor_f target;
-      target.x = pos->x + sin(heading_to_go)*k2p_package.avoid_rate*odroid_outback_land_xy_gain;
-      target.y = pos->y + cos(heading_to_go)*k2p_package.avoid_rate*odroid_outback_land_xy_gain;
-      target.z = waypoint_get_alt(WP_dummy); // WP_ODROID_OUTBACK_LANDING
+            struct EnuCoor_f target;
+            target.x = pos->x + sin(heading_to_go)*k2p_package.avoid_rate*odroid_outback_land_xy_gain;
+            target.y = pos->y + cos(heading_to_go)*k2p_package.avoid_rate*odroid_outback_land_xy_gain;
+            target.z = waypoint_get_alt(WP_dummy); // WP_ODROID_OUTBACK_LANDING
 
-      if((odroid_outback_land_xy_gain > 0.001) && (k2p_package.avoid_rate > 0.2))
-        waypoint_set_enu(WP_dummy, &target); //WP_ODROID_OUTBACK_LANDING
-    }
+            if((odroid_outback_land_xy_gain > 0.001) && (k2p_package.avoid_rate > 0.2))
+              waypoint_set_enu(WP_dummy, &target); //WP_ODROID_OUTBACK_LANDING
+          }
 
-    if (odroid_outback_enable_findjoe) {
-      waypoint_set_xy_i(WP_dummy, POS_BFP_OF_REAL(k2p_package.joe_enu_x), POS_BFP_OF_REAL(k2p_package.joe_enu_y)); // WP_ODROID_OUTBACK_JOE
+        if (odroid_outback_enable_findjoe) {
+            waypoint_set_xy_i(WP_dummy, POS_BFP_OF_REAL(k2p_package.joe_enu_x), POS_BFP_OF_REAL(k2p_package.joe_enu_y)); // WP_ODROID_OUTBACK_JOE
 
-      uint8_t wp_id = WP_dummy; //WP_ODROID_OUTBACK_JOE;
-      RunOnceEvery(60, DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice, &wp_id,&(waypoints[wp_id].enu_i.x),
-                                 &(waypoints[wp_id].enu_i.y), &(waypoints[wp_id].enu_i.z)));
-    }
+            uint8_t wp_id = WP_dummy; //WP_ODROID_OUTBACK_JOE;
+            RunOnceEvery(60, DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice, &wp_id,&(waypoints[wp_id].enu_i.x),
+                                                        &(waypoints[wp_id].enu_i.y), &(waypoints[wp_id].enu_i.z)));
+          }
 
-    // Send ABI message
-    if (timeoutcount > 0) {
-      AbiSendMsgAGL(AGL_SONAR_ADC_ID, k2p_package.height);
-    }
+        // Send ABI message
+        if (timeoutcount > 0) {
+            AbiSendMsgAGL(AGL_SONAR_ADC_ID, k2p_package.height);
+          }
 
-    break;
-  }
+        break;
+      }
     default:
       break;
-  }
+    }
 }
 
 /* We need to wait for incomming messages */
@@ -220,14 +214,12 @@ void odroid_outback_event() {
 
   // If we have a message we should parse it
   if (odroid_outback.msg_available) {
-    odroid_outback_parse_msg();
-    odroid_outback.msg_available = false;
-  }
+      odroid_outback_parse_msg();
+      odroid_outback.msg_available = false;
+    }
 }
 
 void odroid_outback_periodic() {
-
-  payload_package_per_sixtieth_second = 0;
 
   struct FloatEulers *attE = stateGetNedToBodyEulers_f();
   struct FloatQuat *att = stateGetNedToBodyQuat_f();
@@ -247,14 +239,14 @@ void odroid_outback_periodic() {
   p2k_package.gpsz = pos->z;
 
   if (state.ned_initialized_f) {
-    p2k_package.geo_init_gpsx = state.ned_origin_f.lla.lat;
-    p2k_package.geo_init_gpsy = state.ned_origin_f.lla.lon;
-    p2k_package.geo_init_gpsz = state.ned_origin_f.lla.alt;
-  } else {
-    p2k_package.geo_init_gpsx = 0;
-    p2k_package.geo_init_gpsy = 0;
-    p2k_package.geo_init_gpsz = 0;
-  }
+      p2k_package.geo_init_gpsx = state.ned_origin_f.lla.lat;
+      p2k_package.geo_init_gpsy = state.ned_origin_f.lla.lon;
+      p2k_package.geo_init_gpsz = state.ned_origin_f.lla.alt;
+    } else {
+      p2k_package.geo_init_gpsx = 0;
+      p2k_package.geo_init_gpsy = 0;
+      p2k_package.geo_init_gpsz = 0;
+    }
 
 
 
@@ -273,13 +265,13 @@ void odroid_outback_periodic() {
     p2k_package.enables |= 0b100000;
 
   if (timeoutcount > 0) {
-    timeoutcount--;
-  } else {
-    k2p_package.status = 1;
-  }
+      timeoutcount--;
+    } else {
+      k2p_package.status = 1;
+    }
 
   pprz_msg_send_IMCU_DEBUG(&(odroid_outback.transport.trans_tx), odroid_outback.device,
-                                         1, sizeof(struct PPRZ2OdroidPackage), (unsigned char *)(&p2k_package));
+                           1, sizeof(struct PPRZ2OdroidPackage), (unsigned char *)(&p2k_package));
 }
 
 void enableOdroidLandingspotSearch(bool b) {
