@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="4" ground_alt="0" lat0="51 59 27.6" lon0="4 22 42.0" max_dist_from_home="60" name="Delft Basic" security_height="2">
+<flight_plan alt="4" ground_alt="0" lat0="51 59 27.6" lon0="4 22 42.0" max_dist_from_home="120" name="Delft Basic" security_height="2">
   <header>
     #include "autopilot.h"
     #include "subsystems/datalink/datalink.h"
@@ -109,6 +109,14 @@
     </block>
     <block name="land">
       <go wp="TD"/>
+    </block>
+    <block name="descent">
+      <exception cond="8.0 > stateGetPositionEnu_f()->z" deroute="descent_slow"/>
+      <stay climb="-1" vmode="climb" wp="TD"/>
+    </block>
+    <block name="descent_slow">
+      <exception cond="1.0 > stateGetPositionEnu_f()->z" deroute="flare"/>
+      <stay climb="-0.5" vmode="climb" wp="TD"/>
     </block>
     <block name="flare">
       <exception cond="NavDetectGround()" deroute="Holding point"/>
