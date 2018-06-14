@@ -3,7 +3,7 @@
 <module name="odroid_outback" dir="odroid_outback">
   <doc>
     <description>Odroid uart (RS232) communication</description>
-    <configure name="ODROID_OUTBACK_PORT" value="UART3" description="select which uart it is connected to"/>
+    <configure name="ODROID_OUTBACK_PORT" value="UART8" description="select which uart it is connected to"/>
     <configure name="ODROID_OUTBACK_BAUD" value="B115200" description="set the baudrate of the uart"/>
   </doc>
     <settings>
@@ -28,7 +28,7 @@
   <event fun="odroid_outback_event()"/>
   <makefile>
     <!-- Configure default UART port and baudrate -->
-    <configure name="ODROID_OUTBACK_PORT" default="UART3" case="upper|lower"/>
+    <configure name="ODROID_OUTBACK_PORT" default="UART8" case="upper|lower"/>
     <configure name="ODROID_OUTBACK_BAUD" default="B115200"/>
 
     <!-- Enable UART and set baudrate -->
