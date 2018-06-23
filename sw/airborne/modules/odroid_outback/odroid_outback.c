@@ -45,7 +45,7 @@ static struct odroid_outback_t odroid_outback = {
 };
 static uint8_t mp_msg_buf[128]  __attribute__((aligned));   ///< The message buffer for the Odroid
 
-struct  Odroid2PPRZPackage k2p_package;
+struct  Vision2PPRZPackage v2p_package;
 bool odroid_outback_enable_landing = false;
 bool odroid_outback_enable_spotsearch = false;
 bool odroid_outback_enable_findjoe = false;
@@ -56,11 +56,12 @@ float odroid_outback_search_height = 35.0;
 float odroid_outback_land_xy_gain = 4.5f;
 float odroid_outback_land_z_gain = 1.5f;
 struct FloatVect3 land_cmd;
+bool het_moment = false;
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
 
-static void send_odroid_outback(struct transport_tx *trans, struct link_device *dev)
+static void send_odroid_outback( struct transport_tx *trans UNUSED, struct link_device *dev UNUSED)
 {
 
   //  //fix rotated orientation of camera in DelftaCopter
@@ -94,8 +95,8 @@ void odroid_outback_init() {
 #endif
 
   NavSetWaypointHere(WP_dummy); //WP_ODROID_OUTBACK_LANDING
-  k2p_package.height = -0.01;
-  k2p_package.status = 1;
+  v2p_package.height = -0.01;
+  v2p_package.status = 1;
 
   land_cmd.x = 0;
   land_cmd.y = 0;
@@ -135,60 +136,33 @@ static inline void odroid_outback_parse_msg(void)
         uint8_t size = DL_IMCU_DEBUG_msg_length(mp_msg_buf);
         uint8_t *msg = DL_IMCU_DEBUG_msg(mp_msg_buf);
 
-        unsigned char * tmp = (unsigned char*)&k2p_package;
+        unsigned char * tmp = (unsigned char*)&v2p_package;
         for(uint8_t i = 0; i < size; i++) {
             tmp[i] = msg[i];
           }
         timeoutcount = 100;
 
-        struct EnuCoor_f *pos = stateGetPositionEnu_f();
+        //struct EnuCoor_f *pos = stateGetPositionEnu_f();
 
         //float diff_search = (odroid_outback_search_height - k2p_package.height)*odroid_outback_height_gain;
 
         if (odroid_outback_enable_spotsearch) {
             // WP_ODROID_OUTBACK_LANDSPOT
-            waypoint_set_xy_i(WP_dummy, POS_BFP_OF_REAL(k2p_package.land_enu_x), POS_BFP_OF_REAL(k2p_package.land_enu_y));
+            waypoint_set_xy_i(WP_dummy, POS_BFP_OF_REAL(v2p_package.land_enu_x), POS_BFP_OF_REAL(v2p_package.land_enu_y));
           }
 
         if (odroid_outback_enable_landing) {
-            /*
-      struct FloatQuat *att = stateGetNedToBodyQuat_f();
-
-      struct FloatRMat ltp_to_odroid_outback_rmat;
-      float_rmat_of_quat(&ltp_to_odroid_outback_rmat, att);
-
-      //x,y,z pos van joe
-      struct FloatVect3 joe;
-      joe.x = k2p_package.target_x;
-      joe.y = k2p_package.target_y;
-      joe.z = k2p_package.height;
-
-      struct FloatVect3 measured_ltp;
-      float_rmat_transp_vmult(&measured_ltp, &ltp_to_odroid_outback_rmat, &joe);
-
-      waypoint_set_xy_i(WP_ODROID_OUTBACK_LANDING,POS_BFP_OF_REAL(measured_ltp.x), POS_BFP_OF_REAL(measured_ltp.y));
-      */
-
-            land_cmd.x = k2p_package.descend_x * odroid_outback_land_xy_gain;
-            land_cmd.y = k2p_package.descend_y * odroid_outback_land_xy_gain;
-            land_cmd.z = -k2p_package.descend_z * odroid_outback_land_z_gain;
-
-            float psi = stateGetNedToBodyEulers_f()->psi;
-            //
-            float heading_to_go = psi + k2p_package.avoid_psi - 0.5 * M_PI;
-            FLOAT_ANGLE_NORMALIZE(heading_to_go);
-
-            struct EnuCoor_f target;
-            target.x = pos->x + sin(heading_to_go)*k2p_package.avoid_rate*odroid_outback_land_xy_gain;
-            target.y = pos->y + cos(heading_to_go)*k2p_package.avoid_rate*odroid_outback_land_xy_gain;
-            target.z = waypoint_get_alt(WP_dummy); // WP_ODROID_OUTBACK_LANDING
-
-            if((odroid_outback_land_xy_gain > 0.001) && (k2p_package.avoid_rate > 0.2))
-              waypoint_set_enu(WP_dummy, &target); //WP_ODROID_OUTBACK_LANDING
+            if (v2p_package.out_of_range_since > 0 && v2p_package.out_of_range_since < 1.f) {
+                het_moment = true;
+              } else {
+                het_moment = false;
+              }
+          } else {
+            het_moment = false;
           }
 
         if (odroid_outback_enable_findjoe) {
-            waypoint_set_xy_i(WP_dummy, POS_BFP_OF_REAL(k2p_package.joe_enu_x), POS_BFP_OF_REAL(k2p_package.joe_enu_y)); // WP_ODROID_OUTBACK_JOE
+            waypoint_set_xy_i(WP_dummy, POS_BFP_OF_REAL(v2p_package.joe_enu_x), POS_BFP_OF_REAL(v2p_package.joe_enu_y)); // WP_ODROID_OUTBACK_JOE
 
             uint8_t wp_id = WP_dummy; //WP_ODROID_OUTBACK_JOE;
             RunOnceEvery(60, DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice, &wp_id,&(waypoints[wp_id].enu_i.x),
@@ -197,7 +171,7 @@ static inline void odroid_outback_parse_msg(void)
 
         // Send ABI message
         if (timeoutcount > 0) {
-            AbiSendMsgAGL(AGL_SONAR_ADC_ID, k2p_package.height);
+            AbiSendMsgAGL(AGL_SONAR_ADC_ID, v2p_package.height);
           }
 
         break;
@@ -226,7 +200,7 @@ void odroid_outback_periodic() {
   struct EnuCoor_f *pos = stateGetPositionEnu_f();
 
 
-  struct PPRZ2OdroidPackage p2k_package;
+  struct PPRZ2VisionPackage p2k_package;
   p2k_package.phi = attE->theta;
   p2k_package.theta = -attE->phi;
   p2k_package.psi = attE->psi;
@@ -267,11 +241,11 @@ void odroid_outback_periodic() {
   if (timeoutcount > 0) {
       timeoutcount--;
     } else {
-      k2p_package.status = 1;
+      v2p_package.status = 1;
     }
 
   pprz_msg_send_IMCU_DEBUG(&(odroid_outback.transport.trans_tx), odroid_outback.device,
-                           1, sizeof(struct PPRZ2OdroidPackage), (unsigned char *)(&p2k_package));
+                           1, sizeof(struct PPRZ2VisionPackage), (unsigned char *)(&p2k_package));
 }
 
 void enableOdroidLandingspotSearch(bool b) {
@@ -291,6 +265,7 @@ void enableOdroidOpticFlow(bool b) {
 }
 
 bool enableOdroidAttCalib(bool b) {
+  //http://mariotapilouw.blogspot.com/2011/05/plane-fitting-using-opencv.html
   odroid_outback_enable_attcalib = b;
   return true; // klote pprz flight plan
 }
@@ -301,5 +276,5 @@ bool enableOdroidVideoRecord(bool b) {
 }
 
 bool getOdroidReady(void) {
-  return k2p_package.status == 0;
+  return v2p_package.status == 0;
 }
