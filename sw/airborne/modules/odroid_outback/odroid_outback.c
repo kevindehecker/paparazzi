@@ -52,35 +52,23 @@ bool odroid_outback_enable_findjoe = false;
 bool odroid_outback_enable_opticflow = false;
 bool odroid_outback_enable_attcalib = false;
 bool odroid_outback_enable_videorecord = false;
-float odroid_outback_search_height = 35.0;
-float odroid_outback_land_xy_gain = 4.5f;
-float odroid_outback_land_z_gain = 1.5f;
-struct FloatVect3 land_cmd;
 bool het_moment = false;
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
 
-static void send_odroid_outback( struct transport_tx *trans UNUSED, struct link_device *dev UNUSED)
+static void send_odroid_outback( struct transport_tx *trans, struct link_device *dev)
 {
 
   //  //fix rotated orientation of camera in DelftaCopter
-  //  float ggmphi = -k2p_package.att_calib_theta;
-  //  float ggmtheta = k2p_package.att_calib_phi;
-  //  pprz_msg_send_ODROID_OUTBACK(trans, dev, AC_ID,
-  //                        &k2p_package.status,
-  //                        &k2p_package.height,
-  //                        &k2p_package.avoid_psi,
-  //                        &k2p_package.avoid_rate,
-  //                        &k2p_package.descend_z,
-  //                        &k2p_package.joe_enu_x,
-  //                        &k2p_package.joe_enu_y,
-  //                        &k2p_package.land_enu_x,
-  //                        &k2p_package.land_enu_y,
-  //                        &k2p_package.flow_x,
-  //                        &k2p_package.flow_y,
-  //                        &ggmphi,
-  //                        &ggmtheta);
+  pprz_msg_send_VISION_OUTBACK(trans, dev, AC_ID,
+                          &v2p_package.status,
+                          &v2p_package.height,
+                          &v2p_package.out_of_range_since,
+                          &v2p_package.marker_enu_x,
+                          &v2p_package.marker_enu_y,
+                          &v2p_package.flow_x,
+                          &v2p_package.flow_y);
 }
 #endif
 
@@ -98,9 +86,6 @@ void odroid_outback_init() {
   v2p_package.height = -0.01;
   v2p_package.status = 1;
 
-  land_cmd.x = 0;
-  land_cmd.y = 0;
-  land_cmd.z = 0;
 }
 
 static int timeoutcount = 0;
@@ -162,7 +147,7 @@ static inline void odroid_outback_parse_msg(void)
           }
 
         if (odroid_outback_enable_findjoe) {
-            waypoint_set_xy_i(WP_dummy, POS_BFP_OF_REAL(v2p_package.joe_enu_x), POS_BFP_OF_REAL(v2p_package.joe_enu_y)); // WP_ODROID_OUTBACK_JOE
+            waypoint_set_xy_i(WP_dummy, POS_BFP_OF_REAL(v2p_package.marker_enu_x), POS_BFP_OF_REAL(v2p_package.marker_enu_y)); // WP_ODROID_OUTBACK_JOE
 
             uint8_t wp_id = WP_dummy; //WP_ODROID_OUTBACK_JOE;
             RunOnceEvery(60, DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice, &wp_id,&(waypoints[wp_id].enu_i.x),

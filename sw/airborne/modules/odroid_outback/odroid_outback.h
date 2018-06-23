@@ -46,15 +46,10 @@ struct odroid_outback_t {
 struct Vision2PPRZPackage {
     float height;
     float out_of_range_since;
-    float descend_x;
-    float descend_y;
-    float descend_z;
-    float joe_enu_x;
-    float joe_enu_y;
+    float marker_enu_x;
+    float marker_enu_y;
     float land_enu_x;
     float land_enu_y;
-    float avoid_psi;
-    float avoid_rate;
     float flow_x;
     float flow_y;
     float att_calib_phi;
@@ -88,8 +83,6 @@ extern bool odroid_outback_enable_findjoe;
 extern bool odroid_outback_enable_opticflow;
 extern bool odroid_outback_enable_attcalib;
 extern bool odroid_outback_enable_videorecord;
-extern float odroid_outback_land_xy_gain;
-extern float odroid_outback_land_z_gain;
 extern struct FloatVect3 land_cmd;
 extern bool het_moment;
 
