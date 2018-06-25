@@ -44,6 +44,7 @@ struct odroid_outback_t {
 
 //should be exactly the same as pprz.h
 struct Vision2PPRZPackage {
+    int32_t frame_id;
     float height;
     float out_of_range_since;
     float marker_enu_x;
@@ -52,8 +53,6 @@ struct Vision2PPRZPackage {
     float land_enu_y;
     float flow_x;
     float flow_y;
-    float att_calib_phi;
-    float att_calib_theta;
     uint8_t status;
 } __attribute__((__packed__));
 extern struct Vision2PPRZPackage v2p_package;
@@ -85,6 +84,7 @@ extern bool odroid_outback_enable_attcalib;
 extern bool odroid_outback_enable_videorecord;
 extern struct FloatVect3 land_cmd;
 extern bool het_moment;
+extern bool vision_timeout;
 
 extern void odroid_outback_init(void);
 extern void odroid_outback_event(void);

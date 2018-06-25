@@ -53,6 +53,7 @@ bool odroid_outback_enable_opticflow = false;
 bool odroid_outback_enable_attcalib = false;
 bool odroid_outback_enable_videorecord = false;
 bool het_moment = false;
+bool vision_timeout = false;
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
@@ -72,6 +73,8 @@ static void send_odroid_outback( struct transport_tx *trans, struct link_device 
 }
 #endif
 
+int timeoutcount = 0;
+
 /* Initialize the Odroid */
 void odroid_outback_init() {
   // Initialize transport protocol
@@ -79,17 +82,16 @@ void odroid_outback_init() {
 
 
 #if PERIODIC_TELEMETRY
-  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_PAYLOAD_FLOAT, send_odroid_outback);
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_VISION_OUTBACK, send_odroid_outback);
 #endif
 
   NavSetWaypointHere(WP_dummy); //WP_ODROID_OUTBACK_LANDING
   v2p_package.height = -0.01;
   v2p_package.status = 1;
+  vision_timeout = false;
+  timeoutcount = ODROID_OUTBACK_PERIODIC_FREQ / 2;
 
 }
-
-static int timeoutcount = 0;
-
 
 /* Parse the InterMCU message */
 static inline void odroid_outback_parse_msg(void)
@@ -125,7 +127,13 @@ static inline void odroid_outback_parse_msg(void)
         for(uint8_t i = 0; i < size; i++) {
             tmp[i] = msg[i];
           }
-        timeoutcount = 100;
+        timeoutcount = ODROID_OUTBACK_PERIODIC_FREQ / 2;
+        vision_timeout = false;
+        static int32_t frame_id_prev = 0;
+        if (frame_id_prev >= v2p_package.frame_id) {
+            timeoutcount = 0;
+          }
+        frame_id_prev = v2p_package.frame_id;
 
         //struct EnuCoor_f *pos = stateGetPositionEnu_f();
 
@@ -137,7 +145,7 @@ static inline void odroid_outback_parse_msg(void)
           }
 
         if (odroid_outback_enable_landing) {
-            if (v2p_package.out_of_range_since > 0 && v2p_package.out_of_range_since < 1.f) {
+            if ((v2p_package.out_of_range_since > 0 && v2p_package.out_of_range_since < 1.f) || (v2p_package.out_of_range_since < 0 && v2p_package.height < 0.3 )) {
                 het_moment = true;
               } else {
                 het_moment = false;
@@ -157,6 +165,8 @@ static inline void odroid_outback_parse_msg(void)
         // Send ABI message
         if (timeoutcount > 0) {
             AbiSendMsgAGL(AGL_SONAR_ADC_ID, v2p_package.height);
+          } else {
+            vision_timeout = true;
           }
 
         break;
