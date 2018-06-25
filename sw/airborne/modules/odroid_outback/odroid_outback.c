@@ -58,12 +58,17 @@ bool vision_timeout = false;
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
 
+uint8_t timeoutcount = 0;
+
 static void send_odroid_outback( struct transport_tx *trans, struct link_device *dev)
 {
 
   //  //fix rotated orientation of camera in DelftaCopter
   pprz_msg_send_VISION_OUTBACK(trans, dev, AC_ID,
                           &v2p_package.status,
+                          &het_moment,
+                          &timeoutcount,
+                          &vision_timeout,
                           &v2p_package.height,
                           &v2p_package.out_of_range_since,
                           &v2p_package.marker_enu_x,
@@ -73,7 +78,7 @@ static void send_odroid_outback( struct transport_tx *trans, struct link_device 
 }
 #endif
 
-int timeoutcount = 0;
+
 
 /* Initialize the Odroid */
 void odroid_outback_init() {
