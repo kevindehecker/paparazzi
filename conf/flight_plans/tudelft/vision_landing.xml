@@ -83,16 +83,6 @@
       <go from="p4" hmode="route" wp="p1"/>
       <deroute block="stay_p1"/>
     </block>
-    <block name="test yaw">
-      <go wp="p1"/>
-      <for from="1" to="16" var="i">
-        <heading alt="WaypointAlt(WP_p1)" course="90 * $i" until="stage_time > 3"/>
-      </for>
-      <deroute block="Standby"/>
-    </block>
-    <block name="circle CAM" pre_call="nav_set_heading_towards_waypoint(WP_CAM)">
-      <circle radius="nav_radius" wp="CAM"/>
-    </block>
     <block name="land here" strip_button="Land Here" strip_icon="land-right.png">
       <call_once fun="NavSetWaypointHere(WP_TD)"/>
     </block>
@@ -102,11 +92,13 @@
     <block name="descent">
       <exception cond="8.0 > stateGetPositionEnu_f()->z" deroute="descent_slow"/>
       <exception cond="vision_timeout " deroute="Standby"/>
+      <exception cond="!odroid_outback_enable_landing " deroute="Standby"/>      
       <stay climb="-1" vmode="climb" wp="TD"/>
     </block>
     <block name="descent_slow">
       <exception cond="het_moment" deroute="flare"/>
       <exception cond="vision_timeout " deroute="Standby"/>
+      <exception cond="!odroid_outback_enable_landing " deroute="Standby"/>      
       <stay climb="-0.5" vmode="climb" wp="TD"/>
     </block>
     <block name="flare">

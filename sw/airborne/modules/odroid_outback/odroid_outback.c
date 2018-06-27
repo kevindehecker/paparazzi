@@ -66,9 +66,9 @@ static void send_odroid_outback( struct transport_tx *trans, struct link_device 
   //  //fix rotated orientation of camera in DelftaCopter
   pprz_msg_send_VISION_OUTBACK(trans, dev, AC_ID,
                           &v2p_package.status,
-                          &het_moment,
+                          (uint8_t *)&het_moment,
                           &timeoutcount,
-                          &vision_timeout,
+                          (uint8_t *)&vision_timeout,
                           &v2p_package.height,
                           &v2p_package.out_of_range_since,
                           &v2p_package.marker_enu_x,
@@ -169,10 +169,8 @@ static inline void odroid_outback_parse_msg(void)
 
         // Send ABI message
         if (timeoutcount > 0) {
-            AbiSendMsgAGL(AGL_SONAR_ADC_ID, v2p_package.height);
-          } else {
-            vision_timeout = true;
-          }
+          AbiSendMsgAGL(AGL_SONAR_ADC_ID, v2p_package.height);
+        }
 
         break;
       }
@@ -241,8 +239,11 @@ void odroid_outback_periodic() {
   if (timeoutcount > 0) {
       timeoutcount--;
     } else {
-      v2p_package.status = 1;
+      v2p_package.status = 1;      
     }
+  if (v2p_package.status != 0) {
+      vision_timeout = true;
+  }
 
   pprz_msg_send_IMCU_DEBUG(&(odroid_outback.transport.trans_tx), odroid_outback.device,
                            1, sizeof(struct PPRZ2VisionPackage), (unsigned char *)(&p2k_package));
